@@ -11,18 +11,18 @@
   :root{
     --bg:#0a0c0f;--bg2:#111418;--bg3:#181d23;--border:#1f2833;
     --text:#e8f0f8;--muted:#8899aa;--accent:#00d4aa;--accent2:#ff6b35;
-    --green:#26a69a;--red:#ef5350;--yellow:#f5c842;
+    --green:#6A9FCA;--red:#CC8844;--yellow:#f5c842;
     --tv:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     --mono:var(--tv);--sans:var(--tv);
     --chart-bg:#0a0c0f;--chart-grid:#1f2833;--row-border:#0f1318;--row-active:#0d2a22;
-    --vol-up:#1a3a35;--vol-down:#3a1a1a;
+    --vol-up:#2a4a6a;--vol-down:#6a4422;
   }
   [data-theme="light"]{
     --bg:#f5f7fa;--bg2:#ffffff;--bg3:#e8ecf0;--border:#d0d7dd;
     --text:#1a1f2e;--muted:#5a6775;--accent:#00a885;--accent2:#e55a2b;
-    --green:#1a7f64;--red:#c53030;--yellow:#c99005;
-    --chart-bg:#ffffff;--chart-grid:#e0e4e8;--row-border:#e8ecf0;--row-active:#d4efe6;
-    --vol-up:#d4efe6;--vol-down:#f5d4d4;
+    --green:#5588BB;--red:#BB7733;--yellow:#c99005;
+    --chart-bg:#ffffff;--chart-grid:#e0e4e8;--row-border:#e8ecf0;--row-active:#d4e6f0;
+    --vol-up:#a0c4dd;--vol-down:#d4aa77;
   }
   /* Light theme overrides for floating UI */
   [data-theme="light"] .ma-float{
@@ -51,7 +51,7 @@
   .stat-badge span{color:var(--accent);}
   .main{display:grid;grid-template-columns:clamp(320px,30vw,480px) 1fr;overflow:hidden;}
   .table-panel{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-  .table-header{display:grid;grid-template-columns:18% 12% 22% 22% 16% 10%;padding:5px 12px;background:var(--bg3);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;user-select:none;}
+  .table-header{display:grid;grid-template-columns:8% 17% 11% 21% 21% 14% 8%;padding:5px 12px;background:var(--bg3);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;user-select:none;}
   .table-header span{cursor:pointer;transition:color 0.15s;}
   .table-header span:hover{color:var(--accent);}
   .table-header span.sort-asc::after{content:' ▲';color:var(--accent);}
@@ -59,9 +59,23 @@
   .table-body{flex:1;overflow-y:auto;}
   .table-body::-webkit-scrollbar{width:4px;}
   .table-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-  .row{display:grid;grid-template-columns:18% 12% 22% 22% 16% 10%;padding:7px 12px;border-bottom:1px solid var(--row-border);font-family:var(--mono);font-size:11px;cursor:pointer;transition:background 0.1s;align-items:center;}
+  .row{display:grid;grid-template-columns:8% 17% 11% 21% 21% 14% 8%;padding:7px 12px;border-bottom:1px solid var(--row-border);font-family:var(--mono);font-size:11px;cursor:pointer;transition:background 0.1s;align-items:center;}
   .row:hover{background:var(--bg3);}
   .row.active{background:var(--row-active);border-left:2px solid var(--accent);}
+  .fav-col{display:flex;align-items:center;justify-content:center;}
+  .fav-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1;
+    cursor:pointer;
+    padding:0;
+    transition:color 0.12s ease, transform 0.12s ease;
+  }
+  .fav-btn:hover{color:var(--yellow);transform:scale(1.08);}
+  .fav-btn.active{color:var(--yellow);}
+  .fav-head{font-size:12px;text-align:center;}
   .sym{color:var(--text);font-weight:600;}
   .date{color:var(--muted);font-size:10px;}
   .gain{font-weight:600;color:var(--green);}
@@ -237,7 +251,10 @@
     border-bottom: 1px solid var(--border);
     font-family: var(--mono);
     font-size: 11px;
-    min-height: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    overflow: hidden;
+    white-space: nowrap;
     color: var(--muted);
   }
   .info-item {
@@ -355,6 +372,70 @@
   }
   .ma-float .ma-row select.ma-type{width: 54px!important;}
   .ma-float .ma-row input.ma-period{width: 56px!important;}
+  .ma-float .ind-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:6px;
+    padding:2px 2px 4px;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:1.2px;
+    text-transform:uppercase;
+  }
+  .ma-float .ind-row{
+    display:grid;
+    grid-template-columns:16px minmax(44px,1fr) repeat(2,56px) repeat(2,20px);
+    align-items:center;
+    gap:6px;
+    width:100%;
+    padding:6px 6px;
+    border:1px solid transparent;
+    border-radius:10px;
+    background:rgba(24,29,35,0.44);
+  }
+  [data-theme="light"] .ma-float .ind-row{
+    background:rgba(232,236,240,0.65);
+  }
+  .ma-float .ind-row.compact{
+    grid-template-columns:16px minmax(44px,1fr) 56px 56px 20px;
+  }
+  .ma-float .ind-row label{
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:11px;
+    font-weight:600;
+  }
+  .ma-float .ind-row .mini{
+    width:100%;
+    min-width:0;
+    background:var(--bg3);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-family:var(--mono);
+    font-size:10px;
+    padding:6px 8px;
+    border-radius:10px;
+    outline:none;
+    text-align:center;
+  }
+  .ma-float .ind-row .mini-color{
+    width:20px;
+    height:18px;
+    border:1px solid var(--border);
+    border-radius:50%;
+    padding:0;
+    background:none;
+    cursor:pointer;
+  }
+  #info-ind{
+    min-width: 185px;
+    color: var(--yellow);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
   .ma-float .ma-row input[type=color]{width: 20px;height: 18px;}
   .ma-float .ma-del{font-size: 12px;}
   
@@ -731,6 +812,49 @@
   }
   .vol-pane.hidden{display:none!important;}
   #vol-chart{width:100%;height:100%;}
+  .rsi-pane,
+  .ao-pane{
+    height: 140px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: hidden;
+    z-index: 10;
+    position: relative;
+  }
+  .rsi-pane.hidden,
+  .ao-pane.hidden{display:none!important;}
+  #rsi-chart,
+  #ao-chart{width:100%;height:100%;}
+  .rsi-pane-info,
+  .ao-pane-info{
+    position:absolute;
+    top:6px;
+    left:10px;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    pointer-events:none;
+    user-select:none;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+  .rsi-pane-info .v,
+  .ao-pane-info .v{
+    font-weight:600;
+    display:inline-block;
+    width:66px;
+    text-align:left;
+  }
+  .rsi-pane-info .v{color:#aab0b7;}
+  .ao-pane-info .v{color:#8d949d;}
   .vol-resize-hit{
     position:absolute;
     top:0;
@@ -902,6 +1026,7 @@
   <div class="main">
     <div class="table-panel">
       <div class="table-header" id="table-header">
+        <span class="fav-head" data-col="favorite">★</span>
         <span data-col="symbol">Symbol</span>
         <span data-col="year">Year</span>
         <span data-col="low_date">Low</span>
@@ -922,6 +1047,7 @@
         <span class="chart-info"   id="ct-vol"></span>
         <div class="tf-controls" style="display:flex;align-items:center;gap:3px;">
           <button class="tb-btn active" id="tf-D" title="Daily">D</button>
+          <button class="tb-btn" id="tf-3D" title="3 Day">3D</button>
           <button class="tb-btn" id="tf-W" title="Weekly">W</button>
           <button class="tb-btn" id="tf-M" title="Monthly">M</button>
         </div>
@@ -989,6 +1115,7 @@
             <path d="M2,16 L6,14 L10,16 L14,12 L18,16" stroke="currentColor" fill="none" stroke-width="1.5" opacity="0.5"/>
           </svg>
         </button>
+        <button id="ind-toggle" class="ma-toggle-btn text" title="Indicators" aria-label="Indicators">IND</button>
         <button id="spy-toggle" class="ma-toggle-btn text" title="Benchmark overlay (VS SPY): Off → Line → Candle → Bar" aria-label="Benchmark overlay">VS</button>
         <div class="tb-sep"></div>
         <div class="tb-sep"></div>
@@ -997,6 +1124,36 @@
       <div class="ma-float" id="ma-panel" aria-hidden="true">
         <div class="ma-controls" id="ma-controls">
           <button class="tb-btn" id="ma-add-btn">+ MA</button>
+        </div>
+      </div>
+      <div class="ma-float" id="ind-panel" aria-hidden="true">
+        <div class="ind-head">
+          <span>Indicators</span>
+          <span style="opacity:0.75;">Pane auto-shows</span>
+        </div>
+        <div class="ma-controls" id="ind-controls">
+          <div class="ind-row compact">
+            <input id="ind-rsi-enabled" type="checkbox" checked>
+            <label for="ind-rsi-enabled">RSI</label>
+            <input id="ind-rsi-period" class="mini" type="number" min="2" max="100" step="1" value="14">
+            <input id="ind-rsi-color" class="mini-color" type="color" value="#00d4aa">
+            <span></span>
+          </div>
+          <div class="ind-row">
+            <input id="ind-ao-enabled" type="checkbox" checked>
+            <label for="ind-ao-enabled">AO</label>
+            <input id="ind-ao-fast" class="mini" type="number" min="2" max="100" step="1" value="5">
+            <input id="ind-ao-slow" class="mini" type="number" min="3" max="200" step="1" value="34">
+            <input id="ind-ao-up" class="mini-color" type="color" value="#6A9FCA">
+            <input id="ind-ao-down" class="mini-color" type="color" value="#6f7782">
+          </div>
+          <div class="ind-row compact">
+            <input id="ind-pp-enabled" type="checkbox" checked>
+            <label for="ind-pp-enabled">Pocket Pivot</label>
+            <input id="ind-pp-lookback" class="mini" type="number" min="2" max="30" step="1" value="10">
+            <input id="ind-pp-color" class="mini-color" type="color" value="#f5c842">
+            <span></span>
+          </div>
         </div>
       </div>
       
@@ -1035,6 +1192,7 @@
           <span class="info-value info-vol" id="info-dvol">—</span>
         </div>
         <div class="info-item"><span class="info-label">MA:</span><span class="info-value" id="info-ma">—</span></div>
+        <div class="info-item"><span class="info-label">IND:</span><span class="info-value" id="info-ind">—</span></div>
         <div class="info-spacer"></div>
         <div class="info-actions">
           <button class="tb-btn" id="log-toggle" title="Log / Linear scale">Log</button>
@@ -1233,6 +1391,18 @@
           </div>
           <div id="vol-chart"></div>
         </div>
+        <div class="rsi-pane hidden" id="rsi-pane" aria-hidden="true">
+          <div class="rsi-pane-info" id="rsi-pane-info" aria-hidden="true">
+            <span>RSI</span><span class="v" id="rsi-pane-value">—</span>
+          </div>
+          <div id="rsi-chart"></div>
+        </div>
+        <div class="ao-pane hidden" id="ao-pane" aria-hidden="true">
+          <div class="ao-pane-info" id="ao-pane-info" aria-hidden="true">
+            <span>AO</span><span class="v" id="ao-pane-value">—</span>
+          </div>
+          <div id="ao-chart"></div>
+        </div>
         <canvas id="crosshair-overlay"></canvas>
       </div>
     </div>
@@ -1249,15 +1419,18 @@ let chart=null,candleSeries=null,ohlcSeries=null,volSeries=null;
 let volChart=null;
 let volPaneEnabled=false;
 let volPaneHeight=140;
+let rsiChart=null, aoChart=null;
+let indicatorPaneHeight=140;
 let _syncingVolRange=false;
 let priceSeries=null;
 let currentBars=[],currentSymbol='';
 let currentMoveRow=null; // cache selected row for re-applying markers after setData()
-let sortCol='year',sortDir=1;
+let sortCol='year',sortDir=-1;
+let favorites=new Set();
 let isLogScale=false;
 let maList=[],maIdCounter=0;
 let drawTool='pan';
-let currentTF='D'; // D | W | M
+let currentTF='D'; // D | 3D | W | M
 // ===== VS (SPY benchmark overlay) state =====
 let spyLineSeries=null, spyCandleSeries=null, spyBarSeries=null;
 let spyOverlayEnabled=false;
@@ -1265,7 +1438,10 @@ let spyOverlayMode='line'; // 'line' | 'candle' | 'bar'
 let spyBars=null; // cached SPY bars from server endpoint
 let spyVisibleFromTime=null, spyVisibleToTime=null; // used to normalize the overlay to 100 at the left edge
 let chartType='candle'; // 'candle' | 'ohlc'
-let priceColors = { up: '#26a69a', down: '#ef5350' };
+let priceColors = { up: '#6A9FCA', down: '#CC8844' };
+let indicatorSeries={rsi:null,ao:null};
+let indicatorDataMaps={rsi:new Map(),ao:new Map()};
+let pocketPivotTimes=new Set();
 let drawings={};      // {symbol:[{id,type,...}]}
 let drawIdCtr=0;
 
@@ -1281,11 +1457,56 @@ let crosshairOverlayDpr = 1;
 let crosshairOverlayLabel = '';
 let overlayMainOffsetY = 0;
 let overlayVolOffsetY = 0;
+let overlayRsiOffsetY = 0;
+let overlayAoOffsetY = 0;
 
 function syncPersistedRightOffset(){
   if(!chart) return;
   const ro = chart.timeScale().options().rightOffset;
   if(typeof ro === 'number' && Number.isFinite(ro)) persistedRightOffset = ro;
+}
+
+function syncSubchartsToMain(range){
+  if (_syncingVolRange) return;
+  if (!range || range.from == null || range.to == null) return;
+  _syncingVolRange = true;
+  try { volChart?.timeScale().setVisibleLogicalRange(range); } catch(e) {}
+  try { rsiChart?.timeScale().setVisibleLogicalRange(range); } catch(e) {}
+  try { aoChart?.timeScale().setVisibleLogicalRange(range); } catch(e) {}
+  _syncingVolRange = false;
+}
+
+function syncSubchartsToCurrentMainRange(){
+  if(!chart) return;
+  let range = null;
+  try { range = chart.timeScale().getVisibleLogicalRange(); } catch(e) {}
+  if(range && range.from != null && range.to != null) syncSubchartsToMain(range);
+}
+
+function getRightScaleWidth(ch){
+  if(!ch || typeof ch.priceScale !== 'function') return null;
+  try{
+    const scale = ch.priceScale('right');
+    if(scale && typeof scale.width === 'function'){
+      const w = scale.width();
+      if(Number.isFinite(w) && w > 0) return w;
+    }
+  }catch(e){}
+  return null;
+}
+
+function syncRightScaleWidths(){
+  const widths = [chart, volChart, rsiChart, aoChart]
+    .map(getRightScaleWidth)
+    .filter(w => Number.isFinite(w) && w > 0);
+  if(!widths.length) return;
+  const target = Math.max(48, ...widths);
+  [chart, volChart, rsiChart, aoChart].forEach(ch => {
+    if(!ch || typeof ch.priceScale !== 'function') return;
+    try{
+      ch.priceScale('right').applyOptions({ minimumWidth: target });
+    }catch(e){}
+  });
 }
 
 // per-tool style settings
@@ -1309,6 +1530,9 @@ let pendingP1=null;   // first click for ray/seg
 let undoHistory=[];   // [{symbol, snapshot}]
 let measureStart=null; // measure tool first point
 let measureEnd=null;   // measure tool second point (live)
+let measureShortcutActive=false;
+let lastChartPointerShift=false;
+let suppressPanSelectionClick=false;
 let selectedId=null;
 let previewMouseX=0,previewMouseY=0;
 // drag state (global so document listeners can access)
@@ -1319,6 +1543,13 @@ const MA_DEFAULTS=[
   {type:'EMA',period:50, color:'#00d4aa'},
   {type:'MA', period:200,color:'#ff6b35'},
 ];
+const INDICATOR_DEFAULTS={
+  rsi:{enabled:true,period:14,color:'#aab0b7'},
+  ao:{enabled:true,fast:5,slow:34,upColor:'#8f97a1',downColor:'#6f7782'},
+  pocketPivot:{enabled:true,lookback:10,color:'#4d82b7'},
+};
+const POCKET_PIVOT_BLUE = '#4d82b7';
+let indicatorSettings=JSON.parse(JSON.stringify(INDICATOR_DEFAULTS));
 
 // ==============================================
 // THEME
@@ -1367,21 +1598,38 @@ function applyTheme() {
         });
       }
     }catch(e){}
+    try{
+      if (rsiChart) {
+        rsiChart.applyOptions({
+          layout: { background: { color: bg }, textColor: tx },
+          grid: { vertLines: { visible: false }, horzLines: { visible: false } },
+          rightPriceScale: { borderColor: border, visible: true, borderVisible: true },
+          timeScale: { borderColor: border },
+        });
+      }
+      if (aoChart) {
+        aoChart.applyOptions({
+          layout: { background: { color: bg }, textColor: tx },
+          grid: { vertLines: { visible: false }, horzLines: { visible: false } },
+          rightPriceScale: { borderColor: border, visible: true, borderVisible: true },
+          timeScale: { borderColor: border },
+        });
+      }
+    }catch(e){}
 
     // Update volume colors
     if (currentBars.length) {
       const tf = currentTF;
       const bars = resampleBars(currentBars, tf);
-      volSeries.setData(bars.map(b => ({
-        time: b.time,
-        value: b.volume,
-        // Match candle colors (not theme tints)
-        color: b.close >= b.open ? (priceColors?.up || '#26a69a') : (priceColors?.down || '#ef5350')
-      })));
+      pocketPivotTimes = indicatorSettings.pocketPivot.enabled
+        ? calcPocketPivotTimes(bars, indicatorSettings.pocketPivot.lookback)
+        : new Set();
+      volSeries?.setData(buildVolumeSeriesData(bars));
     }
 
     // Update MA lines - refresh them to pick up any color changes
     updateAllMA();
+    updateIndicatorSeries();
   }
 }
 
@@ -1407,6 +1655,8 @@ function saveSettings(){
     spyOverlayEnabled,spyOverlayMode,
     volumePaneEnabled: !!volPaneEnabled,
     volumePaneHeight: (typeof volPaneHeight === 'number' && Number.isFinite(volPaneHeight)) ? volPaneHeight : 140,
+    indicatorPaneHeight: (typeof indicatorPaneHeight === 'number' && Number.isFinite(indicatorPaneHeight)) ? indicatorPaneHeight : 140,
+    indicatorSettings,
     rightOffsetBars: persistedRightOffset,
     maList:maList.map(m=>({type:m.type,period:m.period,color:m.color,enabled:m.enabled}))
   }));
@@ -1428,6 +1678,33 @@ function flash(msg){
   clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),1800);
 }
 
+function rowKey(r){
+  return `${r.symbol}|${r.year}|${r.low_date}|${r.high_date}`;
+}
+function loadFavorites(){
+  try{
+    const raw=JSON.parse(localStorage.getItem('bm_favorites')||'[]');
+    favorites=new Set(Array.isArray(raw)?raw:[]);
+  }catch(e){
+    favorites=new Set();
+  }
+}
+function saveFavorites(skipFlash=false){
+  try{
+    localStorage.setItem('bm_favorites', JSON.stringify([...favorites]));
+    if(!skipFlash) flash('Favorites saved');
+  }catch(e){}
+}
+function isFavoriteRow(r){
+  return favorites.has(rowKey(r));
+}
+function toggleFavoriteRow(r){
+  const key=rowKey(r);
+  if(favorites.has(key)) favorites.delete(key);
+  else favorites.add(key);
+  saveFavorites();
+}
+
 // ==============================================
 // MA
 // ==============================================
@@ -1443,10 +1720,160 @@ function calcEMA(bars,p){
   for(let i=p;i<bars.length;i++){e=bars[i].close*k+e*(1-k);out.push({time:bars[i].time,value:parseFloat(e.toFixed(4))});}
   return out;
 }
+function calcRSI(bars,p){
+  if(!bars || bars.length<=p) return [];
+  let gains=0,losses=0;
+  for(let i=1;i<=p;i++){
+    const change=bars[i].close-bars[i-1].close;
+    if(change>=0) gains+=change;
+    else losses-=change;
+  }
+  let avgGain=gains/p;
+  let avgLoss=losses/p;
+  const out=[];
+  const pushValue=(i)=>{
+    const rs=avgLoss===0 ? Infinity : avgGain/avgLoss;
+    const value=avgLoss===0 ? 100 : (100-(100/(1+rs)));
+    out.push({time:bars[i].time,value:parseFloat(value.toFixed(2))});
+  };
+  pushValue(p);
+  for(let i=p+1;i<bars.length;i++){
+    const change=bars[i].close-bars[i-1].close;
+    const gain=Math.max(change,0);
+    const loss=Math.max(-change,0);
+    avgGain=((avgGain*(p-1))+gain)/p;
+    avgLoss=((avgLoss*(p-1))+loss)/p;
+    pushValue(i);
+  }
+  return out;
+}
+function calcAO(bars,fast=5,slow=34){
+  if(!bars || bars.length<slow) return [];
+  const medians=bars.map(b=>(b.high+b.low)/2);
+  const sumsFast=[], sumsSlow=[];
+  let runFast=0, runSlow=0;
+  for(let i=0;i<medians.length;i++){
+    runFast+=medians[i];
+    runSlow+=medians[i];
+    if(i>=fast) runFast-=medians[i-fast];
+    if(i>=slow) runSlow-=medians[i-slow];
+    sumsFast[i]=i>=fast-1 ? runFast/fast : null;
+    sumsSlow[i]=i>=slow-1 ? runSlow/slow : null;
+  }
+  const out=[];
+  let prev=null;
+  for(let i=0;i<bars.length;i++){
+    if(sumsFast[i]==null || sumsSlow[i]==null) continue;
+    const value=parseFloat((sumsFast[i]-sumsSlow[i]).toFixed(4));
+    out.push({
+      time:bars[i].time,
+      value,
+      color:(prev==null || value>=prev) ? indicatorSettings.ao.upColor : indicatorSettings.ao.downColor
+    });
+    prev=value;
+  }
+  return out;
+}
+function calcPocketPivotTimes(bars,lookback=10){
+  const out=new Set();
+  if(!bars || bars.length<2) return out;
+  for(let i=1;i<bars.length;i++){
+    if(!(bars[i].close > bars[i-1].close)) continue;
+    let maxDownVol=0;
+    const start=Math.max(1, i-lookback);
+    for(let j=start;j<i;j++){
+      if(bars[j].close < bars[j-1].close){
+        maxDownVol=Math.max(maxDownVol, Number(bars[j].volume)||0);
+      }
+    }
+    const todayVol=Number(bars[i].volume)||0;
+    if(todayVol>0 && todayVol>maxDownVol){
+      out.add(bars[i].time);
+    }
+  }
+  return out;
+}
+function getVolumeBaseColor(){
+  return {
+    up: isLightTheme ? 'rgba(108,118,130,0.34)' : 'rgba(122,132,144,0.28)',
+    down: isLightTheme ? 'rgba(88,97,108,0.26)' : 'rgba(92,102,114,0.22)',
+  };
+}
+function buildVolumeSeriesData(bars){
+  const baseColor = getVolumeBaseColor();
+  return (bars || []).map(b=>({
+    time:b.time,
+    value:b.volume,
+    color:pocketPivotTimes.has(b.time)
+      ? POCKET_PIVOT_BLUE
+      : (b.close >= b.open ? baseColor.up : baseColor.down)
+  }));
+}
+function alignIndicatorSeriesToBars(bars, data){
+  const map = new Map((data || []).map(p => [p.time, p]));
+  return (bars || []).map(b => {
+    const point = map.get(b.time);
+    if (!point) return { time: b.time };
+    return { ...point };
+  });
+}
+function normalizeChartTimeInput(t){
+  if (!t) return null;
+  if (typeof t === 'string') return t.length >= 10 ? t.slice(0, 10) : t;
+  if (typeof t === 'number') {
+    try { return new Date(t * 1000).toISOString().slice(0, 10); } catch(e) { return null; }
+  }
+  if (typeof t === 'object' && t.year) {
+    const mm = String(t.month).padStart(2, '0');
+    const dd = String(t.day || 1).padStart(2, '0');
+    return `${t.year}-${mm}-${dd}`;
+  }
+  return null;
+}
+function snapChartTimeToCurrentTF(t){
+  const raw = normalizeChartTimeInput(t);
+  if (!raw) return null;
+  const bars = resampleBars(currentBars, currentTF);
+  if (!bars || !bars.length) return raw;
+  const exact = bars.find(b => b.time === raw);
+  if (exact) return exact.time;
+  const targetMs = new Date(raw).getTime();
+  let best = bars[0].time;
+  let bestDiff = Infinity;
+  for (const b of bars) {
+    const diff = Math.abs(new Date(b.time).getTime() - targetMs);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = b.time;
+    }
+  }
+  return best;
+}
+function snapCoordinateToCurrentTF(x){
+  if(!chart || typeof x !== 'number' || !Number.isFinite(x)) return null;
+  const bars = resampleBars(currentBars, currentTF);
+  if(!bars || !bars.length) return null;
+  let best = null;
+  let bestDiff = Infinity;
+  for (const b of bars) {
+    let bx = null;
+    try { bx = chart.timeScale().timeToCoordinate(b.time); } catch(e) { bx = null; }
+    if (bx == null || !Number.isFinite(bx)) continue;
+    const diff = Math.abs(bx - x);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = b.time;
+    }
+  }
+  if (best) return best;
+  let raw = null;
+  try { raw = chart.timeScale().coordinateToTime(x); } catch(e) { raw = null; }
+  return snapChartTimeToCurrentTF(raw);
+}
 function getMaData(bars,type,p){return type==='EMA'?calcEMA(bars,p):calcMA(bars,p);}
 function addMaRow(cfg={},skipSave=false){
   const id=++maIdCounter,type=cfg.type||'EMA',period=cfg.period||20,color=cfg.color||'#fff',enabled=cfg.enabled!==false;
-  const series=chart?chart.addLineSeries({color,lineWidth:2,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}):null;
+  const series=chart?chart.addLineSeries({color,lineWidth:1,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false}):null;
   maList.push({id,type,period,color,enabled,series});
   const ctrl=document.getElementById('ma-controls'),addBtn=document.getElementById('ma-add-btn');
   const div=document.createElement('div');div.className='ma-row';div.dataset.id=id;
@@ -1540,6 +1967,213 @@ if (localStorage.getItem('ma_open') === '1') {
 }
 
 // ==============================================
+// INDICATOR PANEL
+// ==============================================
+const indToggle = document.getElementById('ind-toggle');
+const indPanel = document.getElementById('ind-panel');
+
+function clampInt(raw, fallback, min, max){
+  const v=parseInt(raw,10);
+  if(!Number.isFinite(v)) return fallback;
+  return Math.max(min, Math.min(max, v));
+}
+
+function positionIndPanel(){
+  if(!indToggle || !indPanel) return;
+  const panelHost=document.querySelector('.chart-panel');
+  if(!panelHost) return;
+  const hostRect=panelHost.getBoundingClientRect();
+  const tRect=indToggle.getBoundingClientRect();
+  indPanel.style.left=`${Math.max(8, tRect.left-hostRect.left)}px`;
+  indPanel.style.top=`${Math.max(8, tRect.bottom-hostRect.top+8)}px`;
+}
+
+function setIndOpen(open){
+  if(!indPanel || !indToggle) return;
+  indPanel.classList.toggle('open', open);
+  indPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+  localStorage.setItem('ind_open', open ? '1' : '0');
+  if(open) positionIndPanel();
+}
+
+function getLastMapValue(map){
+  let last=null;
+  for(const v of map.values()) last=v;
+  return last;
+}
+
+function updateIndicatorInfoDisplay(timeStr=null){
+  const infoInd=document.getElementById('info-ind');
+  const paneRsi=document.getElementById('rsi-pane-value');
+  const paneAo=document.getElementById('ao-pane-value');
+  const rsiVal=timeStr ? indicatorDataMaps.rsi.get(timeStr) : getLastMapValue(indicatorDataMaps.rsi);
+  const aoVal=timeStr ? indicatorDataMaps.ao.get(timeStr) : getLastMapValue(indicatorDataMaps.ao);
+  const hasPP=timeStr ? pocketPivotTimes.has(timeStr) : false;
+  if(paneRsi) paneRsi.textContent = rsiVal==null ? '—' : rsiVal.toFixed(2);
+  if(paneAo) paneAo.textContent = aoVal==null ? '—' : aoVal.toFixed(3);
+  if(infoInd){
+    const parts=[];
+    if(rsiVal!=null) parts.push(`RSI ${rsiVal.toFixed(2)}`);
+    if(aoVal!=null) parts.push(`AO ${aoVal.toFixed(3)}`);
+    if(hasPP) parts.push('PP');
+    infoInd.textContent = parts.length ? parts.join(' | ') : '—';
+  }
+}
+
+function updateIndicatorSeries(){
+  const bars=resampleBars(currentBars, currentTF);
+  const hasBars=Array.isArray(bars) && bars.length;
+  const rsiCoreData=(indicatorSettings.rsi.enabled && hasBars)
+    ? calcRSI(bars, indicatorSettings.rsi.period)
+    : [];
+  const aoCoreData=(indicatorSettings.ao.enabled && hasBars)
+    ? calcAO(bars, indicatorSettings.ao.fast, indicatorSettings.ao.slow)
+    : [];
+  pocketPivotTimes=(indicatorSettings.pocketPivot.enabled && hasBars)
+    ? calcPocketPivotTimes(bars, indicatorSettings.pocketPivot.lookback)
+    : new Set();
+
+  const rsiData = alignIndicatorSeriesToBars(bars, rsiCoreData);
+  const aoData = alignIndicatorSeriesToBars(bars, aoCoreData);
+
+  indicatorDataMaps.rsi=new Map(rsiCoreData.map(p=>[p.time,p.value]));
+  indicatorDataMaps.ao=new Map(aoCoreData.map(p=>[p.time,p.value]));
+  try{
+    indicatorSeries.rsi?.applyOptions({ color: indicatorSettings.rsi.color });
+    indicatorSeries.rsi?.setData(rsiData);
+  }catch(e){}
+  try{
+    indicatorSeries.ao?.setData(aoData);
+  }catch(e){}
+  try{
+    volSeries?.setData(buildVolumeSeriesData(bars));
+  }catch(e){}
+  updateIndicatorInfoDisplay(hasBars ? bars[bars.length-1].time : null);
+  requestAnimationFrame(() => { try { syncRightScaleWidths(); } catch(e) {} });
+}
+
+function syncIndicatorInputs(){
+  const cfg=indicatorSettings;
+  cfg.pocketPivot.color = POCKET_PIVOT_BLUE;
+  const map=[
+    ['ind-rsi-enabled', cfg.rsi.enabled],
+    ['ind-rsi-period', cfg.rsi.period],
+    ['ind-rsi-color', cfg.rsi.color],
+    ['ind-ao-enabled', cfg.ao.enabled],
+    ['ind-ao-fast', cfg.ao.fast],
+    ['ind-ao-slow', cfg.ao.slow],
+    ['ind-ao-up', cfg.ao.upColor],
+    ['ind-ao-down', cfg.ao.downColor],
+    ['ind-pp-enabled', cfg.pocketPivot.enabled],
+    ['ind-pp-lookback', cfg.pocketPivot.lookback],
+    ['ind-pp-color', cfg.pocketPivot.color],
+  ];
+  map.forEach(([id, value])=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    if(el.type==='checkbox') el.checked=!!value;
+    else el.value=String(value);
+  });
+}
+
+indToggle?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setIndOpen(!indPanel.classList.contains('open'));
+});
+
+document.addEventListener('pointerdown', (e) => {
+  if(!indPanel || !indToggle) return;
+  if(!indPanel.classList.contains('open')) return;
+  if(indPanel.contains(e.target) || indToggle.contains(e.target)) return;
+  setIndOpen(false);
+}, true);
+
+window.addEventListener('resize', () => {
+  if(indPanel?.classList.contains('open')) positionIndPanel();
+});
+
+if (localStorage.getItem('ind_open') === '1') {
+  setIndOpen(true);
+}
+
+document.getElementById('ind-rsi-enabled')?.addEventListener('change', e => {
+  indicatorSettings.rsi.enabled=!!e.target.checked;
+  saveSettings();
+  updateIndicatorSeries();
+  applyMoveMarkers();
+  window._ensureIndicatorPane?.(indicatorSettings.rsi.enabled || indicatorSettings.ao.enabled);
+});
+document.getElementById('ind-rsi-period')?.addEventListener('input', e => {
+  indicatorSettings.rsi.period=clampInt(e.target.value, 14, 2, 100);
+  e.target.value=String(indicatorSettings.rsi.period);
+  saveSettings();
+  updateIndicatorSeries();
+});
+document.getElementById('ind-rsi-color')?.addEventListener('input', e => {
+  indicatorSettings.rsi.color=e.target.value;
+  saveSettings();
+  updateIndicatorSeries();
+});
+document.getElementById('ind-ao-enabled')?.addEventListener('change', e => {
+  indicatorSettings.ao.enabled=!!e.target.checked;
+  saveSettings();
+  updateIndicatorSeries();
+  window._ensureIndicatorPane?.(indicatorSettings.rsi.enabled || indicatorSettings.ao.enabled);
+});
+document.getElementById('ind-ao-fast')?.addEventListener('input', e => {
+  indicatorSettings.ao.fast=clampInt(e.target.value, 5, 2, 100);
+  if(indicatorSettings.ao.fast>=indicatorSettings.ao.slow){
+    indicatorSettings.ao.slow=Math.min(200, indicatorSettings.ao.fast+1);
+    const slowEl=document.getElementById('ind-ao-slow');
+    if(slowEl) slowEl.value=String(indicatorSettings.ao.slow);
+  }
+  e.target.value=String(indicatorSettings.ao.fast);
+  saveSettings();
+  updateIndicatorSeries();
+});
+document.getElementById('ind-ao-slow')?.addEventListener('input', e => {
+  indicatorSettings.ao.slow=clampInt(e.target.value, 34, 3, 200);
+  if(indicatorSettings.ao.slow<=indicatorSettings.ao.fast){
+    indicatorSettings.ao.fast=Math.max(2, indicatorSettings.ao.slow-1);
+    const fastEl=document.getElementById('ind-ao-fast');
+    if(fastEl) fastEl.value=String(indicatorSettings.ao.fast);
+  }
+  e.target.value=String(indicatorSettings.ao.slow);
+  saveSettings();
+  updateIndicatorSeries();
+});
+document.getElementById('ind-ao-up')?.addEventListener('input', e => {
+  indicatorSettings.ao.upColor=e.target.value;
+  saveSettings();
+  updateIndicatorSeries();
+});
+document.getElementById('ind-ao-down')?.addEventListener('input', e => {
+  indicatorSettings.ao.downColor=e.target.value;
+  saveSettings();
+  updateIndicatorSeries();
+});
+document.getElementById('ind-pp-enabled')?.addEventListener('change', e => {
+  indicatorSettings.pocketPivot.enabled=!!e.target.checked;
+  saveSettings();
+  updateIndicatorSeries();
+  applyMoveMarkers();
+});
+document.getElementById('ind-pp-lookback')?.addEventListener('input', e => {
+  indicatorSettings.pocketPivot.lookback=clampInt(e.target.value, 10, 2, 30);
+  e.target.value=String(indicatorSettings.pocketPivot.lookback);
+  saveSettings();
+  updateIndicatorSeries();
+  applyMoveMarkers();
+});
+document.getElementById('ind-pp-color')?.addEventListener('input', e => {
+  indicatorSettings.pocketPivot.color=POCKET_PIVOT_BLUE;
+  e.target.value=POCKET_PIVOT_BLUE;
+  saveSettings();
+  updateIndicatorSeries();
+});
+
+// ==============================================
 // VS (SPY benchmark overlay) toggle
 // ==============================================
 const spyToggle = document.getElementById('spy-toggle');
@@ -1593,6 +2227,9 @@ function updateCrosshairInfo(param) {
   const volPaneVol = document.getElementById('vol-pane-vol');
   const volPaneDVol = document.getElementById('vol-pane-dvol');
   const infoMA = document.getElementById('info-ma');
+  const infoInd = document.getElementById('info-ind');
+  const paneRsi = document.getElementById('rsi-pane-value');
+  const paneAo = document.getElementById('ao-pane-value');
 
   const clear = () => {
     infoDate.textContent = '—';
@@ -1607,6 +2244,9 @@ function updateCrosshairInfo(param) {
     if (volPaneVol) volPaneVol.textContent = '—';
     if (volPaneDVol) volPaneDVol.textContent = '—';
     if (infoMA) infoMA.textContent = '—';
+    if (infoInd) infoInd.textContent = '—';
+    if (paneRsi) paneRsi.textContent = '—';
+    if (paneAo) paneAo.textContent = '—';
   };
 
   if (!param || !param.point || !currentBars || !currentBars.length) { clear(); return; }
@@ -1729,6 +2369,8 @@ function updateCrosshairInfo(param) {
     }
     infoMA.innerHTML = parts.length ? parts.join('<span class="ma-sep">|</span>') : '—';
   }
+
+  updateIndicatorInfoDisplay(bar?.time || timeStr);
 }
 
 // ==============================================
@@ -1741,7 +2383,7 @@ function setLog(v){
   btn.textContent=v?'Linear':'Log';
   btn.classList.toggle('log-on',v);
 }
-['D','W','M'].forEach(tf=>document.getElementById('tf-'+tf).addEventListener('click',()=>setTimeframe(tf)));
+['D','3D','W','M'].forEach(tf=>document.getElementById('tf-'+tf).addEventListener('click',()=>setTimeframe(tf)));
 document.getElementById('log-toggle').addEventListener('click',()=>{setLog(!isLogScale);saveSettings();});
 
 // per-tool popup setup
@@ -1778,6 +2420,22 @@ document.addEventListener('click',e=>{ if(!e.target.closest('.tool-group')) docu
 // ==============================================
 function resampleBars(bars, tf){
   if(tf==='D') return bars;
+  if(tf==='3D'){
+    const out=[];
+    for(let i=0;i<bars.length;i+=3){
+      const chunk=bars.slice(i, i+3);
+      if(!chunk.length) continue;
+      out.push({
+        time: chunk[0].time,
+        open: chunk[0].open,
+        high: Math.max(...chunk.map(b=>b.high)),
+        low: Math.min(...chunk.map(b=>b.low)),
+        close: chunk[chunk.length-1].close,
+        volume: chunk.reduce((sum,b)=>sum+(Number(b.volume)||0),0),
+      });
+    }
+    return out;
+  }
   const isWeekly = tf==='W';
 
   function getPeriodKey(dateStr){
@@ -1935,7 +2593,7 @@ function updateSpyOverlay(){
 
 function setTimeframe(tf){
   currentTF=tf;
-  ['D','W','M'].forEach(t=>document.getElementById('tf-'+t).classList.toggle('active',t===tf));
+  ['D','3D','W','M'].forEach(t=>document.getElementById('tf-'+t).classList.toggle('active',t===tf));
   if(activeIdx>=0) selectRow(activeIdx);
 }
 
@@ -1973,17 +2631,12 @@ function applyTimeframe(){
     ohlcSeries?.setData([]);
     priceSeries = candleSeries || ohlcSeries;
   }
-  volSeries.setData(bars.map(b=>({
-    time:b.time,
-    value:b.volume,
-    // Match candle colors (not theme tints)
-    color:b.close>=b.open ? (priceColors?.up || '#26a69a') : (priceColors?.down || '#ef5350')
-  })));
   const tempBars=bars;
   maList.forEach(m=>{
     if(!m.series)return;
     m.series.setData(m.enabled?getMaData(tempBars,m.type,m.period):[]);
   });
+  updateIndicatorSeries();
   applyMoveMarkers();
   try { updateSpyOverlay(); } catch (e) {}
   redrawAll();
@@ -2004,11 +2657,63 @@ function applyMoveMarkers(){
   if(!sb || !eb) return;
 
   try{
-    priceSeries.setMarkers([
+    const markers=[
       {time:sb.time,position:'belowBar',color:'#00d4aa',shape:'arrowUp', text:`▶ Low ${r.low_date} $${r.low_price}`},
       {time:eb.time,position:'aboveBar',color:'#ff6b35',shape:'arrowDown',text:`◀ High ${r.high_date} +${parseFloat(r.gain_pct).toFixed(0)}%`},
-    ]);
+    ];
+    markers.sort((a,b)=>String(a.time).localeCompare(String(b.time)));
+    priceSeries.setMarkers(markers);
   }catch(e){}
+}
+
+function applyInitialSelectionRange(tfBars, startTime, endTime){
+  if(!chart || !Array.isArray(tfBars) || !tfBars.length || !startTime || !endTime) return;
+  const times=tfBars.map(b=>b.time);
+  const si=times.indexOf(startTime);
+  const ei=times.indexOf(endTime);
+  if(si < 0 || ei < 0) return;
+
+  const left=Math.min(si, ei);
+  const right=Math.max(si, ei);
+  const span=Math.max(1, right-left);
+
+  const ctxByTf = currentTF === 'W'
+    ? { minWindow: 90, leftFloor: 32, rightFloor: 18 }
+    : currentTF === '3D'
+      ? { minWindow: 120, leftFloor: 42, rightFloor: 24 }
+    : currentTF === 'M'
+      ? { minWindow: 48, leftFloor: 14, rightFloor: 8 }
+      : { minWindow: 260, leftFloor: 90, rightFloor: 50 };
+
+  const leftPad=Math.max(
+    ctxByTf.leftFloor,
+    Math.round(span * 1.0),
+    Math.round(ctxByTf.minWindow * 0.45)
+  );
+  const rightPad=Math.max(
+    ctxByTf.rightFloor,
+    Math.round(span * 0.45),
+    Math.round(ctxByTf.minWindow * 0.25)
+  );
+
+  let fromIdx=Math.max(0, left-leftPad);
+  let toIdx=Math.min(tfBars.length-1, right+rightPad);
+
+  const currentWindow=toIdx-fromIdx+1;
+  if(currentWindow < ctxByTf.minWindow){
+    const deficit=ctxByTf.minWindow-currentWindow;
+    const extraLeft=Math.ceil(deficit * 0.65);
+    const extraRight=deficit-extraLeft;
+    fromIdx=Math.max(0, fromIdx-extraLeft);
+    toIdx=Math.min(tfBars.length-1, toIdx+extraRight);
+  }
+
+  const range = {
+    from: fromIdx,
+    to: toIdx,
+  };
+  chart.timeScale().setVisibleLogicalRange(range);
+  syncSubchartsToMain(range);
 }
 
 // ==============================================
@@ -2029,7 +2734,12 @@ const price2p=p=>priceSeries?.priceToCoordinate(p)??null;
 
 function time2p(t){
   if(!chart||!t) return null;
-  const direct=chart.timeScale().timeToCoordinate(t);
+  let direct=null;
+  try{
+    direct=chart.timeScale().timeToCoordinate(t);
+  }catch(e){
+    direct=null;
+  }
   if(direct!=null) return direct;
   if(!currentBars.length) return null;
   const resampled=resampleBars(currentBars, currentTF);
@@ -2183,7 +2893,7 @@ function drawMeasure(){
   const priceDiff=endPrice-measureStart.price;
   const pct=(priceDiff/measureStart.price*100).toFixed(2);
   const sign=priceDiff>=0?'+':'';
-  const color=priceDiff>=0?'#26a69a':'#ef5350';
+  const color=priceDiff>=0?'#6A9FCA':'#CC8844';
 
   let bars=0;
   if(currentBars.length){
@@ -2240,7 +2950,7 @@ const TOOLS=['pan','hline','line','ray','seg','text','note','measure'];
 function setTool(t){
   drawTool=t;pendingP1=null;
   document.getElementById('hint').classList.add('hidden');
-  if(t!=='measure'){measureStart=null;measureEnd=null;}
+  if(t!=='measure'){measureStart=null;measureEnd=null;measureShortcutActive=false;}
   TOOLS.forEach(id=>document.getElementById('tool-'+id).classList.toggle('active',id===t));
   syncDrawVars();
 }
@@ -2255,6 +2965,7 @@ document.getElementById('tool-clear').addEventListener('click',()=>{
 // ==============================================
 function setupChartEvents(){
   const chartEl=document.getElementById('chart');
+  const wrapEl=document.getElementById('chart-wrap');
 
   function setChartInteraction(enabled){
     chart.applyOptions({
@@ -2342,25 +3053,39 @@ function setupChartEvents(){
     }
   }catch(e){}
 
+  wrapEl?.addEventListener('mousedown', e => {
+    lastChartPointerShift = !!e.shiftKey;
+  }, true);
+  wrapEl?.addEventListener('mouseup', () => {
+    setTimeout(() => { lastChartPointerShift = false; }, 0);
+  }, true);
+
   chart.subscribeClick(param=>{
-    if(!currentSymbol||drawTool==='pan')return;
+    if(!currentSymbol||!param.point)return;
+    const actionTool = (measureShortcutActive || lastChartPointerShift) ? 'measure' : drawTool;
+    if(actionTool==='pan')return;
     if(!param.point)return;
     let price=priceSeries?.coordinateToPrice(param.point.y);
     if(price==null)return;
     price=parseFloat(price.toFixed(4));
-    const time=param.time; if(!time)return;
+    const time=snapCoordinateToCurrentTF(param.point.x) || snapChartTimeToCurrentTF(param.time); if(!time)return;
 
-    if(drawTool==='hline'){
+    if(actionTool==='measure' && drawTool!=='measure'){
+      measureShortcutActive = true;
+      suppressPanSelectionClick = true;
+    }
+
+    if(actionTool==='hline'){
       addDrawing({type:'hline',price,color:drawColor,width:drawWidth,style:drawLineStyle});saveDrawings();
       setTool('pan');
     }
-    else if(drawTool==='ray'||drawTool==='seg'||drawTool==='line'||drawTool==='note'){
+    else if(actionTool==='ray'||actionTool==='seg'||actionTool==='line'||actionTool==='note'){
       if(!pendingP1){
         pendingP1={price,time};
         document.getElementById('hint').classList.remove('hidden');
         redrawAll();
       } else {
-        if(drawTool==='note'){
+        if(actionTool==='note'){
           const p1=pendingP1;
           pendingP1=null;
           document.getElementById('hint').classList.add('hidden');
@@ -2380,17 +3105,17 @@ function setupChartEvents(){
           });
           return;
         }
-        addDrawing({type:drawTool,p1:pendingP1,p2:{price,time},color:drawColor,width:drawWidth,style:drawLineStyle});
+        addDrawing({type:actionTool,p1:pendingP1,p2:{price,time},color:drawColor,width:drawWidth,style:drawLineStyle});
         pendingP1=null;
         document.getElementById('hint').classList.add('hidden');
         saveDrawings();
         setTool('pan');
       }
     }
-    else if(drawTool==='text'){
+    else if(actionTool==='text'){
       showTextInput(param.point.x,param.point.y,price,time);
     }
-    else if(drawTool==='measure'){
+    else if(actionTool==='measure'){
       if(!measureStart){
         measureStart={price,time,x:param.point.x,y:param.point.y};
         document.getElementById('hint').classList.remove('hidden');
@@ -2398,11 +3123,16 @@ function setupChartEvents(){
         measureEnd={price,time,x:param.point.x,y:param.point.y};
         document.getElementById('hint').classList.add('hidden');
         measureStart=null; measureEnd=null;
+        measureShortcutActive=false;
       }
     }
   });
 
   chart.subscribeClick(param=>{
+    if(suppressPanSelectionClick){
+      suppressPanSelectionClick=false;
+      return;
+    }
     if(drawTool!=='pan'||!currentSymbol||!param.point)return;
     const x=param.point.x, y=param.point.y;
     const hit=hitTest(x,y);
@@ -2806,6 +3536,10 @@ function initChart(){
       if (chartEl) overlayMainOffsetY = chartEl.getBoundingClientRect().top - rect.top;
       const volPaneEl2 = document.getElementById('vol-pane');
       if (volPaneEl2) overlayVolOffsetY = volPaneEl2.getBoundingClientRect().top - rect.top;
+      const rsiPaneEl2 = document.getElementById('rsi-pane');
+      if (rsiPaneEl2) overlayRsiOffsetY = rsiPaneEl2.getBoundingClientRect().top - rect.top;
+      const aoPaneEl2 = document.getElementById('ao-pane');
+      if (aoPaneEl2) overlayAoOffsetY = aoPaneEl2.getBoundingClientRect().top - rect.top;
     }catch(e){}
 
     const cw = Math.max(1, Math.round(rect.width));
@@ -2935,20 +3669,25 @@ function initChart(){
     timeScale:{borderColor:borderColor,timeVisible:false,rightOffset:persistedRightOffset},
     localization:{locale:'en-US'},
   });
+  try{
+    chart.timeScale().subscribeVisibleLogicalRangeChange((range)=>{
+      syncSubchartsToMain(range);
+    });
+  }catch(e){}
   candleSeries=chart.addCandlestickSeries({
-    upColor:'#26a69a',downColor:'#ef5350',
-    borderUpColor:'#26a69a',borderDownColor:'#ef5350',
-    wickUpColor:'#26a69a',wickDownColor:'#ef5350',
+    upColor:'#6A9FCA',downColor:'#CC8844',
+    borderUpColor:'#6A9FCA',borderDownColor:'#CC8844',
+    wickUpColor:'#6A9FCA',wickDownColor:'#CC8844',
   });
   ohlcSeries = chart.addBarSeries({
-    upColor: '#26a69a',
-    downColor: '#ef5350',
+    upColor: '#6A9FCA',
+    downColor: '#CC8844',
     thinBars: false,
     openVisible: true,
   });
   volSeries=chart.addHistogramSeries({
     color:'#1f2833',priceFormat:{type:'volume'},
-    priceScaleId:'vol',scaleMargins:{top:0.85,bottom:0},
+    priceScaleId:'vol',scaleMargins:{top:0.92,bottom:0},
   });
 
   // ===== Background benchmark overlay: SPY (normalized to 100) =====
@@ -2961,19 +3700,19 @@ function initChart(){
     priceScaleId: 'spy',
   });
   spyCandleSeries = chart.addCandlestickSeries({
-    upColor: 'rgba(38,166,154,0.12)',
-    downColor: 'rgba(239,83,80,0.12)',
-    borderUpColor: 'rgba(38,166,154,0.22)',
-    borderDownColor: 'rgba(239,83,80,0.22)',
-    wickUpColor: 'rgba(38,166,154,0.18)',
-    wickDownColor: 'rgba(239,83,80,0.18)',
+    upColor: 'rgba(106,159,202,0.12)',
+    downColor: 'rgba(204,136,68,0.12)',
+    borderUpColor: 'rgba(106,159,202,0.22)',
+    borderDownColor: 'rgba(204,136,68,0.22)',
+    wickUpColor: 'rgba(106,159,202,0.18)',
+    wickDownColor: 'rgba(204,136,68,0.18)',
     priceLineVisible: false,
     lastValueVisible: false,
     priceScaleId: 'spy',
   });
   spyBarSeries = chart.addBarSeries({
-    upColor: 'rgba(38,166,154,0.22)',
-    downColor: 'rgba(239,83,80,0.22)',
+    upColor: 'rgba(106,159,202,0.22)',
+    downColor: 'rgba(204,136,68,0.22)',
     thinBars: true,
     openVisible: false,
     priceLineVisible: false,
@@ -2992,6 +3731,48 @@ function initChart(){
   const volResizeHit = document.getElementById('vol-resize-hit');
   const volPaneInfoEl = document.getElementById('vol-pane-info');
   const volEl = document.getElementById('vol-chart');
+  const rsiPaneEl = document.getElementById('rsi-pane');
+  const rsiPaneInfoEl = document.getElementById('rsi-pane-info');
+  const rsiEl = document.getElementById('rsi-chart');
+  const aoPaneEl = document.getElementById('ao-pane');
+  const aoPaneInfoEl = document.getElementById('ao-pane-info');
+  const aoEl = document.getElementById('ao-chart');
+
+  function updateSubchartTimeScales(){
+    const hasRsi = !!indicatorSettings.rsi.enabled;
+    const hasAo = !!indicatorSettings.ao.enabled;
+    const bottomTarget = hasAo ? 'ao' : hasRsi ? 'rsi' : volPaneEnabled ? 'vol' : 'main';
+    try {
+      chart?.timeScale()?.applyOptions({
+        visible: bottomTarget === 'main',
+        borderVisible: bottomTarget === 'main',
+        timeVisible: bottomTarget === 'main',
+        rightOffset: persistedRightOffset,
+      });
+    } catch (e) {}
+    try {
+      volChart?.timeScale()?.applyOptions({
+        visible: volPaneEnabled && bottomTarget === 'vol',
+        borderVisible: volPaneEnabled && bottomTarget === 'vol',
+        timeVisible: volPaneEnabled && bottomTarget === 'vol',
+        rightOffset: persistedRightOffset,
+      });
+    } catch (e) {}
+    try {
+      rsiChart?.timeScale()?.applyOptions({
+        visible: hasRsi && bottomTarget === 'rsi',
+        borderVisible: hasRsi && bottomTarget === 'rsi',
+        timeVisible: hasRsi && bottomTarget === 'rsi',
+        rightOffset: persistedRightOffset,
+      });
+      aoChart?.timeScale()?.applyOptions({
+        visible: hasAo && bottomTarget === 'ao',
+        borderVisible: hasAo && bottomTarget === 'ao',
+        timeVisible: hasAo && bottomTarget === 'ao',
+        rightOffset: persistedRightOffset,
+      });
+    } catch (e) {}
+  }
 
   function syncChartLayout(){
     try{
@@ -3002,8 +3783,17 @@ function initChart(){
         volChart.resize(wrap.clientWidth||w, volPaneEl.clientHeight || volPaneHeight || 140);
       }
     }catch(e){}
+    try{
+      if (rsiChart && rsiPaneEl) {
+        rsiChart.resize(wrap.clientWidth||w, rsiPaneEl.clientHeight || indicatorPaneHeight || 92);
+      }
+      if (aoChart && aoPaneEl) {
+        aoChart.resize(wrap.clientWidth||w, aoPaneEl.clientHeight || indicatorPaneHeight || 92);
+      }
+    }catch(e){}
     try { resizeCanvas(); } catch(e) {}
     try { resizeCrosshairOverlay(); } catch(e) {}
+    requestAnimationFrame(() => { try { syncRightScaleWidths(); } catch(e) {} });
   }
 
   function ensureVolumePane(enabled, skipSave=false){
@@ -3040,12 +3830,6 @@ function initChart(){
     });
 
     if (enabled) {
-      // Hide the main chart time axis while volume pane is enabled.
-      // (Keep the only shared time axis on volChart.)
-      try {
-        chart?.timeScale()?.applyOptions({ visible: false, borderVisible: false, timeVisible: false });
-      } catch (e) {}
-
       // Remove histogram series from main chart.
       if (volSeries && chart) {
         try { chart.removeSeries(volSeries); } catch(e) {}
@@ -3118,35 +3902,16 @@ function initChart(){
           });
         }catch(e){}
 
-        // Sync visible range between main chart and volume pane chart.
-        try{
-          chart?.timeScale().subscribeVisibleLogicalRangeChange((range)=>{
-            if (!volChart || _syncingVolRange) return;
-            _syncingVolRange = true;
-            try { volChart.timeScale().setVisibleLogicalRange(range); } catch(e) {}
-            _syncingVolRange = false;
-          });
-          volChart.timeScale().subscribeVisibleLogicalRangeChange((range)=>{
-            if (!chart || _syncingVolRange) return;
-            _syncingVolRange = true;
-            try { chart.timeScale().setVisibleLogicalRange(range); } catch(e) {}
-            _syncingVolRange = false;
-          });
-        }catch(e){}
       }
 
       if (volChart) {
         volSeries = volChart.addHistogramSeries(makeVolSeriesOptions());
       }
 
+      updateSubchartTimeScales();
+      syncSubchartsToCurrentMainRange();
       syncChartLayout();
     } else {
-      // Restore the main chart time axis when volume pane is disabled.
-      try {
-        chart?.timeScale()?.applyOptions({ visible: true, borderVisible: true, timeVisible: true });
-      } catch (e) {}
-
-      // Disable: destroy vol chart and recreate histogram series on main chart.
       if (volChart) {
         try { volChart.remove(); } catch(e) {}
       }
@@ -3159,10 +3924,12 @@ function initChart(){
           color:'#1f2833',
           priceFormat:{type:'volume'},
           priceScaleId:'vol',
-          scaleMargins:{top:0.85,bottom:0},
+          scaleMargins:{top:0.92,bottom:0},
         });
       }
 
+      updateSubchartTimeScales();
+      syncSubchartsToCurrentMainRange();
       syncChartLayout();
     }
 
@@ -3175,6 +3942,143 @@ function initChart(){
     if (!skipSave) saveSettings();
   }
   window._ensureVolumePane = ensureVolumePane;
+
+  function bindSubchartCrosshair(subchart, offsetKey){
+    if(!subchart) return;
+    try{
+      const monthNames2 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      subchart.subscribeCrosshairMove(param=>{
+        if(!param || !param.point) return;
+        try{
+          let label = '';
+          const t = param.time;
+          if(typeof t === 'string'){
+            const iso = t.length >= 10 ? t.slice(0,10) : t;
+            const yy = iso.slice(0,4);
+            const mm = iso.slice(5,7);
+            const dd = iso.slice(8,10) || '01';
+            const mi = Math.max(0, Math.min(11, parseInt(mm,10)-1));
+            label = `${parseInt(dd,10)} ${monthNames2[mi] || 'Jan'} '${yy.slice(2)}`;
+          } else if(typeof t === 'number'){
+            const d = new Date(t*1000);
+            label = `${d.getUTCDate()} ${monthNames2[d.getUTCMonth()] || 'Jan'} '${String(d.getUTCFullYear()).slice(2)}`;
+          } else if(t && typeof t === 'object' && t.year){
+            const mi = Math.max(0, Math.min(11, parseInt(String(t.month),10)-1));
+            label = `${t.day || 1} ${monthNames2[mi] || 'Jan'} '${String(t.year).slice(2)}`;
+          }
+          let xCoord = null;
+          try { xCoord = subchart.timeScale().timeToCoordinate(param.time); } catch(e) {}
+          const yBase = offsetKey === 'rsi' ? overlayRsiOffsetY : overlayAoOffsetY;
+          const yOverlay = param.point.y + yBase;
+          if (xCoord != null && Number.isFinite(xCoord)) window._setCrosshairX?.(xCoord, label, yOverlay);
+          else window._setCrosshairX?.(param.point.x, label, yOverlay);
+        }catch(e){}
+      });
+    }catch(e){}
+  }
+
+  function ensureIndicatorPanes(skipSave=false){
+    const showRsi = !!indicatorSettings.rsi.enabled;
+    const showAo = !!indicatorSettings.ao.enabled;
+    const paneHeight = Math.max(80, Math.min(220, Math.round(indicatorPaneHeight || 92)));
+
+    if (rsiPaneEl) {
+      rsiPaneEl.classList.toggle('hidden', !showRsi);
+      rsiPaneEl.setAttribute('aria-hidden', showRsi ? 'false' : 'true');
+      rsiPaneEl.style.height = `${paneHeight}px`;
+    }
+    if (aoPaneEl) {
+      aoPaneEl.classList.toggle('hidden', !showAo);
+      aoPaneEl.setAttribute('aria-hidden', showAo ? 'false' : 'true');
+      aoPaneEl.style.height = `${paneHeight}px`;
+    }
+    rsiPaneInfoEl?.setAttribute('aria-hidden', showRsi ? 'false' : 'true');
+    aoPaneInfoEl?.setAttribute('aria-hidden', showAo ? 'false' : 'true');
+
+    if (showRsi) {
+      if (!rsiChart && rsiEl) {
+        rsiChart = LightweightCharts.createChart(rsiEl, {
+          width: w,
+          height: paneHeight,
+          layout:{background:{color:bgColor},textColor:textColor},
+          grid:{vertLines:{visible:false},horzLines:{visible:false}},
+          crosshair:{
+            mode:LightweightCharts.CrosshairMode.None,
+            vertLine:{visible:false,color:'rgba(0,0,0,0)',width:1,style:LightweightCharts.LineStyle.Solid},
+            horzLine:{visible:false,color:'rgba(0,0,0,0)',width:1,style:LightweightCharts.LineStyle.Dashed},
+          },
+          rightPriceScale:{borderColor:borderColor, visible:true, borderVisible:true},
+          timeScale:{borderColor:borderColor,timeVisible:true,rightOffset:persistedRightOffset},
+          localization:{locale:'en-US'},
+          handleScroll:false,
+          handleScale:false,
+        });
+        indicatorSeries.rsi = rsiChart.addLineSeries({
+          color: indicatorSettings.rsi.color,
+          lineWidth: 1,
+          priceLineVisible: false,
+          lastValueVisible: false,
+          crosshairMarkerVisible: false,
+        });
+        try{
+          rsiChart.priceScale().applyOptions({ scaleMargins: { top: 0.14, bottom: 0.14 } });
+          indicatorSeries.rsi.createPriceLine({ price: 70, color: 'rgba(125,130,138,0.16)', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Solid, axisLabelVisible: false, title: '' });
+          indicatorSeries.rsi.createPriceLine({ price: 50, color: 'rgba(140,145,153,0.45)', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Solid, axisLabelVisible: false, title: '' });
+          indicatorSeries.rsi.createPriceLine({ price: 30, color: 'rgba(125,130,138,0.16)', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Solid, axisLabelVisible: false, title: '' });
+        }catch(e){}
+        bindSubchartCrosshair(rsiChart, 'rsi');
+      }
+    } else if (rsiChart) {
+      try { rsiChart.remove(); } catch(e) {}
+      rsiChart = null;
+      indicatorSeries.rsi = null;
+      if (rsiEl) rsiEl.innerHTML = '';
+    }
+
+    if (showAo) {
+      if (!aoChart && aoEl) {
+        aoChart = LightweightCharts.createChart(aoEl, {
+          width: w,
+          height: paneHeight,
+          layout:{background:{color:bgColor},textColor:textColor},
+          grid:{vertLines:{visible:false},horzLines:{visible:false}},
+          crosshair:{
+            mode:LightweightCharts.CrosshairMode.None,
+            vertLine:{visible:false,color:'rgba(0,0,0,0)',width:1,style:LightweightCharts.LineStyle.Solid},
+            horzLine:{visible:false,color:'rgba(0,0,0,0)',width:1,style:LightweightCharts.LineStyle.Dashed},
+          },
+          rightPriceScale:{borderColor:borderColor, visible:true, borderVisible:true},
+          timeScale:{borderColor:borderColor,timeVisible:true,rightOffset:persistedRightOffset},
+          localization:{locale:'en-US'},
+          handleScroll:false,
+          handleScale:false,
+        });
+        indicatorSeries.ao = aoChart.addHistogramSeries({
+          color: indicatorSettings.ao.upColor,
+          priceLineVisible: false,
+          lastValueVisible: false,
+        });
+        try{
+          aoChart.priceScale().applyOptions({ scaleMargins: { top: 0.16, bottom: 0.16 } });
+        }catch(e){}
+        bindSubchartCrosshair(aoChart, 'ao');
+      }
+    } else if (aoChart) {
+      try { aoChart.remove(); } catch(e) {}
+      aoChart = null;
+      indicatorSeries.ao = null;
+      if (aoEl) aoEl.innerHTML = '';
+    }
+
+    updateSubchartTimeScales();
+    syncSubchartsToCurrentMainRange();
+    syncChartLayout();
+    if (currentBars && currentBars.length) {
+      try { updateIndicatorSeries(); } catch(e) {}
+    }
+    if (!skipSave) saveSettings();
+  }
+  window._ensureIndicatorPane = ensureIndicatorPanes;
 
   // Volume pane height drag (invisible handle).
   if (volResizeHit && volPaneEl) {
@@ -3208,9 +4112,8 @@ function initChart(){
     });
   }
   const saved=loadSettings();
-  if (saved?.priceColors?.up && saved?.priceColors?.down) {
-    priceColors = { up: saved.priceColors.up, down: saved.priceColors.down };
-  }
+  // Always use hardcoded candle colors
+  priceColors = { up: '#6A9FCA', down: '#CC8844' };
   if (typeof saved?.spyOverlayEnabled === 'boolean') {
     spyOverlayEnabled = saved.spyOverlayEnabled;
   }
@@ -3224,6 +4127,23 @@ function initChart(){
   if (typeof saved?.volumePaneHeight === 'number' && Number.isFinite(saved.volumePaneHeight)) {
     volPaneHeight = saved.volumePaneHeight;
   }
+  if (typeof saved?.indicatorPaneHeight === 'number' && Number.isFinite(saved.indicatorPaneHeight)) {
+    indicatorPaneHeight = saved.indicatorPaneHeight;
+  }
+  if (saved?.indicatorSettings) {
+    const savedAo = saved.indicatorSettings.ao || {};
+    indicatorSettings = {
+      rsi: { ...INDICATOR_DEFAULTS.rsi, ...(saved.indicatorSettings.rsi || {}) },
+      ao: {
+        ...INDICATOR_DEFAULTS.ao,
+        ...savedAo,
+        upColor: savedAo.upColor || savedAo.color || INDICATOR_DEFAULTS.ao.upColor,
+        downColor: savedAo.downColor || INDICATOR_DEFAULTS.ao.downColor,
+      },
+      pocketPivot: { ...INDICATOR_DEFAULTS.pocketPivot, ...(saved.indicatorSettings.pocketPivot || {}) },
+    };
+  }
+  indicatorSettings.pocketPivot.color = POCKET_PIVOT_BLUE;
   if (typeof saved?.rightOffsetBars === 'number' && Number.isFinite(saved.rightOffsetBars)) {
     persistedRightOffset = Math.max(0, Math.min(30, Math.round(saved.rightOffsetBars)));
     try { chart.timeScale().applyOptions({ rightOffset: persistedRightOffset }); } catch(e) {}
@@ -3245,8 +4165,10 @@ function initChart(){
   ohlcSeries.setData([]);
   applyPriceColors(true);
   setupChartMenu();
+  syncIndicatorInputs();
 
-  // Apply volume pane after menu exists (and only after we read persisted settings).
+  // Apply indicator pane before volume pane so the bottom time axis can be assigned correctly.
+  ensureIndicatorPanes(true);
   ensureVolumePane(volPaneEnabled, true);
 
   // Ensure overlay canvas size/offsets are correct after pane layout is applied.
@@ -3382,6 +4304,8 @@ function setupChartMenu(){
     persistedRightOffset = next;
     try { chart?.timeScale()?.applyOptions({ rightOffset: persistedRightOffset }); } catch(err) {}
     try { volChart?.timeScale()?.applyOptions({ rightOffset: persistedRightOffset }); } catch(err) {}
+    try { rsiChart?.timeScale()?.applyOptions({ rightOffset: persistedRightOffset }); } catch(err) {}
+    try { aoChart?.timeScale()?.applyOptions({ rightOffset: persistedRightOffset }); } catch(err) {}
     saveSettings();
   });
 }
@@ -3390,8 +4314,13 @@ function setupChartMenu(){
 // DATA & FILTERS
 // ==============================================
 async function loadResults(){
-  try{allRows=await(await fetch('/api/results')).json();applyFilters();}
-  catch(e){document.getElementById('table-body').innerHTML=`<div style="padding:20px;color:#ef5350;font-family:var(--mono);font-size:12px;">Error: ${e.message}</div>`;}
+  try{
+    allRows=await(await fetch('/api/results')).json();
+    document.querySelectorAll('.table-header span').forEach(s=>s.classList.remove('sort-asc','sort-desc'));
+    document.querySelector('.table-header span[data-col="year"]')?.classList.add('sort-desc');
+    applyFilters();
+  }
+  catch(e){document.getElementById('table-body').innerHTML=`<div style="padding:20px;color:#CC8844;font-family:var(--mono);font-size:12px;">Error: ${e.message}</div>`;}
 }
 function applyFilters(){
   const mg=parseFloat(document.getElementById('f-gain').value)||0;
@@ -3407,6 +4336,10 @@ function applyFilters(){
 }
 function applySort(){
   filtered.sort((a,b)=>{
+    if(sortCol==='favorite'){
+      const av=isFavoriteRow(a)?1:0, bv=isFavoriteRow(b)?1:0;
+      return av<bv?-sortDir:av>bv?sortDir:0;
+    }
     let av=a[sortCol],bv=b[sortCol];
     if(['gain_pct','avg_vol_b','year'].includes(sortCol)){av=parseFloat(av);bv=parseFloat(bv);}
     return av<bv?-sortDir:av>bv?sortDir:0;
@@ -3428,6 +4361,7 @@ function renderTable(){
   if(!filtered.length){body.innerHTML='<div style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;">No results.</div>';return;}
   body.innerHTML=filtered.map((r,i)=>`
     <div class="row ${i===activeIdx?'active':''}" data-i="${i}">
+      <span class="fav-col"><button class="fav-btn ${isFavoriteRow(r)?'active':''}" data-fav="${i}" aria-label="Favorite mover" title="Favorite mover">${isFavoriteRow(r)?'★':'☆'}</button></span>
       <span class="sym">${r.symbol}</span>
       <span class="date">${r.year}</span>
       <span class="date">${r.low_date}</span>
@@ -3436,6 +4370,24 @@ function renderTable(){
       <span class="vol">${r.avg_vol_b}B</span>
     </div>`).join('');
   body.querySelectorAll('.row').forEach(el=>el.addEventListener('click',()=>selectRow(parseInt(el.dataset.i))));
+  body.querySelectorAll('.fav-btn').forEach(btn=>btn.addEventListener('click',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    const idx=parseInt(btn.dataset.fav,10);
+    if(!Number.isFinite(idx) || !filtered[idx]) return;
+    const selectedKey=currentMoveRow ? rowKey(currentMoveRow) : null;
+    toggleFavoriteRow(filtered[idx]);
+    if(sortCol==='favorite'){
+      applySort();
+      if(selectedKey){
+        activeIdx=filtered.findIndex(r=>rowKey(r)===selectedKey);
+        renderTable();
+      }
+    } else {
+      if(selectedKey) activeIdx=filtered.findIndex(r=>rowKey(r)===selectedKey);
+      renderTable();
+    }
+  }));
 }
 
 // ==============================================
@@ -3460,21 +4412,17 @@ async function selectRow(i){
     currentBars=bars;
     candleSeries.setData(bars.map(b=>({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close})));
     volSeries.setData(bars.map(b => {
-      const volUp = isLightTheme ? '#d4efe6' : '#1a3a35';
-      const volDown = isLightTheme ? '#f5d4d4' : '#3a1a1a';
+      const s = getComputedStyle(document.documentElement);
+      const volUp = s.getPropertyValue('--vol-up').trim();
+      const volDown = s.getPropertyValue('--vol-down').trim();
       return { time: b.time, value: b.volume, color: b.close >= b.open ? volUp : volDown };
     }));
     applyTimeframe();
     const tfBars=resampleBars(currentBars,currentTF);
     const findBar=t=>tfBars.find(b=>b.time===t)||tfBars.reduce((best,b)=>b.time.localeCompare(t)<0?b:best,tfBars[0]);
     const sb=findBar(r.low_date),eb=findBar(r.high_date);
-    (priceSeries || candleSeries).setMarkers([
-      {time:sb.time,position:'belowBar',color:'#00d4aa',shape:'arrowUp',  text:`▶ Low ${r.low_date} $${r.low_price}`},
-      {time:eb.time,position:'aboveBar',color:'#ff6b35',shape:'arrowDown',text:`◀ High ${r.high_date} +${parseFloat(r.gain_pct).toFixed(0)}%`},
-    ]);
-    const times=tfBars.map(b=>b.time),si=times.indexOf(sb.time),ei=times.indexOf(eb.time);
-    const pad=Math.max(5,Math.round((ei-si)*0.2));
-    chart.timeScale().setVisibleRange({from:tfBars[Math.max(0,si-pad)].time,to:tfBars[Math.min(tfBars.length-1,ei+pad)].time});
+    applyMoveMarkers();
+    applyInitialSelectionRange(tfBars, sb.time, eb.time);
     redrawAll();
     
     // Reset crosshair info
@@ -3494,6 +4442,7 @@ window.addEventListener('load',async()=>{
     document.documentElement.setAttribute('data-theme', 'light');
     themeToggle.textContent = '🌙 Dark';
   }
+  loadFavorites();
   initChart();
   await loadDrawings();
   loadResults();
