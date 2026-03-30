@@ -9,6 +9,7 @@
 import argparse
 import csv
 import os
+import platform
 import shutil
 import sys
 
@@ -18,10 +19,17 @@ SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_RESULT = os.path.join(SCRIPT_DIR, "big_movers_result.csv")
 DEFAULT_OUT    = os.path.join(SCRIPT_DIR, "collected_stocks")
 
-SOURCE_DIRS = [
-    r"D:\US_stocks_daily_data\delisted stocks from 2000",
-    r"D:\US_stocks_daily_data\listed stocks from 2000",
-]
+if platform.system() == 'Windows':
+    SOURCE_DIRS = [
+        r"D:\US_stocks_daily_data\delisted stocks from 2000",
+        r"D:\US_stocks_daily_data\listed stocks from 2000",
+    ]
+else:
+    _home = os.path.expanduser("~")
+    SOURCE_DIRS = [
+        os.path.join(_home, "US_stocks_daily_data", "delisted stocks from 2000"),
+        os.path.join(_home, "US_stocks_daily_data", "listed stocks from 2000"),
+    ]
 # ────────────────────────────────────────────────────────
 
 
