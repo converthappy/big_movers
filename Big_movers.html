@@ -1045,6 +1045,7 @@
         <span class="chart-gain"   id="ct-gain"></span>
         <span class="chart-info"   id="ct-range"></span>
         <span class="chart-info"   id="ct-vol"></span>
+        <span class="chart-info"   id="ct-rs">RS —</span>
         <div class="tf-controls" style="display:flex;align-items:center;gap:3px;">
           <button class="tb-btn active" id="tf-D" title="Daily">D</button>
           <button class="tb-btn" id="tf-3D" title="3 Day">3D</button>
@@ -1191,6 +1192,7 @@
           <span class="info-label">$Vol:</span>
           <span class="info-value info-vol" id="info-dvol">—</span>
         </div>
+        <div class="info-item"><span class="info-label">RS:</span><span class="info-value" id="info-rs">—</span></div>
         <div class="info-item"><span class="info-label">MA:</span><span class="info-value" id="info-ma">—</span></div>
         <div class="info-item"><span class="info-label">IND:</span><span class="info-value" id="info-ind">—</span></div>
         <div class="info-spacer"></div>
@@ -1425,6 +1427,9 @@ let _syncingVolRange=false;
 let priceSeries=null;
 let currentBars=[],currentSymbol='';
 let currentMoveRow=null; // cache selected row for re-applying markers after setData()
+let currentRsSeries=[], currentRsMap=new Map(), currentRsLatest=null;
+let rsSeriesCache=new Map();
+let currentSelectionToken=0;
 let sortCol='year',sortDir=-1;
 let favorites=new Set();
 let isLogScale=false;
@@ -1455,6 +1460,7 @@ let crosshairOverlayX = null;
 let crosshairOverlayY = null;
 let crosshairOverlayDpr = 1;
 let crosshairOverlayLabel = '';
+let lastCrosshairParam = null;
 let overlayMainOffsetY = 0;
 let overlayVolOffsetY = 0;
 let overlayRsiOffsetY = 0;
@@ -1703,6 +1709,71 @@ function toggleFavoriteRow(r){
   if(favorites.has(key)) favorites.delete(key);
   else favorites.add(key);
   saveFavorites();
+}
+function getRsAtOrBefore(timeStr){
+  if(!timeStr || !currentRsSeries.length) return null;
+  const exact = currentRsMap.get(timeStr);
+  if(exact != null) return exact;
+  let best = null;
+  for(const point of currentRsSeries){
+    if(point.time > timeStr) break;
+    best = point.rating;
+  }
+  return best;
+}
+async function fetchJsonOrThrow(url){
+  const resp = await fetch(url);
+  const text = await resp.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
+  if (!resp.ok) {
+    const msg = data?.error || text || `${resp.status} ${resp.statusText}`;
+    throw new Error(msg);
+  }
+  if (data == null) {
+    throw new Error(`Invalid JSON response from ${url}`);
+  }
+  return data;
+}
+async function fetchJsonOptional(url, fallback=null){
+  try {
+    const resp = await fetch(url);
+    const text = await resp.text();
+    if (!resp.ok) return fallback;
+    return text ? JSON.parse(text) : fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function resetCurrentRsData(){
+  currentRsSeries = [];
+  currentRsMap = new Map();
+  currentRsLatest = null;
+  const chartRs = document.getElementById('ct-rs');
+  if (chartRs) chartRs.textContent = 'RS —';
+}
+function applyCurrentRsPayload(rsPayload){
+  currentRsSeries = Array.isArray(rsPayload?.series) ? rsPayload.series : [];
+  currentRsMap = new Map(currentRsSeries.map(p => [p.time, p.rating]));
+  currentRsLatest = currentRsSeries.length ? currentRsSeries[currentRsSeries.length - 1].rating : null;
+  const chartRs = document.getElementById('ct-rs');
+  if (chartRs) chartRs.textContent = currentRsLatest == null ? 'RS —' : `RS ${currentRsLatest}`;
+  updateCrosshairInfo(lastCrosshairParam);
+}
+async function loadRsForSymbol(symbol, selectionToken){
+  const sym = (symbol || '').toUpperCase();
+  if (!sym || sym === 'SPY') return;
+  if (rsSeriesCache.has(sym)) {
+    if (selectionToken === currentSelectionToken && sym === currentSymbol) {
+      applyCurrentRsPayload(rsSeriesCache.get(sym));
+    }
+    return;
+  }
+  const payload = await fetchJsonOptional(`/api/rs_rating?symbol=${encodeURIComponent(sym)}`, { series: [] });
+  rsSeriesCache.set(sym, payload || { series: [] });
+  if (selectionToken === currentSelectionToken && sym === currentSymbol) {
+    applyCurrentRsPayload(payload);
+  }
 }
 
 // ==============================================
@@ -2226,6 +2297,7 @@ function updateCrosshairInfo(param) {
   const infoDVol = document.getElementById('info-dvol');
   const volPaneVol = document.getElementById('vol-pane-vol');
   const volPaneDVol = document.getElementById('vol-pane-dvol');
+  const infoRs = document.getElementById('info-rs');
   const infoMA = document.getElementById('info-ma');
   const infoInd = document.getElementById('info-ind');
   const paneRsi = document.getElementById('rsi-pane-value');
@@ -2243,6 +2315,7 @@ function updateCrosshairInfo(param) {
     infoDVol.textContent = '—';
     if (volPaneVol) volPaneVol.textContent = '—';
     if (volPaneDVol) volPaneDVol.textContent = '—';
+    if (infoRs) infoRs.textContent = currentRsLatest == null ? '—' : String(currentRsLatest);
     if (infoMA) infoMA.textContent = '—';
     if (infoInd) infoInd.textContent = '—';
     if (paneRsi) paneRsi.textContent = '—';
@@ -2341,6 +2414,10 @@ function updateCrosshairInfo(param) {
   infoDVol.textContent = fmtVol(dvol);
   if (volPaneVol) volPaneVol.textContent = fmtVol(vol);
   if (volPaneDVol) volPaneDVol.textContent = fmtVol(dvol);
+  if (infoRs) {
+    const rs = getRsAtOrBefore(bar.time || timeStr);
+    infoRs.textContent = rs == null ? (currentRsLatest == null ? '—' : String(currentRsLatest)) : String(rs);
+  }
 
   // MA values (stable width)
   if (infoMA) {
@@ -3005,10 +3082,12 @@ function setupChartEvents(){
   chart.subscribeCrosshairMove(param=>{
     if (!param || !param.point) {
       // Mouse moved out of chart - clear info bar
+      lastCrosshairParam = null;
       updateCrosshairInfo(null);
       window._setCrosshairX?.(null);
       return;
     }
+    lastCrosshairParam = param;
     
     previewMouseX = param.point.x;
     previewMouseY = param.point.y;
@@ -4394,11 +4473,13 @@ function renderTable(){
 // SELECT ROW
 // ==============================================
 async function selectRow(i){
+  const selectionToken = ++currentSelectionToken;
   activeIdx=i;renderTable();
   document.querySelector('.row.active')?.scrollIntoView({block:'nearest'});
   const r=filtered[i];
   currentMoveRow = r;
   currentSymbol=r.symbol;
+  resetCurrentRsData();
   document.getElementById('ct-sym').textContent=r.symbol;
   document.getElementById('ct-cond').textContent=r.year;
   document.getElementById('ct-gain').textContent=`+${parseFloat(r.gain_pct).toFixed(2)}%`;
@@ -4407,7 +4488,8 @@ async function selectRow(i){
   document.getElementById('placeholder').classList.add('hidden');
   document.getElementById('loading').classList.remove('hidden');
   try{
-    const bars=await(await fetch(`/api/ohlcv?symbol=${r.symbol}`)).json();
+    const bars = await fetchJsonOrThrow(`/api/ohlcv?symbol=${encodeURIComponent(r.symbol)}`);
+    if (selectionToken !== currentSelectionToken || r.symbol !== currentSymbol) return;
     if(bars.error)throw new Error(bars.error);
     currentBars=bars;
     candleSeries.setData(bars.map(b=>({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close})));
@@ -4427,9 +4509,12 @@ async function selectRow(i){
     
     // Reset crosshair info
     updateCrosshairInfo(null);
+    document.getElementById('loading').classList.add('hidden');
+    loadRsForSymbol(r.symbol, selectionToken);
   }catch(e){
     console.error(e);document.getElementById('ct-gain').textContent=`Error: ${e.message}`;
-  }finally{document.getElementById('loading').classList.add('hidden');}
+    document.getElementById('loading').classList.add('hidden');
+  }
 }
 
 // ==============================================

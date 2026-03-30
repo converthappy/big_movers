@@ -6,6 +6,7 @@
 import csv
 import os
 import json
+from bisect import bisect_right
 from flask import Flask, jsonify, send_from_directory, request, Response
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +21,8 @@ STOCKS_DIRS = [
 # SPY benchmark data source (UI "VS" overlay)
 SPY_HIST_CSV = os.path.join(SCRIPT_DIR, "SPY Historical Data.csv")
 _SPY_BARS_CACHE = None
+_UNIVERSE_CLOSES_CACHE = None
+_RS_SERIES_CACHE = {}
 
 def _normalize_date_maybe(raw):
     s = str(raw or "").strip()
@@ -136,6 +139,185 @@ def _load_spy_bars():
     return _SPY_BARS_CACHE
 
 
+def _load_symbol_bars(symbol):
+    symbol = (symbol or "").strip().upper()
+    if not symbol:
+        return []
+
+    if symbol == "SPY":
+        return _load_spy_bars()
+
+    path = None
+    for d in STOCKS_DIRS:
+        for fname in [f"{symbol}.csv", f"{symbol.lower()}.csv"]:
+            c = os.path.join(d, fname)
+            if os.path.exists(c):
+                path = c
+                break
+        if path:
+            break
+
+    if not path:
+        return []
+
+    bars = []
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        reader = csv.reader(f)
+        header = next(reader, None)
+        if not header:
+            return []
+        if len(header) >= 2 and "date" in (header[1] or "").lower():
+            fmt = "new"
+        elif len(header) >= 1 and "date" in (header[0] or "").lower():
+            fmt = "noindex"
+        else:
+            fmt = "old"
+        for row in reader:
+            try:
+                if fmt == "new":
+                    if len(row) < 7:
+                        continue
+                    t = row[1].strip()
+                    o = float(row[2])
+                    h = float(row[3])
+                    l = float(row[4])
+                    c = float(row[5])
+                    v = float(row[6])
+                elif fmt == "noindex":
+                    if len(row) < 6:
+                        continue
+                    raw_t = row[0].strip()
+                    if len(raw_t) == 10 and raw_t[2] == "/":
+                        parts = raw_t.split("/")
+                        t = f"{parts[2]}-{parts[0]:>02}-{parts[1]:>02}"
+                    else:
+                        t = raw_t
+                    o = float(row[1])
+                    h = float(row[2])
+                    l = float(row[3])
+                    c = float(row[4])
+                    v = float(row[5])
+                else:
+                    if len(row) < 6:
+                        continue
+                    t = row[0].strip()
+                    c = float(row[1])
+                    o = float(row[2])
+                    h = float(row[3])
+                    l = float(row[4])
+                    v = float(row[5])
+                if c <= 0:
+                    continue
+                bars.append({
+                    "time": t,
+                    "open": o,
+                    "high": h,
+                    "low": l,
+                    "close": c,
+                    "volume": v,
+                })
+            except (ValueError, IndexError):
+                continue
+
+    bars.sort(key=lambda x: x["time"])
+    return bars
+
+
+def _load_universe_close_cache():
+    global _UNIVERSE_CLOSES_CACHE
+    if _UNIVERSE_CLOSES_CACHE is not None:
+        return _UNIVERSE_CLOSES_CACHE
+
+    universe = {}
+    stocks_dir = STOCKS_DIRS[0] if STOCKS_DIRS else None
+    if not stocks_dir or not os.path.isdir(stocks_dir):
+        _UNIVERSE_CLOSES_CACHE = universe
+        return universe
+
+    for fname in sorted(os.listdir(stocks_dir)):
+        if not fname.lower().endswith(".csv"):
+            continue
+        symbol = os.path.splitext(fname)[0].upper()
+        bars = _load_symbol_bars(symbol)
+        dates = []
+        closes = []
+        for bar in bars:
+            t = bar.get("time")
+            c = bar.get("close")
+            if not t or c is None or c <= 0:
+                continue
+            dates.append(t)
+            closes.append(float(c))
+        if len(dates) >= 253:
+            universe[symbol] = {"dates": dates, "closes": closes}
+
+    _UNIVERSE_CLOSES_CACHE = universe
+    return universe
+
+
+def _weighted_ibd_score(closes, idx):
+    lookbacks = (63, 126, 189, 252)
+    if idx is None or idx < lookbacks[-1]:
+        return None
+    current = closes[idx]
+    if current <= 0:
+        return None
+    weights = (0.4, 0.2, 0.2, 0.2)
+    score = 0.0
+    for weight, lb in zip(weights, lookbacks):
+        base = closes[idx - lb]
+        if base <= 0:
+            return None
+        score += weight * ((current / base) - 1.0)
+    return score
+
+
+def _compute_ibd_style_rs_series(symbol):
+    symbol = (symbol or "").strip().upper()
+    if not symbol:
+        return []
+    if symbol in _RS_SERIES_CACHE:
+        return _RS_SERIES_CACHE[symbol]
+
+    universe = _load_universe_close_cache()
+    target = universe.get(symbol)
+    if not target:
+        _RS_SERIES_CACHE[symbol] = []
+        return []
+
+    target_dates = target["dates"]
+    target_closes = target["closes"]
+    out = []
+
+    for idx in range(252, len(target_dates)):
+        date_str = target_dates[idx]
+        target_score = _weighted_ibd_score(target_closes, idx)
+        if target_score is None:
+            continue
+
+        peer_scores = []
+        for peer in universe.values():
+            peer_dates = peer["dates"]
+            peer_idx = bisect_right(peer_dates, date_str) - 1
+            if peer_idx < 252:
+                continue
+            score = _weighted_ibd_score(peer["closes"], peer_idx)
+            if score is not None:
+                peer_scores.append(score)
+
+        if len(peer_scores) < 20:
+            continue
+
+        peer_scores.sort()
+        rank = bisect_right(peer_scores, target_score)
+        pct = int(round((rank / len(peer_scores)) * 99))
+        pct = max(1, min(99, pct))
+        out.append({"time": date_str, "rating": pct})
+
+    _RS_SERIES_CACHE[symbol] = out
+    return out
+
+
 def _resolve_index_html_path():
     # Repo uses Big_movers.html; tolerate lowercase for clones on case-sensitive FS
     for name in ("Big_movers.html", "big_movers.html"):
@@ -173,88 +355,32 @@ def api_ohlcv():
     if not symbol:
         return jsonify({"error": "symbol required"}), 400
 
-    # Special-case SPY: serve from SPY Historical Data.csv
-    if symbol == "SPY":
-        try:
-            return jsonify(_load_spy_bars())
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-
-    # Search configured directories
-    path = None
-    for d in STOCKS_DIRS:
-        for fname in [f"{symbol}.csv", f"{symbol.lower()}.csv"]:
-            c = os.path.join(d, fname)
-            if os.path.exists(c):
-                path = c
-                break
-        if path:
-            break
-
-    if not path:
-        return jsonify({"error": f"{symbol}.csv not found in any configured directory"}), 404
-
-    bars = []
     try:
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
-            reader = csv.reader(f)
-            header = next(reader, None)
-            if not header:
-                return jsonify([])
-            # Detect CSV column layout
-            if len(header) >= 2 and "date" in (header[1] or "").lower():
-                fmt = "new"
-            elif len(header) >= 1 and "date" in (header[0] or "").lower():
-                fmt = "noindex"
-            else:
-                fmt = "old"
-            for row in reader:
-                try:
-                    if fmt == "new":
-                        # [idx, date, open, high, low, close, volume]
-                        if len(row) < 7:
-                            continue
-                        t = row[1].strip()
-                        o = float(row[2])
-                        h = float(row[3])
-                        l = float(row[4])
-                        c = float(row[5])
-                        v = float(row[6])
-                    elif fmt == "noindex":
-                        # [DateTime, Open, High, Low, Close, Volume]
-                        if len(row) < 6:
-                            continue
-                        raw_t = row[0].strip()
-                        if len(raw_t) == 10 and raw_t[2] == '/':
-                            parts = raw_t.split('/')
-                            t = f"{parts[2]}-{parts[0]:>02}-{parts[1]:>02}"
-                        else:
-                            t = raw_t
-                        o = float(row[1])
-                        h = float(row[2])
-                        l = float(row[3])
-                        c = float(row[4])
-                        v = float(row[5])
-                    else:
-                        # [date, close, open, high, low, volume, ...]
-                        if len(row) < 6:
-                            continue
-                        t = row[0].strip()
-                        c = float(row[1])
-                        o = float(row[2])
-                        h = float(row[3])
-                        l = float(row[4])
-                        v = float(row[5])
-                    if c <= 0:
-                        continue
-                    bars.append({"time": t, "open": o, "high": h, "low": l, "close": c, "volume": v})
-                except (ValueError, IndexError):
-                    continue
+        bars = _load_symbol_bars(symbol)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-    bars.sort(key=lambda x: x["time"])
+    if not bars:
+        return jsonify({"error": f"{symbol}.csv not found in any configured directory"}), 404
     return jsonify(bars)
+
+
+@app.route("/api/rs_rating")
+def api_rs_rating():
+    symbol = (request.args.get("symbol") or "").strip().upper()
+    if not symbol:
+        return jsonify({"error": "symbol required"}), 400
+    if symbol == "SPY":
+        return jsonify([])
+    try:
+        data = _compute_ibd_style_rs_series(symbol)
+        return jsonify({
+            "symbol": symbol,
+            "method": "ibd_style_weighted_3_6_9_12m",
+            "series": data,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 DRAWINGS_FILE = os.path.join(SCRIPT_DIR, "drawings.json")
