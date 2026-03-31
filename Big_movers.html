@@ -618,7 +618,6 @@
   .draw-toolbar.collapsed #tool-pan,
   .draw-toolbar.collapsed #tool-hline,
   .draw-toolbar.collapsed #tool-line,
-  .draw-toolbar.collapsed #tool-ray,
   .draw-toolbar.collapsed #tool-seg,
   .draw-toolbar.collapsed #tool-box,
   .draw-toolbar.collapsed #tool-note,
@@ -1245,36 +1244,15 @@
               </div>
             </span>
             <span class="tool-group">
-              <button class="tb-btn" id="tool-line" title="Extended Line [Alt+A]" aria-label="Line">
+              <button class="tb-btn" id="tool-line" title="Arrow [Alt+A]" aria-label="Arrow">
                 <span class="tb-ico" aria-hidden="true">
-                  <svg viewBox="0 0 20 20"><path d="M3 10h14"/><path d="M6 7l-3 3 3 3M14 7l3 3-3 3"/></svg>
+                  <svg viewBox="0 0 20 20"><path d="M4 15L15 4"/><path d="M10 4h5v5"/></svg>
                 </span>
               </button>
-              <button class="tool-cfg-btn" id="cfg-line" title="Line style" aria-label="Line settings">
+              <button class="tool-cfg-btn" id="cfg-line" title="Arrow style" aria-label="Arrow settings">
                 <svg viewBox="0 0 20 20"><path d="M10 2l1.4 2.5 2.9.6-2 2.2.3 3-2.6-1.2-2.6 1.2.3-3-2-2.2 2.9-.6L10 2z"/></svg>
               </button>
               <div class="tool-popup hidden" id="popup-line">
-                <label>Color</label><input type="color" class="cfg-color" value="#ffffff">
-                <label>Width</label>
-                <select class="cfg-width">
-                  <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
-                </select>
-                <label>Style</label>
-                <select class="cfg-style">
-                  <option value="solid">——</option><option value="dash">- -</option><option value="dot">···</option>
-                </select>
-              </div>
-            </span>
-            <span class="tool-group">
-              <button class="tb-btn" id="tool-ray" title="Ray [Alt+R]" aria-label="Ray">
-                <span class="tb-ico" aria-hidden="true">
-                  <svg viewBox="0 0 20 20"><path d="M4 16L16 4"/><path d="M11 4h5v5"/></svg>
-                </span>
-              </button>
-              <button class="tool-cfg-btn" id="cfg-ray" title="Ray style" aria-label="Ray settings">
-                <svg viewBox="0 0 20 20"><path d="M10 2l1.4 2.5 2.9.6-2 2.2.3 3-2.6-1.2-2.6 1.2.3-3-2-2.2 2.9-.6L10 2z"/></svg>
-              </button>
-              <div class="tool-popup hidden" id="popup-ray">
                 <label>Color</label><input type="color" class="cfg-color" value="#ffffff">
                 <label>Width</label>
                 <select class="cfg-width">
@@ -1436,9 +1414,11 @@
               </button>
               <div class="tool-popup hidden" id="popup-rr">
                 <label>Line</label><input type="color" class="cfg-color" value="#cfd6df">
+                <label>Reward</label><input type="color" class="cfg-reward-color" value="#2f9a94">
+                <label>Risk</label><input type="color" class="cfg-risk-color" value="#d25448">
                 <label>Width</label>
                 <select class="cfg-width">
-                  <option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                  <option value="0.5">0.5</option><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 </select>
               </div>
             </span>
@@ -1612,7 +1592,7 @@ const toolSettings={
   box:  {color:'#ffffff',width:2,style:'solid'},
   pen:  {color:'#ffffff',width:2,style:'solid'},
   highlight:{color:'#f5c842',width:10,style:'solid'},
-  rr:   {color:'#cfd6df',width:1,style:'solid'},
+  rr:   {color:'#cfd6df',riskColor:'#d25448',rewardColor:'#2f9a94',width:1,style:'solid'},
   text: {color:'#ffffff',fontSize:12,fontFamily:'Arial'},
   note: {color:'#ffffff',width:2,style:'solid',fontSize:12,fontFamily:'Arial'},
 };
@@ -1633,6 +1613,8 @@ let measureShortcutActive=false;
 let lastChartPointerShift=false;
 let suppressPanSelectionClick=false;
 let selectedId=null;
+let selectedIds=new Set();
+let marqueeSelection=null;
 let previewMouseX=0,previewMouseY=0;
 // drag state (global so document listeners can access)
 let dragId=null,dragStartX=0,dragStartY=0,dragOrig=null,wasDrag=false;
@@ -2629,7 +2611,7 @@ function setLog(v){
 document.getElementById('log-toggle').addEventListener('click',()=>{setLog(!isLogScale);saveSettings();});
 
 // per-tool popup setup
-['hline','line','ray','seg','box','pen','highlight','rr','text','note'].forEach(tool=>{
+['hline','line','seg','box','pen','highlight','rr','text','note'].forEach(tool=>{
   const cfgBtn=document.getElementById('cfg-'+tool);
   const popup=document.getElementById('popup-'+tool);
   if(!cfgBtn||!popup)return;
@@ -2645,8 +2627,14 @@ document.getElementById('log-toggle').addEventListener('click',()=>{setLog(!isLo
   popup.querySelector('.cfg-color')?.addEventListener('input',e=>{
     toolSettings[tool].color=e.target.value; syncDrawVars(); saveSettings();
   });
+  popup.querySelector('.cfg-risk-color')?.addEventListener('input',e=>{
+    toolSettings[tool].riskColor=e.target.value; syncDrawVars(); saveSettings();
+  });
+  popup.querySelector('.cfg-reward-color')?.addEventListener('input',e=>{
+    toolSettings[tool].rewardColor=e.target.value; syncDrawVars(); saveSettings();
+  });
   popup.querySelector('.cfg-width')?.addEventListener('change',e=>{
-    toolSettings[tool].width=parseInt(e.target.value); syncDrawVars(); saveSettings();
+    toolSettings[tool].width=parseFloat(e.target.value); syncDrawVars(); saveSettings();
   });
   popup.querySelector('.cfg-style')?.addEventListener('change',e=>{
     toolSettings[tool].style=e.target.value; syncDrawVars(); saveSettings();
@@ -2964,10 +2952,20 @@ function applyInitialSelectionRange(tfBars, startTime, endTime){
 const canvas=document.getElementById('draw-canvas');
 const ctx2=canvas.getContext('2d');
 ctx2.imageSmoothingEnabled=true;
+let canvasDpr=1;
+let canvasCssWidth=0;
+let canvasCssHeight=0;
 
 function resizeCanvas(){
   const w=document.getElementById('chart-wrap');
-  canvas.width=w.clientWidth;canvas.height=w.clientHeight;
+  canvasCssWidth=Math.max(1, Math.round(w.clientWidth||0));
+  canvasCssHeight=Math.max(1, Math.round(w.clientHeight||0));
+  canvasDpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(canvasCssWidth*canvasDpr);
+  canvas.height=Math.round(canvasCssHeight*canvasDpr);
+  canvas.style.width=canvasCssWidth+'px';
+  canvas.style.height=canvasCssHeight+'px';
+  ctx2.setTransform(canvasDpr,0,0,canvasDpr,0,0);
   ctx2.imageSmoothingEnabled=true;
   redrawAll();
 }
@@ -2995,12 +2993,59 @@ function time2p(t){
 }
 
 function redrawAll(){
-  ctx2.clearRect(0,0,canvas.width,canvas.height);
+  ctx2.clearRect(0,0,canvasCssWidth,canvasCssHeight);
   if(currentSymbol&&drawings[currentSymbol])
-    for(const d of drawings[currentSymbol])drawOne(d,d.id===selectedId);
+    for(const d of drawings[currentSymbol])drawOne(d,isDrawingSelected(d.id));
+  if(marqueeSelection) drawMarqueeSelection();
   if(freehandStroke) drawFreehandStroke(freehandStroke, false, true);
   if(pendingP1)drawPreview();
   if(measureStart)drawMeasure();
+}
+
+function isDrawingSelected(id){
+  return selectedIds.has(id) || id===selectedId;
+}
+
+function getSelectedDrawingIds(){
+  const ids=new Set(selectedIds);
+  if(selectedId!=null) ids.add(selectedId);
+  return [...ids];
+}
+
+function hasAnySelection(){
+  return selectedId!=null || selectedIds.size>0;
+}
+
+function clearSelection(){
+  selectedId=null;
+  selectedIds.clear();
+}
+
+function setSingleSelection(id){
+  selectedId=id ?? null;
+  selectedIds.clear();
+  if(id!=null) selectedIds.add(id);
+}
+
+function setMultiSelection(ids){
+  selectedIds=new Set((ids||[]).filter(id=>id!=null));
+  selectedId=selectedIds.size ? [...selectedIds][selectedIds.size-1] : null;
+}
+
+function drawMarqueeSelection(){
+  if(!marqueeSelection) return;
+  const left=Math.min(marqueeSelection.startX, marqueeSelection.x);
+  const top=Math.min(marqueeSelection.startY, marqueeSelection.y);
+  const width=Math.abs(marqueeSelection.x-marqueeSelection.startX);
+  const height=Math.abs(marqueeSelection.y-marqueeSelection.startY);
+  ctx2.save();
+  ctx2.fillStyle='rgba(45,88,222,0.12)';
+  ctx2.strokeStyle='rgba(45,88,222,0.9)';
+  ctx2.lineWidth=1;
+  ctx2.setLineDash([5,4]);
+  ctx2.fillRect(left, top, width, height);
+  ctx2.strokeRect(left, top, width, height);
+  ctx2.restore();
 }
 
 function drawPreview(){
@@ -3017,18 +3062,18 @@ function drawPreview(){
     ctx2.fillRect(left, top, width, height);
     ctx2.strokeRect(left, top, width, height);
   } else {
-    ctx2.beginPath();
     if(drawTool==='ray'){
+      ctx2.beginPath();
       const dx=previewMouseX-x1,dy=previewMouseY-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-      ctx2.moveTo(x1,y1);ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
+      ctx2.moveTo(x1,y1);ctx2.lineTo(x1+(dx/len)*canvasCssWidth*3,y1+(dy/len)*canvasCssWidth*3);
+      ctx2.stroke();
     } else if(drawTool==='line'){
-      const dx=previewMouseX-x1,dy=previewMouseY-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-      ctx2.moveTo(x1-(dx/len)*canvas.width*3,y1-(dy/len)*canvas.width*3);
-      ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
+      drawArrowStroke(ctx2, x1, y1, previewMouseX, previewMouseY, drawWidth);
     } else {
+      ctx2.beginPath();
       ctx2.moveTo(x1,y1);ctx2.lineTo(previewMouseX,previewMouseY);
+      ctx2.stroke();
     }
-    ctx2.stroke();
   }
   ctx2.setLineDash([]);
   ctx2.beginPath();ctx2.arc(x1,y1,5,0,Math.PI*2);ctx2.fillStyle=drawColor;ctx2.fill();
@@ -3046,6 +3091,37 @@ function getCanvasTextLineHeight(fontSize){
     if (Number.isFinite(lh) && lh > 0) return lh;
   }catch(e){}
   return fs * 1.4;
+}
+
+function drawArrowStroke(ctx, x1, y1, x2, y2, lineWidth){
+  const dx=x2-x1, dy=y2-y1;
+  const len=Math.hypot(dx,dy);
+  if(len<0.001){
+    ctx.beginPath();
+    ctx.arc(x1,y1,Math.max(1.5,(lineWidth||1)),0,Math.PI*2);
+    ctx.fill();
+    return;
+  }
+  const ux=dx/len, uy=dy/len;
+  const headLength=Math.max(8, Math.min(len*0.45, (lineWidth||1)*4 + 6));
+  const headHalfWidth=Math.max(4, headLength*0.38);
+  const baseX=x2-ux*headLength, baseY=y2-uy*headLength;
+  const perpX=-uy, perpY=ux;
+
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+
+  ctx.save();
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(baseX + perpX*headHalfWidth, baseY + perpY*headHalfWidth);
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(baseX - perpX*headHalfWidth, baseY - perpY*headHalfWidth);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function projectStrokePoints(d){
@@ -3103,6 +3179,8 @@ function makeDefaultRrTrade(entryPrice, entryTime){
     target:{ price: target },
     endTime: shiftTimeByBars(entryTime, getDefaultRrWidthBars()),
     color: toolSettings.rr.color,
+    riskColor: toolSettings.rr.riskColor,
+    rewardColor: toolSettings.rr.rewardColor,
     width: toolSettings.rr.width || 1,
   };
 }
@@ -3136,6 +3214,20 @@ function drawFreehandStroke(d, sel=false, preview=false){
   for(let i=1;i<pts.length;i++) ctx2.lineTo(pts[i].x, pts[i].y);
   ctx2.stroke();
   ctx2.restore();
+}
+
+function hexToRgba(hex, alpha){
+  const raw=String(hex||'').trim();
+  const normalized=raw.startsWith('#') ? raw.slice(1) : raw;
+  const safe = normalized.length===3
+    ? normalized.split('').map(ch=>ch+ch).join('')
+    : normalized;
+  if(!/^[0-9a-fA-F]{6}$/.test(safe)) return `rgba(255,255,255,${alpha})`;
+  const n=parseInt(safe,16);
+  const r=(n>>16)&255;
+  const g=(n>>8)&255;
+  const b=n&255;
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 function getRrTradeGeometry(d, preview=false){
@@ -3223,9 +3315,12 @@ function drawRRTrade(d, sel=false, preview=false){
   const g=getRrTradeGeometry(d, preview);
   if(!g) return;
   const lineColor=sel ? '#2d58de' : (d.color || '#6f7b88');
-  const width=Math.max(1, Number(d.width)||1) + (sel ? 1 : 0);
-  const riskColor=isLightTheme ? 'rgba(244,93,72,0.12)' : 'rgba(210,84,72,0.18)';
-  const rewardColor=isLightTheme ? 'rgba(47,154,148,0.18)' : 'rgba(47,154,148,0.20)';
+  const baseWidth=Math.max(0.5, Number(d.width)||1);
+  const width=baseWidth + (sel ? 1 : 0);
+  const riskHex=d.riskColor || toolSettings.rr.riskColor || '#d25448';
+  const rewardHex=d.rewardColor || toolSettings.rr.rewardColor || '#2f9a94';
+  const riskColor=hexToRgba(riskHex, isLightTheme ? 0.12 : 0.18);
+  const rewardColor=hexToRgba(rewardHex, isLightTheme ? 0.18 : 0.20);
   const entryBand=isLightTheme ? 'rgba(87,101,117,0.70)' : 'rgba(148,160,174,0.62)';
   ctx2.save();
   ctx2.fillStyle=riskColor;
@@ -3250,9 +3345,9 @@ function drawRRTrade(d, sel=false, preview=false){
     const riskText = `${g.risk.toFixed(2)} (${g.riskPct == null ? '0.00' : g.riskPct.toFixed(2)}%)`;
     const rewardText = `${g.reward.toFixed(2)} (${g.rewardPct == null ? '0.00' : g.rewardPct.toFixed(2)}%)`;
     const centerText = g.rr == null ? `${d.entry.price.toFixed(2)}` : `${d.entry.price.toFixed(2)}  ${g.rr.toFixed(2)}R`;
-    drawRrLabel(rewardText, g.left, g.right, g.rewardTop - 24, g.rewardTop - 4, '#ecfffb', 'rgba(22,155,145,0.92)');
+    drawRrLabel(rewardText, g.left, g.right, g.rewardTop - 24, g.rewardTop - 4, '#ecfffb', hexToRgba(rewardHex, 0.92));
     drawRrLabel(centerText, g.left, g.right, g.yEntry - 12, g.yEntry + 12, '#ecfffb', 'rgba(22,155,145,0.92)');
-    drawRrLabel(riskText, g.left, g.right, g.riskBottom + 4, g.riskBottom + 24, '#fff0f0', 'rgba(242,78,67,0.92)');
+    drawRrLabel(riskText, g.left, g.right, g.riskBottom + 4, g.riskBottom + 24, '#fff0f0', hexToRgba(riskHex, 0.92));
   }
 
   if(sel && !preview){
@@ -3278,10 +3373,10 @@ function drawOne(d,sel=false){
     const y=price2p(d.price);if(y==null){ctx2.restore();return;}
     ctx2.strokeStyle=c;ctx2.lineWidth=lw;
     applyLineStyle(d.style);
-    ctx2.beginPath();ctx2.moveTo(0,y);ctx2.lineTo(canvas.width,y);ctx2.stroke();
+    ctx2.beginPath();ctx2.moveTo(0,y);ctx2.lineTo(canvasCssWidth,y);ctx2.stroke();
     ctx2.setLineDash([]);
     ctx2.fillStyle=c;ctx2.font='10px IBM Plex Mono,monospace';
-    ctx2.fillText(d.price.toFixed(2),canvas.width-62,y-3);
+    ctx2.fillText(d.price.toFixed(2),canvasCssWidth-62,y-3);
     ctx2.beginPath();ctx2.arc(20,y,sel?5:3,0,Math.PI*2);ctx2.fill();
   }
   else if(d.type==='pen' || d.type==='highlight'){
@@ -3318,17 +3413,20 @@ function drawOne(d,sel=false){
     if(x1==null||y1==null||x2==null||y2==null){ctx2.restore();return;}
     ctx2.strokeStyle=c;ctx2.lineWidth=lw;
     applyLineStyle(d.style);
-    ctx2.beginPath();
     if(d.type==='ray'){
+      ctx2.beginPath();
       const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-      ctx2.moveTo(x1,y1);ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
+      ctx2.moveTo(x1,y1);ctx2.lineTo(x1+(dx/len)*canvasCssWidth*3,y1+(dy/len)*canvasCssWidth*3);
+      ctx2.stroke();
     } else if(d.type==='line'){
-      const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-      ctx2.moveTo(x1-(dx/len)*canvas.width*3,y1-(dy/len)*canvas.width*3);
-      ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
-    } else {ctx2.moveTo(x1,y1);ctx2.lineTo(x2,y2);}
-    ctx2.stroke();ctx2.setLineDash([]);
-    // seg: no endpoint dots; ray/extended line: endpoint dots only when selected (sel=true)
+      drawArrowStroke(ctx2, x1, y1, x2, y2, lw);
+    } else {
+      ctx2.beginPath();
+      ctx2.moveTo(x1,y1);ctx2.lineTo(x2,y2);
+      ctx2.stroke();
+    }
+    ctx2.setLineDash([]);
+    // seg: no endpoint dots; ray/arrow: endpoint dots only when selected (sel=true)
     if(sel && (d.type === 'ray' || d.type === 'line')){
       [x1,x2].forEach((hx,i)=>{const hy=i===0?y1:y2;ctx2.beginPath();ctx2.arc(hx,hy,5,0,Math.PI*2);ctx2.fillStyle=c;ctx2.fill();});
     }
@@ -3475,7 +3573,7 @@ function appendFreehandPoint(stroke, x, y){
 // ==============================================
 // TOOL SETUP
 // ==============================================
-const TOOLS=['pan','hline','line','ray','seg','box','pen','highlight','rr','text','note','measure'];
+const TOOLS=['pan','hline','line','seg','box','pen','highlight','rr','text','note','measure'];
 function setTool(t){
   drawTool=t;pendingP1=null;freehandStroke=null;
   setHintText('Click second point to finish', false);
@@ -3486,7 +3584,7 @@ function setTool(t){
 TOOLS.forEach(t=>document.getElementById('tool-'+t).addEventListener('click',()=>setTool(t)));
 document.getElementById('tool-clear').addEventListener('click',()=>{
   if(!currentSymbol)return;
-  drawings[currentSymbol]=[];selectedId=null;redrawAll();saveDrawings();
+  drawings[currentSymbol]=[];clearSelection();redrawAll();saveDrawings();
 });
 
 // ==============================================
@@ -3634,7 +3732,7 @@ function setupChartEvents(){
       saveDrawings();
     }
     setTool('pan');
-    chart.applyOptions({handleScroll:selectedId===null,handleScale:selectedId===null});
+    chart.applyOptions({handleScroll:!hasAnySelection(),handleScale:!hasAnySelection()});
   });
 
   chart.subscribeClick(param=>{
@@ -3658,7 +3756,7 @@ function setupChartEvents(){
     }
     else if(actionTool==='rr'){
       const rrId=addDrawing(makeDefaultRrTrade(price, time));
-      selectedId=rrId;
+      setSingleSelection(rrId);
       saveDrawings();
       setTool('pan');
       setChartInteraction(false);
@@ -3721,9 +3819,10 @@ function setupChartEvents(){
     const x=param.point.x, y=param.point.y;
     const hit=hitTest(x,y);
     const newSel = hit != null ? hit : null;
-    if(newSel!==selectedId){
-      selectedId=newSel;
-      setChartInteraction(selectedId===null);
+    if(newSel!==selectedId || selectedIds.size>1){
+      if(newSel!=null) setSingleSelection(newSel);
+      else clearSelection();
+      setChartInteraction(!hasAnySelection());
       redrawAll();
     }
   });
@@ -3738,18 +3837,35 @@ function setupDrag(){
   const wrapEl=document.getElementById('chart-wrap');
 
   let dragPart='whole';
+  let marqueeActive=false;
   wrapEl.addEventListener('mousedown',e=>{
     if(drawTool!=='pan'||e.button!==0||!currentSymbol)return;
     const rect=wrapEl.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(e.metaKey){
+      marqueeActive=true;
+      marqueeSelection={startX:x,startY:y,x,y};
+      suppressPanSelectionClick=true;
+      chart.applyOptions({handleScroll:false,handleScale:false});
+      redrawAll();
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      return;
+    }
     let fullHit=hitTestFull(x,y);
     if(!fullHit){
       const coarseHit = hitTest(x,y);
       if(coarseHit!=null) fullHit = { id: coarseHit, part: 'whole' };
     }
+    if(!fullHit && hasAnySelection()){
+      clearSelection();
+      chart.applyOptions({handleScroll:true,handleScale:true});
+      redrawAll();
+      return;
+    }
     if(!fullHit)return;
-    if(selectedId!==fullHit.id){
-      selectedId=fullHit.id;
+    if(selectedId!==fullHit.id || selectedIds.size>1){
+      setSingleSelection(fullHit.id);
       chart.applyOptions({handleScroll:false,handleScale:false});
       redrawAll();
     }
@@ -3762,6 +3878,13 @@ function setupDrag(){
   },{capture:true});
 
   document.addEventListener('mousemove',e=>{
+    if(marqueeActive && marqueeSelection){
+      const rect=wrapEl.getBoundingClientRect();
+      marqueeSelection.x=e.clientX-rect.left;
+      marqueeSelection.y=e.clientY-rect.top;
+      redrawAll();
+      return;
+    }
     if(dragId===null)return;
     const rect=wrapEl.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;
@@ -3771,6 +3894,25 @@ function setupDrag(){
   });
 
   document.addEventListener('mouseup',e=>{
+    if(marqueeActive){
+      marqueeActive=false;
+      if(marqueeSelection){
+        const rect={
+          left:Math.min(marqueeSelection.startX, marqueeSelection.x),
+          top:Math.min(marqueeSelection.startY, marqueeSelection.y),
+          right:Math.max(marqueeSelection.startX, marqueeSelection.x),
+          bottom:Math.max(marqueeSelection.startY, marqueeSelection.y),
+        };
+        const ids=getDrawingsInRect(rect);
+        if(ids.length) setMultiSelection(ids);
+        else clearSelection();
+        marqueeSelection=null;
+        setChartInteraction(!hasAnySelection());
+        redrawAll();
+      }
+      suppressPanSelectionClick=false;
+      return;
+    }
     if(dragId!==null){
       if(wasDrag){
         suppressPanSelectionClick=true;
@@ -3795,7 +3937,7 @@ function setupDrag(){
     e.stopPropagation();
     pushUndo();
     drawings[currentSymbol]=drawings[currentSymbol].filter(dd=>dd.id!==hit);
-    selectedId=null;
+    clearSelection();
     chart.applyOptions({handleScroll:true,handleScale:true});
     redrawAll();
     if(d.type==='note'){
@@ -3834,6 +3976,93 @@ function setupDrag(){
 function getDrawing(id){
   if(!currentSymbol||!drawings[currentSymbol])return null;
   return drawings[currentSymbol].find(d=>d.id===id)||null;
+}
+
+function expandBounds(bounds, pad=0){
+  if(!bounds) return null;
+  return {
+    left: bounds.left - pad,
+    top: bounds.top - pad,
+    right: bounds.right + pad,
+    bottom: bounds.bottom + pad,
+  };
+}
+
+function getDrawingBounds(d){
+  if(!d) return null;
+  if(d.type==='hline'){
+    const y=price2p(d.price);
+    if(y==null) return null;
+    return expandBounds({left:0, top:y, right:canvasCssWidth, bottom:y}, THRESH);
+  }
+  if(d.type==='pen' || d.type==='highlight'){
+    const pts=projectStrokePoints(d).map(p=>{
+      const x=time2p(p.time), y=price2p(p.price);
+      return (x==null || y==null) ? null : {x,y};
+    }).filter(Boolean);
+    if(!pts.length) return null;
+    let left=Infinity, top=Infinity, right=-Infinity, bottom=-Infinity;
+    pts.forEach(p=>{
+      left=Math.min(left,p.x); top=Math.min(top,p.y);
+      right=Math.max(right,p.x); bottom=Math.max(bottom,p.y);
+    });
+    return expandBounds({left, top, right, bottom}, Math.max(THRESH, (Number(d.width)||2)+4));
+  }
+  if(d.type==='box' || d.type==='ray' || d.type==='seg' || d.type==='line' || d.type==='note'){
+    const p1x=time2p(d.p1?.time), p1y=price2p(d.p1?.price);
+    const p2x=time2p(d.p2?.time), p2y=price2p(d.p2?.price);
+    if(p1x==null||p1y==null||p2x==null||p2y==null) return null;
+    if(d.type==='line' || d.type==='ray'){
+      return expandBounds({
+        left: Math.min(p1x,p2x),
+        top: Math.min(p1y,p2y),
+        right: Math.max(p1x,p2x),
+        bottom: Math.max(p1y,p2y),
+      }, THRESH+6);
+    }
+    if(d.type==='note'){
+      const left=Math.min(p1x,p2x), top=Math.min(p1y,p2y);
+      const right=Math.max(p1x,p2x), bottom=Math.max(p1y,p2y);
+      return expandBounds({left, top, right, bottom}, THRESH+10);
+    }
+    return expandBounds({
+      left: Math.min(p1x,p2x),
+      top: Math.min(p1y,p2y),
+      right: Math.max(p1x,p2x),
+      bottom: Math.max(p1y,p2y),
+    }, THRESH);
+  }
+  if(d.type==='rr'){
+    const g=getRrTradeGeometry(d, false);
+    if(!g) return null;
+    return expandBounds({left:g.left, top:g.top, right:g.right, bottom:g.bottom}, THRESH+6);
+  }
+  if(d.type==='text'){
+    const x=time2p(d.time), y=price2p(d.price);
+    if(x==null||y==null) return null;
+    const fs=d.fontSize||12;
+    ctx2.save();
+    ctx2.font=`${fs}px Arial,monospace`;
+    const lines=(d.text||'').split('\n');
+    let maxW=0;
+    for(const line of lines) maxW=Math.max(maxW, ctx2.measureText(line).width);
+    ctx2.restore();
+    const h=getCanvasTextLineHeight(fs)*lines.length;
+    return expandBounds({left:x, top:y, right:x+maxW, bottom:y+h}, 6);
+  }
+  return null;
+}
+
+function rectsIntersect(a,b){
+  if(!a || !b) return false;
+  return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+}
+
+function getDrawingsInRect(rect){
+  if(!currentSymbol || !drawings[currentSymbol]) return [];
+  return drawings[currentSymbol]
+    .filter(d => rectsIntersect(getDrawingBounds(d), rect))
+    .map(d => d.id);
 }
 
 function getCursorForHit(hit){
@@ -4251,17 +4480,19 @@ document.addEventListener('keydown',e=>{
   const inInput=document.activeElement===document.getElementById('txt-input')
     ||document.activeElement.tagName==='INPUT'
     ||document.activeElement.tagName==='SELECT';
-  if((e.key==='Delete'||e.key==='Backspace')&&selectedId!=null&&!inInput){
+  if((e.key==='Delete'||e.key==='Backspace')&&hasAnySelection()&&!inInput){
     if(!currentSymbol||!drawings[currentSymbol])return;
+    const idsToDelete=new Set(getSelectedDrawingIds());
+    if(!idsToDelete.size) return;
     pushUndo();
-    drawings[currentSymbol]=drawings[currentSymbol].filter(d=>d.id!==selectedId);
-    selectedId=null;
+    drawings[currentSymbol]=drawings[currentSymbol].filter(d=>!idsToDelete.has(d.id));
+    clearSelection();
     chart.applyOptions({handleScroll:true,handleScale:true});
     redrawAll();saveDrawings();
     return;
   }
   if(!inInput && e.altKey && !e.ctrlKey && !e.metaKey){
-    const keyMap={'v':'pan','h':'hline','a':'line','r':'ray','s':'seg','b':'box','p':'pen','g':'highlight','q':'rr','t':'text','n':'note','m':'measure'};
+    const keyMap={'v':'pan','h':'hline','a':'line','s':'seg','b':'box','p':'pen','g':'highlight','q':'rr','t':'text','n':'note','m':'measure'};
     if(keyMap[e.key.toLowerCase()]){
       e.preventDefault();
       setTool(keyMap[e.key.toLowerCase()]);
@@ -4281,7 +4512,7 @@ document.addEventListener('keydown',e=>{
       if(undoHistory[i].symbol===currentSymbol){
         drawings[currentSymbol]=JSON.parse(JSON.stringify(undoHistory[i].snapshot));
         undoHistory.splice(i,1);
-        selectedId=null;
+        clearSelection();
         chart.applyOptions({handleScroll:true,handleScale:true});
         redrawAll();saveDrawings();
         flash('Undo');
@@ -4969,11 +5200,13 @@ function initChart(){
 
   if(saved?.toolSettings){
     Object.assign(toolSettings, saved.toolSettings);
-    ['hline','line','ray','seg','box','pen','highlight','rr','text','note'].forEach(t=>{
+    ['hline','line','seg','box','pen','highlight','rr','text','note'].forEach(t=>{
       const s=toolSettings[t];
       const popup=document.getElementById('popup-'+t);
       if(!popup)return;
       if(popup.querySelector('.cfg-color')) popup.querySelector('.cfg-color').value=s.color;
+      if(popup.querySelector('.cfg-risk-color') && s.riskColor) popup.querySelector('.cfg-risk-color').value=s.riskColor;
+      if(popup.querySelector('.cfg-reward-color') && s.rewardColor) popup.querySelector('.cfg-reward-color').value=s.rewardColor;
       if(popup.querySelector('.cfg-width')) popup.querySelector('.cfg-width').value=s.width||2;
       if(popup.querySelector('.cfg-style')) popup.querySelector('.cfg-style').value=s.style||'solid';
       if(popup.querySelector('.cfg-fontsize')&&s.fontSize) popup.querySelector('.cfg-fontsize').value=s.fontSize;

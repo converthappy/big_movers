@@ -303,21 +303,6 @@
   "LITE": [
     {
       "color": "#ffffff",
-      "id": 25,
-      "p1": {
-        "price": 363.9946,
-        "time": "2026-02-03"
-      },
-      "p2": {
-        "price": 631.4558,
-        "time": "2026-03-09"
-      },
-      "style": "solid",
-      "type": "seg",
-      "width": 2
-    },
-    {
-      "color": "#ffffff",
       "id": 34,
       "p1": {
         "price": 320.2522,
@@ -332,21 +317,132 @@
       "width": 1
     },
     {
-      "color": "#cfd6df",
-      "endTime": "2026-03-05",
-      "entry": {
-        "price": 383.0269,
-        "time": "2026-01-29"
+      "color": "#ffffff",
+      "id": 39,
+      "p1": {
+        "price": 58.0187,
+        "time": "2025-03-03"
       },
-      "id": 36,
+      "p2": {
+        "price": 56.051,
+        "time": "2025-05-16"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#5c5c5c",
+      "endTime": "2025-09-29",
+      "entry": {
+        "price": 61.9542,
+        "time": "2025-05-07"
+      },
+      "id": 40,
       "stop": {
-        "price": 348.1248
+        "price": 56.4412
       },
       "target": {
-        "price": 668.2812
+        "price": 151.8813
       },
       "type": "rr",
-      "width": 1
+      "width": 0.5
+    },
+    {
+      "color": "#474747",
+      "endTime": "2026-03-05",
+      "entry": {
+        "price": 372.171,
+        "time": "2026-01-29"
+      },
+      "id": 43,
+      "stop": {
+        "price": 331.4131
+      },
+      "target": {
+        "price": 666.231
+      },
+      "type": "rr",
+      "width": 0.5
+    },
+    {
+      "type": "box",
+      "p1": {
+        "price": 401.8975,
+        "time": "2025-12-17"
+      },
+      "p2": {
+        "price": 394.4658,
+        "time": "2026-02-18"
+      },
+      "color": "#ffffff",
+      "width": 1,
+      "style": "solid",
+      "id": 45
+    },
+    {
+      "type": "box",
+      "p1": {
+        "price": 73.6975,
+        "time": "2025-01-08"
+      },
+      "p2": {
+        "price": 72.348,
+        "time": "2025-06-16"
+      },
+      "color": "#ffffff",
+      "width": 1,
+      "style": "solid",
+      "id": 46
+    },
+    {
+      "type": "rr",
+      "entry": {
+        "time": "2025-06-04",
+        "price": 77.7276
+      },
+      "stop": {
+        "price": 69.5611
+      },
+      "target": {
+        "price": 151.2409
+      },
+      "endTime": "2025-09-26",
+      "color": "#474747",
+      "width": 0.5,
+      "id": 47
+    },
+    {
+      "type": "box",
+      "p1": {
+        "price": 173.4078,
+        "time": "2025-09-09"
+      },
+      "p2": {
+        "price": 171.9601,
+        "time": "2025-10-31"
+      },
+      "color": "#ffffff",
+      "width": 1,
+      "style": "solid",
+      "id": 48
+    },
+    {
+      "type": "rr",
+      "entry": {
+        "time": "2025-10-27",
+        "price": 177.7508
+      },
+      "stop": {
+        "price": 162.7672
+      },
+      "target": {
+        "price": 323.5317
+      },
+      "endTime": "2025-12-16",
+      "color": "#474747",
+      "width": 0.5,
+      "id": 49
     }
   ],
   "NBIS": [
