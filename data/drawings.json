@@ -366,7 +366,8 @@
       "width": 0.5
     },
     {
-      "type": "box",
+      "color": "#ffffff",
+      "id": 45,
       "p1": {
         "price": 401.8975,
         "time": "2025-12-17"
@@ -375,13 +376,13 @@
         "price": 394.4658,
         "time": "2026-02-18"
       },
-      "color": "#ffffff",
-      "width": 1,
       "style": "solid",
-      "id": 45
+      "type": "box",
+      "width": 1
     },
     {
-      "type": "box",
+      "color": "#ffffff",
+      "id": 46,
       "p1": {
         "price": 73.6975,
         "time": "2025-01-08"
@@ -390,30 +391,30 @@
         "price": 72.348,
         "time": "2025-06-16"
       },
-      "color": "#ffffff",
-      "width": 1,
       "style": "solid",
-      "id": 46
+      "type": "box",
+      "width": 1
     },
     {
-      "type": "rr",
+      "color": "#474747",
+      "endTime": "2025-09-26",
       "entry": {
-        "time": "2025-06-04",
-        "price": 77.7276
+        "price": 77.7276,
+        "time": "2025-06-04"
       },
+      "id": 47,
       "stop": {
         "price": 69.5611
       },
       "target": {
         "price": 151.2409
       },
-      "endTime": "2025-09-26",
-      "color": "#474747",
-      "width": 0.5,
-      "id": 47
+      "type": "rr",
+      "width": 0.5
     },
     {
-      "type": "box",
+      "color": "#ffffff",
+      "id": 48,
       "p1": {
         "price": 173.4078,
         "time": "2025-09-09"
@@ -422,27 +423,26 @@
         "price": 171.9601,
         "time": "2025-10-31"
       },
-      "color": "#ffffff",
-      "width": 1,
       "style": "solid",
-      "id": 48
+      "type": "box",
+      "width": 1
     },
     {
-      "type": "rr",
+      "color": "#474747",
+      "endTime": "2025-12-16",
       "entry": {
-        "time": "2025-10-27",
-        "price": 177.7508
+        "price": 177.7508,
+        "time": "2025-10-27"
       },
+      "id": 49,
       "stop": {
         "price": 162.7672
       },
       "target": {
         "price": 323.5317
       },
-      "endTime": "2025-12-16",
-      "color": "#474747",
-      "width": 0.5,
-      "id": 49
+      "type": "rr",
+      "width": 0.5
     }
   ],
   "NBIS": [

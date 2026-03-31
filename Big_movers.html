@@ -1420,6 +1420,10 @@
                 <select class="cfg-width">
                   <option value="0.5">0.5</option><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 </select>
+                <label>Opacity</label>
+                <select class="cfg-opacity">
+                  <option value="0.2">20%</option><option value="0.3">30%</option><option value="0.4">40%</option><option value="0.5">50%</option><option value="0.6">60%</option><option value="0.7">70%</option><option value="0.8">80%</option><option value="0.9">90%</option><option value="1" selected>100%</option>
+                </select>
               </div>
             </span>
             <button class="tb-btn" id="tool-measure" title="Measure [Alt+M]" aria-label="Measure">
@@ -1592,7 +1596,7 @@ const toolSettings={
   box:  {color:'#ffffff',width:2,style:'solid'},
   pen:  {color:'#ffffff',width:2,style:'solid'},
   highlight:{color:'#f5c842',width:10,style:'solid'},
-  rr:   {color:'#cfd6df',riskColor:'#d25448',rewardColor:'#2f9a94',width:1,style:'solid'},
+  rr:   {color:'#cfd6df',riskColor:'#d25448',rewardColor:'#2f9a94',width:1,style:'solid',opacity:1},
   text: {color:'#ffffff',fontSize:12,fontFamily:'Arial'},
   note: {color:'#ffffff',width:2,style:'solid',fontSize:12,fontFamily:'Arial'},
 };
@@ -2636,6 +2640,9 @@ document.getElementById('log-toggle').addEventListener('click',()=>{setLog(!isLo
   popup.querySelector('.cfg-width')?.addEventListener('change',e=>{
     toolSettings[tool].width=parseFloat(e.target.value); syncDrawVars(); saveSettings();
   });
+  popup.querySelector('.cfg-opacity')?.addEventListener('change',e=>{
+    toolSettings[tool].opacity=parseFloat(e.target.value); syncDrawVars(); saveSettings();
+  });
   popup.querySelector('.cfg-style')?.addEventListener('change',e=>{
     toolSettings[tool].style=e.target.value; syncDrawVars(); saveSettings();
   });
@@ -3182,6 +3189,7 @@ function makeDefaultRrTrade(entryPrice, entryTime){
     riskColor: toolSettings.rr.riskColor,
     rewardColor: toolSettings.rr.rewardColor,
     width: toolSettings.rr.width || 1,
+    opacity: Number.isFinite(toolSettings.rr.opacity) ? toolSettings.rr.opacity : 1,
   };
 }
 
@@ -3317,12 +3325,14 @@ function drawRRTrade(d, sel=false, preview=false){
   const lineColor=sel ? '#2d58de' : (d.color || '#6f7b88');
   const baseWidth=Math.max(0.5, Number(d.width)||1);
   const width=baseWidth + (sel ? 1 : 0);
+  const opacity=Math.max(0.05, Math.min(1, Number.isFinite(d.opacity) ? d.opacity : (Number.isFinite(toolSettings.rr.opacity) ? toolSettings.rr.opacity : 1)));
   const riskHex=d.riskColor || toolSettings.rr.riskColor || '#d25448';
   const rewardHex=d.rewardColor || toolSettings.rr.rewardColor || '#2f9a94';
   const riskColor=hexToRgba(riskHex, isLightTheme ? 0.12 : 0.18);
   const rewardColor=hexToRgba(rewardHex, isLightTheme ? 0.18 : 0.20);
   const entryBand=isLightTheme ? 'rgba(87,101,117,0.70)' : 'rgba(148,160,174,0.62)';
   ctx2.save();
+  ctx2.globalAlpha=opacity;
   ctx2.fillStyle=riskColor;
   ctx2.fillRect(g.left, g.riskTop, Math.max(1, g.right-g.left), Math.max(1, g.riskBottom-g.riskTop));
   ctx2.fillStyle=rewardColor;
@@ -5208,6 +5218,7 @@ function initChart(){
       if(popup.querySelector('.cfg-risk-color') && s.riskColor) popup.querySelector('.cfg-risk-color').value=s.riskColor;
       if(popup.querySelector('.cfg-reward-color') && s.rewardColor) popup.querySelector('.cfg-reward-color').value=s.rewardColor;
       if(popup.querySelector('.cfg-width')) popup.querySelector('.cfg-width').value=s.width||2;
+      if(popup.querySelector('.cfg-opacity') && Number.isFinite(s.opacity)) popup.querySelector('.cfg-opacity').value=String(s.opacity);
       if(popup.querySelector('.cfg-style')) popup.querySelector('.cfg-style').value=s.style||'solid';
       if(popup.querySelector('.cfg-fontsize')&&s.fontSize) popup.querySelector('.cfg-fontsize').value=s.fontSize;
     });
