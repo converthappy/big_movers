@@ -45,7 +45,7 @@
   "CRDO": [
     {
       "color": "#ffffff",
-      "id": 1,
+      "id": 4,
       "p1": {
         "price": 41.4962,
         "time": {
@@ -68,7 +68,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 3,
+      "id": 5,
       "p1": {
         "price": 113.8716,
         "time": {
@@ -203,7 +203,7 @@
   "HOOD": [
     {
       "color": "#ffffff",
-      "id": 4,
+      "id": 23,
       "p1": {
         "price": 11.1495,
         "time": "2024-02-16"
@@ -218,7 +218,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 5,
+      "id": 24,
       "p1": {
         "price": 44.3355,
         "time": "2025-05-07"
@@ -300,6 +300,55 @@
       "width": 2
     }
   ],
+  "LITE": [
+    {
+      "color": "#ffffff",
+      "id": 25,
+      "p1": {
+        "price": 363.9946,
+        "time": "2026-02-03"
+      },
+      "p2": {
+        "price": 631.4558,
+        "time": "2026-03-09"
+      },
+      "style": "solid",
+      "type": "seg",
+      "width": 2
+    },
+    {
+      "color": "#ffffff",
+      "id": 34,
+      "p1": {
+        "price": 320.2522,
+        "time": "2025-12-04"
+      },
+      "p2": {
+        "price": 312.984,
+        "time": "2026-02-09"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#cfd6df",
+      "endTime": "2026-03-05",
+      "entry": {
+        "price": 383.0269,
+        "time": "2026-01-29"
+      },
+      "id": 36,
+      "stop": {
+        "price": 348.1248
+      },
+      "target": {
+        "price": 668.2812
+      },
+      "type": "rr",
+      "width": 1
+    }
+  ],
   "NBIS": [
     {
       "color": "#ffffff",
@@ -351,7 +400,7 @@
   "NVDA": [
     {
       "color": "#ffffff",
-      "id": 4,
+      "id": 26,
       "p1": {
         "price": 0.3258,
         "time": "2006-08-01"
@@ -366,7 +415,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 5,
+      "id": 27,
       "price": 0.5228,
       "style": "solid",
       "type": "hline",
@@ -374,7 +423,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 6,
+      "id": 28,
       "p1": {
         "price": 0.5248,
         "time": "2006-11-02"
@@ -389,7 +438,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 7,
+      "id": 29,
       "p1": {
         "price": 0.5251,
         "time": {
@@ -412,7 +461,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 8,
+      "id": 30,
       "p1": {
         "price": 0.2392,
         "time": "2010-10-08"
@@ -427,7 +476,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 9,
+      "id": 31,
       "p1": {
         "price": 3.0343,
         "time": "2017-02-08"
@@ -442,7 +491,7 @@
     },
     {
       "color": "#ffffff",
-      "id": 10,
+      "id": 32,
       "p1": {
         "price": 2.3679,
         "time": "2016-11-18"
@@ -474,7 +523,7 @@
   "PTON": [
     {
       "color": "#ffffff",
-      "id": 11,
+      "id": 33,
       "p1": {
         "price": 4.5407,
         "time": "2024-10-18"
@@ -488,34 +537,6 @@
       "width": 2
     }
   ],
-  "VSCO": [],
-  "LITE": [
-    {
-      "type": "pen",
-      "points": [
-        {
-          "time": "2025-05-07",
-          "price": 948.0414
-        }
-      ],
-      "color": "#ffffff",
-      "width": 2,
-      "id": 1
-    },
-    {
-      "type": "line",
-      "p1": {
-        "price": 172.4573,
-        "time": "2025-08-14"
-      },
-      "p2": {
-        "price": 170.9365,
-        "time": "2025-10-21"
-      },
-      "color": "#ffffff",
-      "width": 2,
-      "style": "solid",
-      "id": 2
-    }
-  ]
+  "UAMY": [],
+  "VSCO": []
 }

@@ -620,7 +620,9 @@
   .draw-toolbar.collapsed #tool-line,
   .draw-toolbar.collapsed #tool-ray,
   .draw-toolbar.collapsed #tool-seg,
+  .draw-toolbar.collapsed #tool-box,
   .draw-toolbar.collapsed #tool-note,
+  .draw-toolbar.collapsed #tool-rr,
   .draw-toolbar.collapsed #tool-text { display:none; }
   .tool-group {
     position: relative;
@@ -1306,6 +1308,27 @@
               </div>
             </span>
             <span class="tool-group">
+              <button class="tb-btn" id="tool-box" title="Box [Alt+B]" aria-label="Box">
+                <span class="tb-ico" aria-hidden="true">
+                  <svg viewBox="0 0 20 20"><rect x="4.5" y="5" width="11" height="10" rx="1.5"/></svg>
+                </span>
+              </button>
+              <button class="tool-cfg-btn" id="cfg-box" title="Box style" aria-label="Box settings">
+                <svg viewBox="0 0 20 20"><path d="M10 2l1.4 2.5 2.9.6-2 2.2.3 3-2.6-1.2-2.6 1.2.3-3-2-2.2 2.9-.6L10 2z"/></svg>
+              </button>
+              <div class="tool-popup hidden" id="popup-box">
+                <label>Color</label><input type="color" class="cfg-color" value="#ffffff">
+                <label>Width</label>
+                <select class="cfg-width">
+                  <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+                </select>
+                <label>Style</label>
+                <select class="cfg-style">
+                  <option value="solid">——</option><option value="dash">- -</option><option value="dot">···</option>
+                </select>
+              </div>
+            </span>
+            <span class="tool-group">
               <button class="tb-btn" id="tool-text" title="Text Label [Alt+T]" aria-label="Text">
                 <span class="tb-ico" aria-hidden="true">
                   <svg viewBox="0 0 20 20"><path d="M4 5h12"/><path d="M10 5v12"/><path d="M7 17h6"/></svg>
@@ -1351,6 +1374,71 @@
                   <option value="10">10</option><option value="11">11</option><option value="12" selected>12</option>
                   <option value="14">14</option><option value="16">16</option><option value="18">18</option>
                   <option value="20">20</option><option value="24">24</option>
+                </select>
+              </div>
+            </span>
+            <span class="tool-group">
+              <button class="tb-btn" id="tool-pen" title="Pen [Alt+P]" aria-label="Pen">
+                <span class="tb-ico" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M13.5 4.5l2 2" />
+                    <path d="M6 14l7.5-7.5 2 2L8 16H6z" />
+                    <path d="M6 14l2 2" />
+                  </svg>
+                </span>
+              </button>
+              <button class="tool-cfg-btn" id="cfg-pen" title="Pen style" aria-label="Pen settings">
+                <svg viewBox="0 0 20 20"><path d="M10 2l1.4 2.5 2.9.6-2 2.2.3 3-2.6-1.2-2.6 1.2.3-3-2-2.2 2.9-.6L10 2z"/></svg>
+              </button>
+              <div class="tool-popup hidden" id="popup-pen">
+                <label>Color</label><input type="color" class="cfg-color" value="#ffffff">
+                <label>Width</label>
+                <select class="cfg-width">
+                  <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                </select>
+              </div>
+            </span>
+            <span class="tool-group">
+              <button class="tb-btn" id="tool-highlight" title="Highlighter [Alt+G]" aria-label="Highlighter">
+                <span class="tb-ico" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M6 5.5h7l1.5 4.5-5 5H5l-1.5-4.5z" />
+                    <path d="M4 16.5h12" />
+                  </svg>
+                </span>
+              </button>
+              <button class="tool-cfg-btn" id="cfg-highlight" title="Highlighter style" aria-label="Highlighter settings">
+                <svg viewBox="0 0 20 20"><path d="M10 2l1.4 2.5 2.9.6-2 2.2.3 3-2.6-1.2-2.6 1.2.3-3-2-2.2 2.9-.6L10 2z"/></svg>
+              </button>
+              <div class="tool-popup hidden" id="popup-highlight">
+                <label>Color</label><input type="color" class="cfg-color" value="#f5c842">
+                <label>Width</label>
+                <select class="cfg-width">
+                  <option value="8">8</option><option value="10" selected>10</option><option value="12">12</option><option value="14">14</option><option value="16">16</option><option value="20">20</option>
+                </select>
+              </div>
+            </span>
+            <span class="tool-group">
+              <button class="tb-btn" id="tool-rr" title="Risk Reward [Alt+Q]" aria-label="Risk Reward">
+                <span class="tb-ico" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M4 10h12" />
+                    <path d="M10 4v12" />
+                    <path d="M10 4l3 3" />
+                    <path d="M10 4L7 7" />
+                    <path d="M10 16l3-3" />
+                    <path d="M10 16L7 13" />
+                  </svg>
+                </span>
+              </button>
+              <button class="tool-cfg-btn" id="cfg-rr" title="Risk Reward style" aria-label="Risk Reward settings">
+                <svg viewBox="0 0 20 20"><path d="M10 2l1.4 2.5 2.9.6-2 2.2.3 3-2.6-1.2-2.6 1.2.3-3-2-2.2 2.9-.6L10 2z"/></svg>
+              </button>
+              <div class="tool-popup hidden" id="popup-rr">
+                <label>Line</label><input type="color" class="cfg-color" value="#cfd6df">
+                <label>Width</label>
+                <select class="cfg-width">
+                  <option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 </select>
               </div>
             </span>
@@ -1521,6 +1609,10 @@ const toolSettings={
   ray:  {color:'#ffffff',width:2,style:'solid'},
   seg:  {color:'#ffffff',width:2,style:'solid'},
   line: {color:'#ffffff',width:2,style:'solid'},
+  box:  {color:'#ffffff',width:2,style:'solid'},
+  pen:  {color:'#ffffff',width:2,style:'solid'},
+  highlight:{color:'#f5c842',width:10,style:'solid'},
+  rr:   {color:'#cfd6df',width:1,style:'solid'},
   text: {color:'#ffffff',fontSize:12,fontFamily:'Arial'},
   note: {color:'#ffffff',width:2,style:'solid',fontSize:12,fontFamily:'Arial'},
 };
@@ -1536,6 +1628,7 @@ let pendingP1=null;   // first click for ray/seg
 let undoHistory=[];   // [{symbol, snapshot}]
 let measureStart=null; // measure tool first point
 let measureEnd=null;   // measure tool second point (live)
+let freehandStroke=null;
 let measureShortcutActive=false;
 let lastChartPointerShift=false;
 let suppressPanSelectionClick=false;
@@ -1675,8 +1768,49 @@ async function saveDrawings(){
     flash('Drawings saved');
   }catch(e){}
 }
+function normalizeLoadedDrawings(raw){
+  const source = (raw && typeof raw === 'object') ? raw : {};
+  const out = {};
+  const seenIds = new Set();
+  let nextId = 0;
+  let changed = false;
+
+  Object.entries(source).forEach(([symbol, items]) => {
+    const safeItems = Array.isArray(items) ? items : [];
+    out[symbol] = safeItems.map(item => {
+      const d = (item && typeof item === 'object') ? { ...item } : {};
+      const requestedId = Number.isInteger(d.id) && d.id > 0 ? d.id : null;
+      if (requestedId != null && !seenIds.has(requestedId)) {
+        d.id = requestedId;
+        seenIds.add(requestedId);
+        nextId = Math.max(nextId, requestedId);
+        return d;
+      }
+      changed = true;
+      nextId += 1;
+      while (seenIds.has(nextId)) nextId += 1;
+      d.id = nextId;
+      seenIds.add(d.id);
+      return d;
+    });
+  });
+
+  return { drawings: out, maxId: nextId, changed };
+}
 async function loadDrawings(){
-  try{const r=await fetch('/api/drawings');drawings=await r.json();}catch(e){drawings={};}
+  try{
+    const r=await fetch('/api/drawings');
+    const raw=await r.json();
+    const normalized=normalizeLoadedDrawings(raw);
+    drawings=normalized.drawings;
+    drawIdCtr=normalized.maxId;
+    if(normalized.changed){
+      await fetch('/api/drawings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(drawings)});
+    }
+  }catch(e){
+    drawings={};
+    drawIdCtr=0;
+  }
 }
 function flash(msg){
   const el=document.getElementById('save-flash');
@@ -1687,17 +1821,42 @@ function flash(msg){
 function rowKey(r){
   return `${r.symbol}|${r.year}|${r.low_date}|${r.high_date}`;
 }
-function loadFavorites(){
+function readLocalFavoriteKeys(){
   try{
     const raw=JSON.parse(localStorage.getItem('bm_favorites')||'[]');
-    favorites=new Set(Array.isArray(raw)?raw:[]);
+    return Array.isArray(raw) ? raw.map(String).filter(Boolean) : [];
   }catch(e){
-    favorites=new Set();
+    return [];
   }
 }
-function saveFavorites(skipFlash=false){
+async function loadFavorites(){
+  const localFavorites=readLocalFavoriteKeys();
+  favorites=new Set(localFavorites);
   try{
-    localStorage.setItem('bm_favorites', JSON.stringify([...favorites]));
+    const remote=await fetchJsonOptional('/api/favorites', null);
+    if(Array.isArray(remote) && remote.length){
+      favorites=new Set(remote.map(String).filter(Boolean));
+      localStorage.setItem('bm_favorites', JSON.stringify([...favorites]));
+      return;
+    }
+    if(localFavorites.length){
+      await fetch('/api/favorites',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(localFavorites),
+      });
+    }
+  }catch(e){}
+}
+async function saveFavorites(skipFlash=false){
+  try{
+    const items=[...favorites];
+    localStorage.setItem('bm_favorites', JSON.stringify(items));
+    await fetch('/api/favorites',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(items),
+    });
     if(!skipFlash) flash('Favorites saved');
   }catch(e){}
 }
@@ -1901,17 +2060,17 @@ function normalizeChartTimeInput(t){
   }
   return null;
 }
-function snapChartTimeToCurrentTF(t){
+function snapChartTimeToBars(t, bars){
   const raw = normalizeChartTimeInput(t);
   if (!raw) return null;
-  const bars = resampleBars(currentBars, currentTF);
-  if (!bars || !bars.length) return raw;
-  const exact = bars.find(b => b.time === raw);
+  const safeBars = Array.isArray(bars) ? bars : [];
+  if (!safeBars.length) return raw;
+  const exact = safeBars.find(b => b.time === raw);
   if (exact) return exact.time;
   const targetMs = new Date(raw).getTime();
-  let best = bars[0].time;
+  let best = safeBars[0].time;
   let bestDiff = Infinity;
-  for (const b of bars) {
+  for (const b of safeBars) {
     const diff = Math.abs(new Date(b.time).getTime() - targetMs);
     if (diff < bestDiff) {
       bestDiff = diff;
@@ -1919,6 +2078,12 @@ function snapChartTimeToCurrentTF(t){
     }
   }
   return best;
+}
+function snapChartTimeToCurrentTF(t){
+  const raw = normalizeChartTimeInput(t);
+  if (!raw) return null;
+  const bars = resampleBars(currentBars, currentTF);
+  return snapChartTimeToBars(raw, bars) || raw;
 }
 function snapCoordinateToCurrentTF(x){
   if(!chart || typeof x !== 'number' || !Number.isFinite(x)) return null;
@@ -2464,7 +2629,7 @@ function setLog(v){
 document.getElementById('log-toggle').addEventListener('click',()=>{setLog(!isLogScale);saveSettings();});
 
 // per-tool popup setup
-['hline','line','ray','seg','text','note'].forEach(tool=>{
+['hline','line','ray','seg','box','pen','highlight','rr','text','note'].forEach(tool=>{
   const cfgBtn=document.getElementById('cfg-'+tool);
   const popup=document.getElementById('popup-'+tool);
   if(!cfgBtn||!popup)return;
@@ -2833,6 +2998,7 @@ function redrawAll(){
   ctx2.clearRect(0,0,canvas.width,canvas.height);
   if(currentSymbol&&drawings[currentSymbol])
     for(const d of drawings[currentSymbol])drawOne(d,d.id===selectedId);
+  if(freehandStroke) drawFreehandStroke(freehandStroke, false, true);
   if(pendingP1)drawPreview();
   if(measureStart)drawMeasure();
 }
@@ -2844,18 +3010,27 @@ function drawPreview(){
   ctx2.save();
   ctx2.globalAlpha=0.75;
   ctx2.strokeStyle=drawColor;ctx2.lineWidth=drawWidth;ctx2.setLineDash([5,4]);
-  ctx2.beginPath();
-  if(drawTool==='ray'){
-    const dx=previewMouseX-x1,dy=previewMouseY-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-    ctx2.moveTo(x1,y1);ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
-  } else if(drawTool==='line'){
-    const dx=previewMouseX-x1,dy=previewMouseY-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
-    ctx2.moveTo(x1-(dx/len)*canvas.width*3,y1-(dy/len)*canvas.width*3);
-    ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
+  if(drawTool==='box'){
+    const left=Math.min(x1,previewMouseX), top=Math.min(y1,previewMouseY);
+    const width=Math.abs(previewMouseX-x1), height=Math.abs(previewMouseY-y1);
+    ctx2.fillStyle='rgba(255,255,255,0.04)';
+    ctx2.fillRect(left, top, width, height);
+    ctx2.strokeRect(left, top, width, height);
   } else {
-    ctx2.moveTo(x1,y1);ctx2.lineTo(previewMouseX,previewMouseY);
+    ctx2.beginPath();
+    if(drawTool==='ray'){
+      const dx=previewMouseX-x1,dy=previewMouseY-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
+      ctx2.moveTo(x1,y1);ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
+    } else if(drawTool==='line'){
+      const dx=previewMouseX-x1,dy=previewMouseY-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
+      ctx2.moveTo(x1-(dx/len)*canvas.width*3,y1-(dy/len)*canvas.width*3);
+      ctx2.lineTo(x1+(dx/len)*canvas.width*3,y1+(dy/len)*canvas.width*3);
+    } else {
+      ctx2.moveTo(x1,y1);ctx2.lineTo(previewMouseX,previewMouseY);
+    }
+    ctx2.stroke();
   }
-  ctx2.stroke();ctx2.setLineDash([]);
+  ctx2.setLineDash([]);
   ctx2.beginPath();ctx2.arc(x1,y1,5,0,Math.PI*2);ctx2.fillStyle=drawColor;ctx2.fill();
   ctx2.beginPath();ctx2.arc(previewMouseX,previewMouseY,4,0,Math.PI*2);ctx2.globalAlpha=0.5;ctx2.fillStyle=drawColor;ctx2.fill();
   ctx2.restore();
@@ -2871,6 +3046,222 @@ function getCanvasTextLineHeight(fontSize){
     if (Number.isFinite(lh) && lh > 0) return lh;
   }catch(e){}
   return fs * 1.4;
+}
+
+function projectStrokePoints(d){
+  const points=Array.isArray(d?.points) ? d.points : [];
+  if(!points.length) return [];
+  const bars=resampleBars(currentBars, currentTF);
+  const out=[];
+  for(const pt of points){
+    const time=snapChartTimeToBars(pt.time, bars);
+    if(!time) continue;
+    const price=Number(pt.price);
+    if(!Number.isFinite(price)) continue;
+    const last=out[out.length-1];
+    if(last && last.time===time) last.price=price;
+    else out.push({time, price});
+  }
+  return out;
+}
+
+function setHintText(text='Click second point to finish', visible=true){
+  const hint=document.getElementById('hint');
+  if(!hint) return;
+  hint.textContent=text;
+  hint.classList.toggle('hidden', !visible);
+}
+
+function getCurrentTfBars(){
+  return resampleBars(currentBars, currentTF);
+}
+
+function getDefaultRrWidthBars(){
+  if(currentTF==='M') return 6;
+  if(currentTF==='W') return 10;
+  if(currentTF==='3D') return 16;
+  return 24;
+}
+
+function shiftTimeByBars(baseTime, offset){
+  const bars=getCurrentTfBars();
+  if(!bars.length) return baseTime;
+  const snapped=snapChartTimeToBars(baseTime, bars) || bars[0].time;
+  const idx=Math.max(0, bars.findIndex(b=>b.time===snapped));
+  const nextIdx=Math.max(0, Math.min(bars.length-1, idx + offset));
+  return bars[nextIdx]?.time || snapped;
+}
+
+function makeDefaultRrTrade(entryPrice, entryTime){
+  const entry=parseFloat(entryPrice.toFixed(4));
+  const stop=parseFloat((entry * 0.97).toFixed(4));
+  const target=parseFloat((entry * 1.06).toFixed(4));
+  return {
+    type:'rr',
+    entry:{ time: entryTime, price: entry },
+    stop:{ price: stop },
+    target:{ price: target },
+    endTime: shiftTimeByBars(entryTime, getDefaultRrWidthBars()),
+    color: toolSettings.rr.color,
+    width: toolSettings.rr.width || 1,
+  };
+}
+
+function drawFreehandStroke(d, sel=false, preview=false){
+  const pts=projectStrokePoints(d).map(p=>{
+    const x=time2p(p.time), y=price2p(p.price);
+    return (x==null || y==null) ? null : {x,y};
+  }).filter(Boolean);
+  if(!pts.length) return;
+  const baseColor=d.color||'#ffffff';
+  const strokeColor=sel?'#ffdd00':baseColor;
+  const width=Math.max(1, Number(d.width)||2) + (sel ? 1 : 0);
+  const isHighlight=d.type==='highlight';
+  ctx2.save();
+  ctx2.lineCap='round';
+  ctx2.lineJoin='round';
+  ctx2.strokeStyle=strokeColor;
+  ctx2.lineWidth=width;
+  ctx2.globalAlpha=isHighlight ? (sel ? 0.38 : 0.24) : (preview ? 0.78 : (sel ? 1 : 0.92));
+  if(pts.length===1){
+    ctx2.fillStyle=strokeColor;
+    ctx2.beginPath();
+    ctx2.arc(pts[0].x, pts[0].y, Math.max(2, width * 0.5), 0, Math.PI*2);
+    ctx2.fill();
+    ctx2.restore();
+    return;
+  }
+  ctx2.beginPath();
+  ctx2.moveTo(pts[0].x, pts[0].y);
+  for(let i=1;i<pts.length;i++) ctx2.lineTo(pts[i].x, pts[i].y);
+  ctx2.stroke();
+  ctx2.restore();
+}
+
+function getRrTradeGeometry(d, preview=false){
+  if(!d?.entry) return null;
+  const x1=time2p(d.entry.time);
+  const yEntry=price2p(d.entry.price);
+  if(x1==null || yEntry==null) return null;
+  const endTime=d.endTime || d.stop?.time || d.target?.time || d.entry.time;
+  const x2=time2p(endTime);
+  if(x2==null) return null;
+  let stopPrice=d.stop?.price;
+  let targetPrice=d.target?.price;
+  if(stopPrice==null || targetPrice==null || !Number.isFinite(stopPrice) || !Number.isFinite(targetPrice)) return null;
+  const yStop=price2p(stopPrice);
+  const yTarget=price2p(targetPrice);
+  if(yStop==null || yTarget==null) return null;
+  const left=Math.min(x1, x2);
+  const right=Math.max(x1, x2);
+  const top=Math.min(yEntry, yStop, yTarget);
+  const bottom=Math.max(yEntry, yStop, yTarget);
+  const riskTop=Math.min(yEntry, yStop);
+  const riskBottom=Math.max(yEntry, yStop);
+  const rewardTop=Math.min(yEntry, yTarget);
+  const rewardBottom=Math.max(yEntry, yTarget);
+  const risk=Math.abs(d.entry.price - stopPrice);
+  const reward=Math.abs(targetPrice - d.entry.price);
+  const rr = risk > 0 ? reward / risk : null;
+  const centerX = left + (right-left)/2;
+  return {
+    x1, x2, left, right, centerX, top, bottom, yEntry, yStop, yTarget,
+    endTime,
+    stopPrice, targetPrice, riskTop, riskBottom, rewardTop, rewardBottom,
+    risk, reward, rr,
+    riskPct: d.entry.price ? ((risk / d.entry.price) * 100) : null,
+    rewardPct: d.entry.price ? ((reward / d.entry.price) * 100) : null,
+  };
+}
+
+function drawRrLabel(text, left, right, top, bottom, color, bg='rgba(10,12,15,0.78)'){
+  const width=right-left;
+  const height=bottom-top;
+  if(width < 24 || height < 14) return;
+  ctx2.save();
+  ctx2.font='500 10px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif';
+  const textW=ctx2.measureText(text).width;
+  const boxW=textW+10;
+  const boxH=16;
+  const x=Math.max(left+4, Math.min((left+right-boxW)/2, right-boxW-4));
+  const y=Math.max(top+3, Math.min((top+bottom-boxH)/2, bottom-boxH-3));
+  const r=5;
+  ctx2.beginPath();
+  ctx2.moveTo(x+r, y);
+  ctx2.lineTo(x+boxW-r, y);
+  ctx2.quadraticCurveTo(x+boxW, y, x+boxW, y+r);
+  ctx2.lineTo(x+boxW, y+boxH-r);
+  ctx2.quadraticCurveTo(x+boxW, y+boxH, x+boxW-r, y+boxH);
+  ctx2.lineTo(x+r, y+boxH);
+  ctx2.quadraticCurveTo(x, y+boxH, x, y+boxH-r);
+  ctx2.lineTo(x, y+r);
+  ctx2.quadraticCurveTo(x, y, x+r, y);
+  ctx2.closePath();
+  ctx2.fillStyle=bg;
+  ctx2.fill();
+  ctx2.fillStyle=color;
+  ctx2.textBaseline='middle';
+  ctx2.textAlign='left';
+  ctx2.fillText(text, x+6, y+boxH/2);
+  ctx2.restore();
+}
+
+function drawRrHandle(x, y, color){
+  const size=10;
+  ctx2.save();
+  ctx2.fillStyle = isLightTheme ? '#ffffff' : '#0a0c0f';
+  ctx2.strokeStyle = color;
+  ctx2.lineWidth = 1.5;
+  ctx2.beginPath();
+  ctx2.rect(Math.round(x - size/2), Math.round(y - size/2), size, size);
+  ctx2.fill();
+  ctx2.stroke();
+  ctx2.restore();
+}
+
+function drawRRTrade(d, sel=false, preview=false){
+  const g=getRrTradeGeometry(d, preview);
+  if(!g) return;
+  const lineColor=sel ? '#2d58de' : (d.color || '#6f7b88');
+  const width=Math.max(1, Number(d.width)||1) + (sel ? 1 : 0);
+  const riskColor=isLightTheme ? 'rgba(244,93,72,0.12)' : 'rgba(210,84,72,0.18)';
+  const rewardColor=isLightTheme ? 'rgba(47,154,148,0.18)' : 'rgba(47,154,148,0.20)';
+  const entryBand=isLightTheme ? 'rgba(87,101,117,0.70)' : 'rgba(148,160,174,0.62)';
+  ctx2.save();
+  ctx2.fillStyle=riskColor;
+  ctx2.fillRect(g.left, g.riskTop, Math.max(1, g.right-g.left), Math.max(1, g.riskBottom-g.riskTop));
+  ctx2.fillStyle=rewardColor;
+  ctx2.fillRect(g.left, g.rewardTop, Math.max(1, g.right-g.left), Math.max(1, g.rewardBottom-g.rewardTop));
+  ctx2.fillStyle=entryBand;
+  ctx2.fillRect(g.left, g.yEntry-1, Math.max(1, g.right-g.left), 2);
+
+  ctx2.strokeStyle=lineColor;
+  ctx2.lineWidth=width;
+  ctx2.setLineDash(preview ? [5,4] : []);
+  ctx2.strokeRect(g.left, g.riskTop, Math.max(1, g.right-g.left), Math.max(1, g.riskBottom-g.riskTop));
+  ctx2.strokeRect(g.left, g.rewardTop, Math.max(1, g.right-g.left), Math.max(1, g.rewardBottom-g.rewardTop));
+  ctx2.beginPath();
+  ctx2.moveTo(g.left, g.yEntry);
+  ctx2.lineTo(g.right, g.yEntry);
+  ctx2.stroke();
+  ctx2.setLineDash([]);
+
+  if(sel){
+    const riskText = `${g.risk.toFixed(2)} (${g.riskPct == null ? '0.00' : g.riskPct.toFixed(2)}%)`;
+    const rewardText = `${g.reward.toFixed(2)} (${g.rewardPct == null ? '0.00' : g.rewardPct.toFixed(2)}%)`;
+    const centerText = g.rr == null ? `${d.entry.price.toFixed(2)}` : `${d.entry.price.toFixed(2)}  ${g.rr.toFixed(2)}R`;
+    drawRrLabel(rewardText, g.left, g.right, g.rewardTop - 24, g.rewardTop - 4, '#ecfffb', 'rgba(22,155,145,0.92)');
+    drawRrLabel(centerText, g.left, g.right, g.yEntry - 12, g.yEntry + 12, '#ecfffb', 'rgba(22,155,145,0.92)');
+    drawRrLabel(riskText, g.left, g.right, g.riskBottom + 4, g.riskBottom + 24, '#fff0f0', 'rgba(242,78,67,0.92)');
+  }
+
+  if(sel && !preview){
+    drawRrHandle(g.centerX, g.yTarget, lineColor);
+    drawRrHandle(g.centerX, g.yStop, lineColor);
+    drawRrHandle(g.left, g.yEntry, lineColor);
+    drawRrHandle(g.right, g.yEntry, lineColor);
+  }
+  ctx2.restore();
 }
 
 function drawOne(d,sel=false){
@@ -2892,6 +3283,34 @@ function drawOne(d,sel=false){
     ctx2.fillStyle=c;ctx2.font='10px IBM Plex Mono,monospace';
     ctx2.fillText(d.price.toFixed(2),canvas.width-62,y-3);
     ctx2.beginPath();ctx2.arc(20,y,sel?5:3,0,Math.PI*2);ctx2.fill();
+  }
+  else if(d.type==='pen' || d.type==='highlight'){
+    ctx2.restore();
+    drawFreehandStroke(d, sel, false);
+    return;
+  }
+  else if(d.type==='box'){
+    const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
+    const x2=time2p(d.p2.time),y2=price2p(d.p2.price);
+    if(x1==null||y1==null||x2==null||y2==null){ctx2.restore();return;}
+    const left=Math.min(x1,x2), top=Math.min(y1,y2);
+    const width=Math.abs(x2-x1), height=Math.abs(y2-y1);
+    ctx2.fillStyle=sel?'rgba(255,221,0,0.08)':'rgba(255,255,255,0.035)';
+    ctx2.fillRect(left, top, width, height);
+    ctx2.strokeStyle=c;ctx2.lineWidth=lw;
+    applyLineStyle(d.style);
+    ctx2.strokeRect(left, top, width, height);
+    ctx2.setLineDash([]);
+    if(sel){
+      [[x1,y1],[x2,y2]].forEach(([hx,hy])=>{
+        ctx2.beginPath();ctx2.arc(hx,hy,5,0,Math.PI*2);ctx2.fillStyle=c;ctx2.fill();
+      });
+    }
+  }
+  else if(d.type==='rr'){
+    ctx2.restore();
+    drawRRTrade(d, sel, false);
+    return;
   }
   else if(d.type==='ray'||d.type==='seg'||d.type==='line'){
     const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
@@ -3020,13 +3439,46 @@ function drawMeasure(){
   ctx2.restore();
 }
 
+function isFreehandTool(t){
+  return t==='pen' || t==='highlight';
+}
+
+function makeFreehandPoint(x,y){
+  if(typeof x !== 'number' || typeof y !== 'number') return null;
+  let price=priceSeries?.coordinateToPrice(y);
+  if(price==null || !Number.isFinite(price)) return null;
+  price=parseFloat(price.toFixed(4));
+  const time=snapCoordinateToCurrentTF(x);
+  if(!time) return null;
+  return { time, price };
+}
+
+function appendFreehandPoint(stroke, x, y){
+  if(!stroke) return;
+  const lastX=stroke._lastX;
+  const lastY=stroke._lastY;
+  if(Number.isFinite(lastX) && Number.isFinite(lastY) && Math.hypot(x-lastX, y-lastY) < 3) return;
+  const point=makeFreehandPoint(x,y);
+  if(!point) return;
+  const prev=stroke.points[stroke.points.length-1];
+  if(prev && prev.time===point.time){
+    prev.price=point.price;
+    stroke._lastX=x;
+    stroke._lastY=y;
+    return;
+  }
+  stroke.points.push(point);
+  stroke._lastX=x;
+  stroke._lastY=y;
+}
+
 // ==============================================
 // TOOL SETUP
 // ==============================================
-const TOOLS=['pan','hline','line','ray','seg','text','note','measure'];
+const TOOLS=['pan','hline','line','ray','seg','box','pen','highlight','rr','text','note','measure'];
 function setTool(t){
-  drawTool=t;pendingP1=null;
-  document.getElementById('hint').classList.add('hidden');
+  drawTool=t;pendingP1=null;freehandStroke=null;
+  setHintText('Click second point to finish', false);
   if(t!=='measure'){measureStart=null;measureEnd=null;measureShortcutActive=false;}
   TOOLS.forEach(id=>document.getElementById('tool-'+id).classList.toggle('active',id===t));
   syncDrawVars();
@@ -3104,8 +3556,8 @@ function setupChartEvents(){
     
     if (pendingP1 || measureStart) redrawAll();
     if (drawTool === 'pan') {
-      const hit = hitTest(param.point.x, param.point.y);
-      chartEl.style.cursor = hit != null ? (hit === selectedId ? 'move' : 'pointer') : '';
+      const hit = hitTestFull(param.point.x, param.point.y);
+      chartEl.style.cursor = hit ? getCursorForHit(hit) : '';
     }
     
     // Update crosshair info with current data
@@ -3139,6 +3591,52 @@ function setupChartEvents(){
     setTimeout(() => { lastChartPointerShift = false; }, 0);
   }, true);
 
+  wrapEl?.addEventListener('mousedown', e => {
+    if(!isFreehandTool(drawTool) || e.button!==0 || !currentSymbol) return;
+    const rect=wrapEl.getBoundingClientRect();
+    const x=e.clientX-rect.left;
+    const y=e.clientY-rect.top;
+    const point=makeFreehandPoint(x,y);
+    if(!point) return;
+    freehandStroke={
+      type:drawTool,
+      points:[point],
+      color:toolSettings[drawTool].color,
+      width:toolSettings[drawTool].width || (drawTool==='highlight' ? 10 : 2),
+    };
+    freehandStroke._lastX=x;
+    freehandStroke._lastY=y;
+    suppressPanSelectionClick=true;
+    chart.applyOptions({handleScroll:false,handleScale:false});
+    redrawAll();
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }, true);
+
+  document.addEventListener('mousemove', e => {
+    if(!freehandStroke) return;
+    const rect=wrapEl.getBoundingClientRect();
+    appendFreehandPoint(freehandStroke, e.clientX-rect.left, e.clientY-rect.top);
+    redrawAll();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if(!freehandStroke) return;
+    const finalStroke={
+      type:freehandStroke.type,
+      points:freehandStroke.points.slice(),
+      color:freehandStroke.color,
+      width:freehandStroke.width,
+    };
+    freehandStroke=null;
+    if(finalStroke.points.length){
+      addDrawing(finalStroke);
+      saveDrawings();
+    }
+    setTool('pan');
+    chart.applyOptions({handleScroll:selectedId===null,handleScale:selectedId===null});
+  });
+
   chart.subscribeClick(param=>{
     if(!currentSymbol||!param.point)return;
     const actionTool = (measureShortcutActive || lastChartPointerShift) ? 'measure' : drawTool;
@@ -3158,16 +3656,23 @@ function setupChartEvents(){
       addDrawing({type:'hline',price,color:drawColor,width:drawWidth,style:drawLineStyle});saveDrawings();
       setTool('pan');
     }
-    else if(actionTool==='ray'||actionTool==='seg'||actionTool==='line'||actionTool==='note'){
+    else if(actionTool==='rr'){
+      const rrId=addDrawing(makeDefaultRrTrade(price, time));
+      selectedId=rrId;
+      saveDrawings();
+      setTool('pan');
+      setChartInteraction(false);
+    }
+    else if(actionTool==='ray'||actionTool==='seg'||actionTool==='line'||actionTool==='box'||actionTool==='note'){
       if(!pendingP1){
         pendingP1={price,time};
-        document.getElementById('hint').classList.remove('hidden');
+        setHintText('Click second point to finish', true);
         redrawAll();
       } else {
         if(actionTool==='note'){
           const p1=pendingP1;
           pendingP1=null;
-          document.getElementById('hint').classList.add('hidden');
+          setHintText('Click second point to finish', false);
           showTextInput(param.point.x,param.point.y,price,time,'',function(txt,payload){
             addDrawing({
               type:'note',
@@ -3186,7 +3691,7 @@ function setupChartEvents(){
         }
         addDrawing({type:actionTool,p1:pendingP1,p2:{price,time},color:drawColor,width:drawWidth,style:drawLineStyle});
         pendingP1=null;
-        document.getElementById('hint').classList.add('hidden');
+        setHintText('Click second point to finish', false);
         saveDrawings();
         setTool('pan');
       }
@@ -3197,10 +3702,10 @@ function setupChartEvents(){
     else if(actionTool==='measure'){
       if(!measureStart){
         measureStart={price,time,x:param.point.x,y:param.point.y};
-        document.getElementById('hint').classList.remove('hidden');
+        setHintText('Click second point to finish', true);
       } else {
         measureEnd={price,time,x:param.point.x,y:param.point.y};
-        document.getElementById('hint').classList.add('hidden');
+        setHintText('Click second point to finish', false);
         measureStart=null; measureEnd=null;
         measureShortcutActive=false;
       }
@@ -3215,7 +3720,7 @@ function setupChartEvents(){
     if(drawTool!=='pan'||!currentSymbol||!param.point)return;
     const x=param.point.x, y=param.point.y;
     const hit=hitTest(x,y);
-    const newSel=(hit!=null&&hit!==selectedId)?hit:null;
+    const newSel = hit != null ? hit : null;
     if(newSel!==selectedId){
       selectedId=newSel;
       setChartInteraction(selectedId===null);
@@ -3267,7 +3772,12 @@ function setupDrag(){
 
   document.addEventListener('mouseup',e=>{
     if(dragId!==null){
-      if(wasDrag){ pushUndo(); saveDrawings(); }
+      if(wasDrag){
+        suppressPanSelectionClick=true;
+        setTimeout(()=>{ suppressPanSelectionClick=false; },0);
+        pushUndo();
+        saveDrawings();
+      }
       dragId=null; dragOrig=null;
       setTimeout(()=>{ wasDrag=false; },50);
     }
@@ -3326,6 +3836,27 @@ function getDrawing(id){
   return drawings[currentSymbol].find(d=>d.id===id)||null;
 }
 
+function getCursorForHit(hit){
+  if(!hit) return '';
+  const d = getDrawing(hit.id);
+  if(!d) return '';
+  if(d.type === 'rr'){
+    if(hit.part === 'entry' || hit.part === 'stop' || hit.part === 'target') return 'ns-resize';
+    if(hit.part === 'width') return 'ew-resize';
+    return 'move';
+  }
+  if(d.type === 'box'){
+    if(hit.part === 'p1' || hit.part === 'p2') return 'nwse-resize';
+    return 'move';
+  }
+  if(d.type === 'ray' || d.type === 'line' || d.type === 'seg' || d.type === 'note'){
+    if(hit.part === 'p1' || hit.part === 'p2') return 'crosshair';
+    return 'move';
+  }
+  if(d.type === 'pen' || d.type === 'highlight' || d.type === 'text' || d.type === 'hline') return 'move';
+  return 'pointer';
+}
+
 function applyDrag(id,part,dx,dy){
   const d=getDrawing(id); if(!d)return;
   const o=dragOrig;
@@ -3335,12 +3866,12 @@ function applyDrag(id,part,dx,dy){
   };
   const toTime=(origT,ddx)=>{
     const ox=time2p(origT); if(ox==null)return origT;
-    return chart.timeScale().coordinateToTime(ox+ddx)||origT;
+    return snapCoordinateToCurrentTF(ox+ddx) || snapChartTimeToCurrentTF(chart.timeScale().coordinateToTime(ox+ddx)) || origT;
   };
   if(d.type==='hline'){
     d.price=toPrice(o.price,dy);
   }
-  else if(d.type==='ray'||d.type==='seg'||d.type==='line'||d.type==='note'){
+  else if(d.type==='ray'||d.type==='seg'||d.type==='line'||d.type==='box'||d.type==='note'){
     if(part==='p1'){
       d.p1={...d.p1,price:toPrice(o.p1.price,dy),time:toTime(o.p1.time,dx)};
     } else if(part==='p2'){
@@ -3348,6 +3879,30 @@ function applyDrag(id,part,dx,dy){
     } else {
       d.p1={...d.p1,price:toPrice(o.p1.price,dy),time:toTime(o.p1.time,dx)};
       d.p2={...d.p2,price:toPrice(o.p2.price,dy),time:toTime(o.p2.time,dx)};
+    }
+  }
+  else if(d.type==='pen' || d.type==='highlight'){
+    d.points=(o.points||[]).map(pt=>({
+      time:toTime(pt.time, dx),
+      price:toPrice(pt.price, dy),
+    }));
+  }
+  else if(d.type==='rr'){
+    if(part==='entry'){
+      d.entry={...d.entry, price:toPrice(o.entry.price,dy)};
+    } else if(part==='stop'){
+      d.stop={...d.stop, price:toPrice(o.stop.price,dy)};
+    } else if(part==='target'){
+      d.target={...d.target, price:toPrice(o.target.price,dy)};
+    } else if(part==='width'){
+      d.endTime=toTime(o.endTime || o.stop?.time || o.target?.time || o.entry.time, dx);
+    } else {
+      const newEntryTime=toTime(o.entry.time, dx);
+      const newRightTime=toTime(o.endTime || o.stop?.time || o.target?.time || o.entry.time, dx);
+      d.entry={...d.entry, price:toPrice(o.entry.price,dy), time:newEntryTime};
+      d.stop={...d.stop, price:toPrice(o.stop.price,dy)};
+      d.target={...d.target, price:toPrice(o.target.price,dy)};
+      d.endTime=newRightTime;
     }
   }
   else if(d.type==='text'){
@@ -3361,19 +3916,40 @@ const ENDPOINT_THRESH=10;
 
 function hitTest(mx,my){
   if(!currentSymbol||!drawings[currentSymbol])return null;
+  let bestId=null;
+  let bestScore=-1;
+  let bestDist=Infinity;
   for(const d of[...drawings[currentSymbol]].reverse()){
-    if(isHit(d,mx,my))return d.id;
+    const part=getHitPart(d,mx,my);
+    if(!part) continue;
+    const score=getHitPriority(d, part, mx, my);
+    const dist=getHitDistance(d, part, mx, my);
+    if(score>bestScore || (score===bestScore && dist<bestDist)){
+      bestScore=score;
+      bestDist=dist;
+      bestId=d.id;
+    }
   }
-  return null;
+  return bestId;
 }
 
 function hitTestFull(mx,my){
   if(!currentSymbol||!drawings[currentSymbol])return null;
+  let best=null;
+  let bestScore=-1;
+  let bestDist=Infinity;
   for(const d of[...drawings[currentSymbol]].reverse()){
     const part=getHitPart(d,mx,my);
-    if(part)return{id:d.id,part};
+    if(!part) continue;
+    const score=getHitPriority(d, part, mx, my);
+    const dist=getHitDistance(d, part, mx, my);
+    if(score>bestScore || (score===bestScore && dist<bestDist)){
+      bestScore=score;
+      bestDist=dist;
+      best={id:d.id,part};
+    }
   }
-  return null;
+  return best;
 }
 
 function getHitPart(d,mx,my){
@@ -3381,6 +3957,50 @@ function getHitPart(d,mx,my){
     const y=price2p(d.price);
     if(y==null)return null;
     return Math.abs(my-y)<THRESH?'whole':null;
+  }
+  if(d.type==='pen' || d.type==='highlight'){
+    const pts=projectStrokePoints(d).map(p=>{
+      const x=time2p(p.time), y=price2p(p.price);
+      return (x==null || y==null) ? null : {x,y};
+    }).filter(Boolean);
+    if(!pts.length) return null;
+    const hitW=Math.max(THRESH, (Number(d.width)||2) * (d.type==='highlight' ? 0.8 : 0.5) + 4);
+    if(pts.length===1) return Math.hypot(mx-pts[0].x, my-pts[0].y) < hitW ? 'whole' : null;
+    for(let i=1;i<pts.length;i++){
+      if(distSeg(mx,my,pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y) < hitW) return 'whole';
+    }
+    return null;
+  }
+  if(d.type==='box'){
+    const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
+    const x2=time2p(d.p2.time),y2=price2p(d.p2.price);
+    if(x1==null||y1==null||x2==null||y2==null)return null;
+    if(Math.hypot(mx-x1,my-y1)<ENDPOINT_THRESH)return'p1';
+    if(Math.hypot(mx-x2,my-y2)<ENDPOINT_THRESH)return'p2';
+    const left=Math.min(x1,x2), top=Math.min(y1,y2);
+    const right=Math.max(x1,x2), bottom=Math.max(y1,y2);
+    const onBorder =
+      (mx>=left-THRESH && mx<=right+THRESH && Math.abs(my-top)<THRESH) ||
+      (mx>=left-THRESH && mx<=right+THRESH && Math.abs(my-bottom)<THRESH) ||
+      (my>=top-THRESH && my<=bottom+THRESH && Math.abs(mx-left)<THRESH) ||
+      (my>=top-THRESH && my<=bottom+THRESH && Math.abs(mx-right)<THRESH);
+    if(onBorder) return 'whole';
+    if(mx>=left && mx<=right && my>=top && my<=bottom) return 'whole';
+    return null;
+  }
+  if(d.type==='rr'){
+    const g=getRrTradeGeometry(d, false);
+    if(!g) return null;
+    if(Math.hypot(mx-g.left,my-g.yEntry)<ENDPOINT_THRESH+2) return 'entry';
+    if(Math.hypot(mx-g.centerX,my-g.yStop)<ENDPOINT_THRESH+2) return 'stop';
+    if(Math.hypot(mx-g.centerX,my-g.yTarget)<ENDPOINT_THRESH+2) return 'target';
+    if(Math.hypot(mx-g.right,my-g.yEntry)<ENDPOINT_THRESH+2) return 'width';
+    const withinX = mx >= g.left-THRESH && mx <= g.right+THRESH;
+    const inRisk = withinX && my >= g.riskTop-THRESH && my <= g.riskBottom+THRESH;
+    const inReward = withinX && my >= g.rewardTop-THRESH && my <= g.rewardBottom+THRESH;
+    if(inRisk || inReward) return 'whole';
+    if(distSeg(mx,my,g.left,g.yEntry,g.right,g.yEntry)<THRESH) return 'whole';
+    return null;
   }
   if(d.type==='ray'||d.type==='seg'||d.type==='line'||d.type==='note'){
     const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
@@ -3439,6 +4059,99 @@ function getHitPart(d,mx,my){
 }
 
 function isHit(d,mx,my){ return getHitPart(d,mx,my)!==null; }
+function getHitPriority(d, part, mx, my){
+  if(!d || !part) return -1;
+  if(d.type==='box'){
+    const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
+    const x2=time2p(d.p2.time),y2=price2p(d.p2.price);
+    if(x1==null||y1==null||x2==null||y2==null) return 0;
+    const left=Math.min(x1,x2), top=Math.min(y1,y2);
+    const right=Math.max(x1,x2), bottom=Math.max(y1,y2);
+    if(part==='p1' || part==='p2') return 420;
+    if(mx>left && mx<right && my>top && my<bottom) return 360;
+    return 260;
+  }
+  if(d.type==='rr'){
+    const g=getRrTradeGeometry(d, false);
+    if(!g) return 0;
+    if(part==='entry' || part==='stop' || part==='target' || part==='width') return 420;
+    if(mx>g.left && mx<g.right && my>g.top && my<g.bottom) return 350;
+    return 255;
+  }
+  if(d.type==='note'){
+    return part==='p2' ? 340 : 220;
+  }
+  if(d.type==='text'){
+    return 300;
+  }
+  if(d.type==='pen' || d.type==='highlight'){
+    return 210;
+  }
+  if(d.type==='hline'){
+    return 180;
+  }
+  return (part==='p1' || part==='p2') ? 240 : 200;
+}
+function getHitDistance(d, part, mx, my){
+  if(!d || !part) return Infinity;
+  if(d.type==='hline'){
+    const y=price2p(d.price);
+    return y==null ? Infinity : Math.abs(my-y);
+  }
+  if(d.type==='pen' || d.type==='highlight'){
+    const pts=projectStrokePoints(d).map(p=>{
+      const x=time2p(p.time), y=price2p(p.price);
+      return (x==null || y==null) ? null : {x,y};
+    }).filter(Boolean);
+    if(!pts.length) return Infinity;
+    if(pts.length===1) return Math.hypot(mx-pts[0].x, my-pts[0].y);
+    let best=Infinity;
+    for(let i=1;i<pts.length;i++) best=Math.min(best, distSeg(mx,my,pts[i-1].x,pts[i-1].y,pts[i].x,pts[i].y));
+    return best;
+  }
+  if(d.type==='box'){
+    const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
+    const x2=time2p(d.p2.time),y2=price2p(d.p2.price);
+    if(x1==null||y1==null||x2==null||y2==null) return Infinity;
+    const left=Math.min(x1,x2), top=Math.min(y1,y2);
+    const right=Math.max(x1,x2), bottom=Math.max(y1,y2);
+    if(part==='p1') return Math.hypot(mx-x1,my-y1);
+    if(part==='p2') return Math.hypot(mx-x2,my-y2);
+    if(mx>=left && mx<=right && my>=top && my<=bottom) return 0;
+    return Math.min(
+      distSeg(mx,my,left,top,right,top),
+      distSeg(mx,my,right,top,right,bottom),
+      distSeg(mx,my,right,bottom,left,bottom),
+      distSeg(mx,my,left,bottom,left,top),
+    );
+  }
+  if(d.type==='rr'){
+    const g=getRrTradeGeometry(d, false);
+    if(!g) return Infinity;
+    if(part==='entry') return Math.hypot(mx-g.left,my-g.yEntry);
+    if(part==='stop') return Math.hypot(mx-g.centerX,my-g.yStop);
+    if(part==='target') return Math.hypot(mx-g.centerX,my-g.yTarget);
+    if(part==='width') return Math.hypot(mx-g.right,my-g.yEntry);
+    if(mx>=g.left && mx<=g.right && my>=g.top && my<=g.bottom) return 0;
+    return Math.min(
+      distSeg(mx,my,g.left,g.yEntry,g.right,g.yEntry),
+      distSeg(mx,my,g.left,g.rewardTop,g.right,g.rewardTop),
+      distSeg(mx,my,g.left,g.riskBottom,g.right,g.riskBottom),
+    );
+  }
+  if(d.type==='ray'||d.type==='seg'||d.type==='line'||d.type==='note'){
+    const x1=time2p(d.p1.time),y1=price2p(d.p1.price);
+    const x2=time2p(d.p2.time),y2=price2p(d.p2.price);
+    if(x1==null||y1==null||x2==null||y2==null) return Infinity;
+    if(part==='p1') return Math.hypot(mx-x1,my-y1);
+    if(part==='p2') return Math.hypot(mx-x2,my-y2);
+    return distSeg(mx,my,x1,y1,x2,y2);
+  }
+  if(d.type==='text'){
+    return 0;
+  }
+  return Infinity;
+}
 function distSeg(px,py,x1,y1,x2,y2){
   const dx=x2-x1,dy=y2-y1,len2=dx*dx+dy*dy;
   if(len2===0)return Math.hypot(px-x1,py-y1);
@@ -3458,6 +4171,7 @@ function addDrawing(d){
   pushUndo();
   if(!drawings[currentSymbol])drawings[currentSymbol]=[];
   d.id=++drawIdCtr;drawings[currentSymbol].push(d);redrawAll();
+  return d.id;
 }
 
 // ==============================================
@@ -3547,7 +4261,7 @@ document.addEventListener('keydown',e=>{
     return;
   }
   if(!inInput && e.altKey && !e.ctrlKey && !e.metaKey){
-    const keyMap={'v':'pan','h':'hline','a':'line','r':'ray','s':'seg','t':'text','n':'note','m':'measure'};
+    const keyMap={'v':'pan','h':'hline','a':'line','r':'ray','s':'seg','b':'box','p':'pen','g':'highlight','q':'rr','t':'text','n':'note','m':'measure'};
     if(keyMap[e.key.toLowerCase()]){
       e.preventDefault();
       setTool(keyMap[e.key.toLowerCase()]);
@@ -4255,7 +4969,7 @@ function initChart(){
 
   if(saved?.toolSettings){
     Object.assign(toolSettings, saved.toolSettings);
-    ['hline','line','ray','seg','text','note'].forEach(t=>{
+    ['hline','line','ray','seg','box','pen','highlight','rr','text','note'].forEach(t=>{
       const s=toolSettings[t];
       const popup=document.getElementById('popup-'+t);
       if(!popup)return;
@@ -4527,9 +5241,8 @@ window.addEventListener('load',async()=>{
     document.documentElement.setAttribute('data-theme', 'light');
     themeToggle.textContent = '🌙 Dark';
   }
-  loadFavorites();
   initChart();
-  await loadDrawings();
+  await Promise.all([loadFavorites(), loadDrawings()]);
   loadResults();
 });
 

@@ -11,6 +11,7 @@ from flask import Flask, jsonify, send_from_directory, request, Response
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=SCRIPT_DIR, static_url_path="")
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 
 # Path configuration
 RESULTS_CSV = os.path.join(SCRIPT_DIR, "big_movers_result.csv")
@@ -383,27 +384,71 @@ def api_rs_rating():
         return jsonify({"error": str(e)}), 500
 
 
-DRAWINGS_FILE = os.path.join(SCRIPT_DIR, "drawings.json")
+DRAWINGS_FILE = os.path.join(DATA_DIR, "drawings.json")
+LEGACY_DRAWINGS_FILE = os.path.join(SCRIPT_DIR, "drawings.json")
+FAVORITES_FILE = os.path.join(DATA_DIR, "favorites.json")
+
+
+def _ensure_data_dir():
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+
+def _read_json_file(path, fallback):
+    if not os.path.exists(path):
+        return fallback
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return fallback
+
+
+def _write_json_file(path, data):
+    _ensure_data_dir()
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def _read_state_with_legacy(primary_path, legacy_path, fallback):
+    data = _read_json_file(primary_path, None)
+    if data is not None:
+        return data
+    legacy = _read_json_file(legacy_path, None) if legacy_path else None
+    if legacy is not None:
+        try:
+            _write_json_file(primary_path, legacy)
+        except Exception:
+            pass
+        return legacy
+    return fallback
 
 
 @app.route("/api/drawings", methods=["GET", "POST"])
 def api_drawings():
     if request.method == "GET":
-        if not os.path.exists(DRAWINGS_FILE):
-            return jsonify({})
-        try:
-            with open(DRAWINGS_FILE, "r", encoding="utf-8") as f:
-                return jsonify(json.load(f))
-        except Exception:
-            return jsonify({})
+        return jsonify(_read_state_with_legacy(DRAWINGS_FILE, LEGACY_DRAWINGS_FILE, {}))
     else:
         try:
             data = request.get_json(silent=True) or {}
-            with open(DRAWINGS_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+            _write_json_file(DRAWINGS_FILE, data)
             return jsonify({"ok": True})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/favorites", methods=["GET", "POST"])
+def api_favorites():
+    if request.method == "GET":
+        return jsonify(_read_state_with_legacy(FAVORITES_FILE, None, []))
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, list):
+            data = []
+        cleaned = [str(x) for x in data if str(x).strip()]
+        _write_json_file(FAVORITES_FILE, cleaned)
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
