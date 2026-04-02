@@ -52,6 +52,31 @@ Big Movers includes a full set of annotation tools designed for technical analys
 
 ---
 
+## Updating Daily Prices
+
+The viewer itself still serves local CSVs, but you can refresh those CSVs from Yahoo Finance with:
+
+```bash
+cd /Users/isaacwardle/Documents/big_movers
+python3 update_prices_yfinance.py
+```
+
+By default this:
+- reads symbols from `big_movers_result.csv`
+- updates matching ticker CSVs in your configured source folders if they exist
+- otherwise falls back to `collected_stocks/`
+
+Useful options:
+
+```bash
+python3 update_prices_yfinance.py --dir collected_stocks
+python3 update_prices_yfinance.py --symbol AAPL --symbol MSFT
+python3 update_prices_yfinance.py --all-in-dir --dir collected_stocks
+python3 update_prices_yfinance.py --dry-run
+```
+
+---
+
 ## Technical Stack
 
 - **Server** — Python / Flask, runs locally on port 5051

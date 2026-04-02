@@ -387,6 +387,7 @@ def api_rs_rating():
 DRAWINGS_FILE = os.path.join(DATA_DIR, "drawings.json")
 LEGACY_DRAWINGS_FILE = os.path.join(SCRIPT_DIR, "drawings.json")
 FAVORITES_FILE = os.path.join(DATA_DIR, "favorites.json")
+SETUPS_FILE = os.path.join(DATA_DIR, "setups.json")
 
 
 def _ensure_data_dir():
@@ -446,6 +447,21 @@ def api_favorites():
             data = []
         cleaned = [str(x) for x in data if str(x).strip()]
         _write_json_file(FAVORITES_FILE, cleaned)
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/setups", methods=["GET", "POST"])
+def api_setups():
+    if request.method == "GET":
+        return jsonify(_read_state_with_legacy(SETUPS_FILE, None, []))
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, list):
+            data = []
+        cleaned = [item for item in data if isinstance(item, dict)]
+        _write_json_file(SETUPS_FILE, cleaned)
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

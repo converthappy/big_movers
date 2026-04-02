@@ -352,15 +352,15 @@
       "color": "#474747",
       "endTime": "2026-03-05",
       "entry": {
-        "price": 372.171,
+        "price": 380.6303,
         "time": "2026-01-29"
       },
       "id": 43,
       "stop": {
-        "price": 331.4131
+        "price": 339.8724
       },
       "target": {
-        "price": 666.231
+        "price": 674.6903
       },
       "type": "rr",
       "width": 0.5

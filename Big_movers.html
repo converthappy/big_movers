@@ -51,6 +51,15 @@
   .stat-badge span{color:var(--accent);}
   .main{display:grid;grid-template-columns:clamp(320px,30vw,480px) 1fr;overflow:hidden;}
   .table-panel{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+  .table-tabs{display:flex;align-items:center;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);}
+  .table-tab{
+    flex:1 1 50%;background:transparent;border:none;color:var(--muted);font-family:var(--mono);font-size:11px;
+    padding:10px 12px;cursor:pointer;transition:color .12s ease, background .12s ease, border-color .12s ease;border-bottom:2px solid transparent;
+  }
+  .table-tab:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+  .table-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,212,170,0.07);}
+  .table-pane{display:flex;flex-direction:column;min-height:0;flex:1;}
+  .table-pane.hidden{display:none!important;}
   .table-header{display:grid;grid-template-columns:8% 17% 11% 21% 21% 14% 8%;padding:5px 12px;background:var(--bg3);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;user-select:none;}
   .table-header span{cursor:pointer;transition:color 0.15s;}
   .table-header span:hover{color:var(--accent);}
@@ -59,6 +68,49 @@
   .table-body{flex:1;overflow-y:auto;}
   .table-body::-webkit-scrollbar{width:4px;}
   .table-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  .setup-library-pane{display:flex;flex-direction:column;min-height:0;flex:1;}
+  .setup-library-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;background:var(--bg3);}
+  .setup-library-head .meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .setup-library-search{
+    width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;
+  }
+  .setup-library-list{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px;}
+  .setup-library-item{
+    border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:7px;cursor:pointer;
+    transition:border-color .12s ease, background .12s ease, transform .12s ease;
+  }
+  .setup-library-item:hover{border-color:rgba(0,212,170,0.26);background:rgba(0,212,170,0.05);transform:translateY(-1px);}
+  .setup-library-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .setup-library-item-main{min-width:0;display:flex;flex-direction:column;gap:4px;flex:1;}
+  .setup-library-thumb{
+    width:100%;aspect-ratio:var(--setup-thumb-aspect, 1.25);border-radius:10px;border:1px solid rgba(255,255,255,0.05);overflow:hidden;
+    background:var(--bg2);display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .setup-library-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .setup-library-thumb-placeholder{
+    color:var(--muted);font-family:var(--mono);font-size:10px;padding:8px;text-align:center;
+  }
+  .setup-library-title{font-family:var(--tv);font-size:12px;font-weight:700;color:var(--text);}
+  .setup-library-meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .setup-library-empty{padding:16px 12px;color:var(--muted);font-family:var(--mono);font-size:11px;}
+  .setup-library-menu{position:relative;flex:0 0 auto;}
+  .setup-library-menu-btn{
+    width:24px;height:24px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;transition:border-color .12s ease, color .12s ease, background .12s ease;
+  }
+  .setup-library-menu-btn:hover{border-color:rgba(0,212,170,0.26);color:var(--accent);background:rgba(0,212,170,0.08);}
+  .setup-library-menu-btn svg{width:14px;height:14px;fill:currentColor;}
+  .setup-library-menu-pop{
+    position:absolute;right:0;top:28px;min-width:110px;padding:6px;background:rgba(10,12,15,0.96);border:1px solid var(--border);border-radius:10px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.28);display:flex;flex-direction:column;gap:4px;z-index:6;
+  }
+  [data-theme="light"] .setup-library-menu-pop{background:rgba(255,255,255,0.98);}
+  .setup-library-menu-action{
+    border:none;background:transparent;color:var(--text);cursor:pointer;border-radius:8px;padding:7px 8px;text-align:left;
+    font-family:var(--tv);font-size:11px;font-weight:700;
+  }
+  .setup-library-menu-action:hover{background:rgba(255,255,255,0.05);}
+  .setup-library-menu-action.danger{color:#ff6b6b;}
   .row{display:grid;grid-template-columns:8% 17% 11% 21% 21% 14% 8%;padding:7px 12px;border-bottom:1px solid var(--row-border);font-family:var(--mono);font-size:11px;cursor:pointer;transition:background 0.1s;align-items:center;}
   .row:hover{background:var(--bg3);}
   .row.active{background:var(--row-active);border-left:2px solid var(--accent);}
@@ -92,6 +144,15 @@
   .chart-cond{font-size:10px;padding:2px 7px;border-radius:2px;border:1px solid var(--accent);color:var(--accent);}
   .chart-gain{color:var(--green);font-weight:600;}
   .chart-info{color:var(--muted);font-size:11px;}
+  .rr-nav{margin-left:auto;display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.02);}
+  .rr-nav-btn{
+    width:24px;height:24px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s ease;
+  }
+  .rr-nav-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .rr-nav-btn:hover:not(:disabled){color:var(--accent);border-color:rgba(0,212,170,0.28);background:rgba(0,212,170,0.08);}
+  .rr-nav-btn:disabled{opacity:0.35;cursor:default;}
+  .rr-nav-count{min-width:64px;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.05em;color:var(--text);}
 
   /* Chart settings dropdown (type + colors) */
   .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
@@ -438,7 +499,81 @@
   }
   .ma-float .ma-row input[type=color]{width: 20px;height: 18px;}
   .ma-float .ma-del{font-size: 12px;}
-  
+  .setup-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .setup-card-title{font-family:var(--tv);font-size:12px;font-weight:700;color:var(--text);}
+  .setup-card-meta{font-size:10px;color:var(--muted);font-family:var(--mono);}
+  .setup-card-note{font-size:11px;color:var(--text);line-height:1.45;white-space:pre-wrap;}
+  .setup-tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .setup-tag{padding:2px 7px;border-radius:999px;border:1px solid rgba(0,212,170,0.25);background:rgba(0,212,170,0.08);color:var(--accent);font-size:10px;font-weight:700;font-family:var(--tv);}
+  .setup-card-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .setup-empty{padding:10px 0;color:var(--muted);font-size:11px;font-family:var(--mono);}
+  .setup-link-meta{font-size:10px;color:var(--muted);font-family:var(--mono);}
+  .setup-markers{
+    position:absolute;inset:0;z-index:24;pointer-events:none;
+  }
+  .setup-marker{
+    position:absolute;transform:translate(10px,-50%);pointer-events:auto;display:inline-flex;align-items:center;gap:6px;
+    max-width:220px;padding:6px 8px;border-radius:999px;border:1px solid rgba(0,212,170,0.22);
+    background:rgba(10,12,15,0.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    color:var(--text);box-shadow:0 8px 18px rgba(0,0,0,0.22);
+  }
+  .setup-marker.hidden{display:none;}
+  [data-theme="light"] .setup-marker{background:rgba(255,255,255,0.9);box-shadow:0 8px 18px rgba(0,0,0,0.12);}
+  .setup-marker.expanded{
+    max-width:280px;border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:stretch;gap:8px;
+    transform:translate(12px,-14px);
+  }
+  .setup-marker::before{
+    content:"";position:absolute;left:-8px;top:50%;width:8px;height:1px;background:rgba(0,212,170,0.45);transform:translateY(-50%);
+  }
+  .setup-marker.expanded::before{top:18px;transform:none;}
+  .setup-marker-pin{
+    position:absolute;left:-13px;top:50%;width:6px;height:6px;border-radius:999px;background:var(--accent);transform:translateY(-50%);
+    box-shadow:0 0 0 3px rgba(0,212,170,0.12);
+  }
+  .setup-marker.expanded .setup-marker-pin{top:18px;transform:none;}
+  .setup-marker.active{border-color:rgba(0,212,170,0.5);}
+  .setup-pill-main{
+    display:inline-flex;align-items:center;gap:6px;min-width:0;border:none;background:transparent;color:inherit;cursor:pointer;padding:0;margin:0;
+    font-family:var(--tv);font-size:11px;font-weight:700;
+  }
+  .setup-pill-main:hover{color:var(--accent);}
+  .setup-pill-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;}
+  .setup-pill-count{font-size:10px;color:var(--muted);font-family:var(--mono);font-weight:600;}
+  .setup-pill-edit{
+    flex:0 0 auto;width:18px;height:18px;border:none;background:transparent;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;
+    cursor:pointer;padding:0;border-radius:6px;
+  }
+  .setup-pill-edit:hover{color:var(--accent);background:rgba(0,212,170,0.10);}
+  .setup-pill-edit svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .setup-marker-head{
+    display:flex;align-items:center;gap:8px;cursor:grab;padding:2px 0 4px;user-select:none;
+  }
+  .setup-marker-head:active{cursor:grabbing;}
+  .setup-marker-title{font-family:var(--tv);font-size:12px;font-weight:700;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+  .setup-marker-card{display:flex;flex-direction:column;gap:8px;}
+  .setup-marker-input,.setup-marker-textarea{
+    width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:7px 9px;font-family:var(--mono);font-size:11px;outline:none;
+  }
+  .setup-marker-tags{
+    min-height:54px;resize:vertical;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;
+  }
+  .setup-marker-textarea{min-height:72px;resize:vertical;line-height:1.45;}
+  .setup-tag-suggestions{display:flex;flex-wrap:wrap;gap:6px;}
+  .setup-tag-suggestion{
+    border:1px solid rgba(0,212,170,0.20);background:rgba(0,212,170,0.06);color:var(--muted);border-radius:999px;padding:3px 8px;cursor:pointer;
+    font-family:var(--tv);font-size:10px;font-weight:700;transition:border-color .12s ease, color .12s ease, background .12s ease;
+  }
+  .setup-tag-suggestion:hover{border-color:rgba(0,212,170,0.36);color:var(--accent);background:rgba(0,212,170,0.10);}
+  .setup-tag-suggestion.active{border-color:rgba(0,212,170,0.44);color:var(--accent);background:rgba(0,212,170,0.14);}
+  .setup-marker-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .setup-marker-actions-left,.setup-marker-actions-right{display:flex;align-items:center;gap:6px;}
+  .setup-mini-btn{
+    border:1px solid var(--border);background:var(--bg2);color:var(--text);border-radius:8px;padding:6px 8px;cursor:pointer;font-family:var(--tv);font-size:10px;font-weight:700;
+  }
+  .setup-mini-btn:hover{border-color:rgba(0,212,170,0.35);color:var(--accent);background:rgba(0,212,170,0.08);}
+  .setup-marker-meta{font-size:10px;color:var(--muted);font-family:var(--mono);}
+  .setup-marker-check{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);font-family:var(--tv);font-weight:700;}
   /* Icon button styles */
   .ma-toggle-btn, #toolbar-toggle {
     background: transparent;
@@ -621,6 +756,7 @@
   .draw-toolbar.collapsed #tool-seg,
   .draw-toolbar.collapsed #tool-box,
   .draw-toolbar.collapsed #tool-note,
+  .draw-toolbar.collapsed #tool-setup,
   .draw-toolbar.collapsed #tool-rr,
   .draw-toolbar.collapsed #tool-text { display:none; }
   .tool-group {
@@ -1026,17 +1162,32 @@
   </div>
   <div class="main">
     <div class="table-panel">
-      <div class="table-header" id="table-header">
-        <span class="fav-head" data-col="favorite">★</span>
-        <span data-col="symbol">Symbol</span>
-        <span data-col="year">Year</span>
-        <span data-col="low_date">Low</span>
-        <span data-col="high_date">High</span>
-        <span data-col="gain_pct">Gain%</span>
-        <span data-col="avg_vol_b">Vol$B</span>
+      <div class="table-tabs">
+        <button class="table-tab active" id="tab-movers" type="button">Movers</button>
+        <button class="table-tab" id="tab-setups" type="button">Setups</button>
       </div>
-      <div class="table-body" id="table-body">
-        <div style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;">Loading...</div>
+      <div class="table-pane" id="pane-movers">
+        <div class="table-header" id="table-header">
+          <span class="fav-head" data-col="favorite">★</span>
+          <span data-col="symbol">Symbol</span>
+          <span data-col="year">Year</span>
+          <span data-col="low_date">Low</span>
+          <span data-col="high_date">High</span>
+          <span data-col="gain_pct">Gain%</span>
+          <span data-col="avg_vol_b">Vol$B</span>
+        </div>
+        <div class="table-body" id="table-body">
+          <div style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px;">Loading...</div>
+        </div>
+      </div>
+      <div class="table-pane hidden setup-library-pane" id="pane-setups">
+        <div class="setup-library-head">
+          <div class="meta" id="setup-library-summary">0 setups</div>
+          <input id="setup-library-search" class="setup-library-search" type="text" placeholder="Search setups, symbols, tags">
+        </div>
+        <div class="setup-library-list" id="setup-library-list">
+          <div class="setup-library-empty">No saved setups yet.</div>
+        </div>
       </div>
     </div>
     <div class="chart-panel">
@@ -1118,7 +1269,17 @@
           </svg>
         </button>
         <button id="ind-toggle" class="ma-toggle-btn text" title="Indicators" aria-label="Indicators">IND</button>
+        <button id="setups-toggle" class="ma-toggle-btn text" title="Setup Library" aria-label="Setup Library">SET</button>
         <button id="spy-toggle" class="ma-toggle-btn text" title="Benchmark overlay (VS SPY): Off → Line → Candle → Bar" aria-label="Benchmark overlay">VS</button>
+        <div class="rr-nav hidden" id="rr-nav" aria-label="Risk reward trade navigator">
+          <button class="rr-nav-btn" id="rr-nav-prev" type="button" title="Previous off-screen RR trade" aria-label="Previous off-screen RR trade">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>
+          </button>
+          <span class="rr-nav-count" id="rr-nav-count">0 Trades</span>
+          <button class="rr-nav-btn" id="rr-nav-next" type="button" title="Next off-screen RR trade" aria-label="Next off-screen RR trade">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5L13 10l-5.5 5.5"/></svg>
+          </button>
+        </div>
         <div class="tb-sep"></div>
         <div class="tb-sep"></div>
       </div>
@@ -1158,7 +1319,6 @@
           </div>
         </div>
       </div>
-      
       <!-- Crosshair Info Bar -->
       <div class="crosshair-info" id="crosshair-info">
         <div class="info-item">
@@ -1397,6 +1557,16 @@
               </div>
             </span>
             <span class="tool-group">
+              <button class="tb-btn" id="tool-setup" title="Setup Tag [Alt+K]" aria-label="Setup Tag">
+                <span class="tb-ico" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M6 4.5h5.5l4 4-5.5 5.5L4.5 8.5V4.5z" />
+                    <circle cx="8.2" cy="7.5" r="1.2" />
+                  </svg>
+                </span>
+              </button>
+            </span>
+            <span class="tool-group">
               <button class="tb-btn" id="tool-rr" title="Risk Reward [Alt+Q]" aria-label="Risk Reward">
                 <span class="tb-ico" aria-hidden="true">
                   <svg viewBox="0 0 20 20">
@@ -1450,6 +1620,7 @@
           <div class="placeholder" id="placeholder"><div class="icon">📈</div><p>Select a move from the list to view chart</p></div>
           <div class="loading hidden" id="loading">Loading chart data...</div>
           <div id="chart"></div>
+          <div class="setup-markers" id="setup-markers" aria-label="Saved setups on chart"></div>
           <canvas id="draw-canvas"></canvas>
           <div id="txt-wrap">
             <div id="txt-hint">Shift+Enter: new line &nbsp;|&nbsp; Enter: confirm &nbsp;|&nbsp; Esc: cancel</div>
@@ -1521,6 +1692,21 @@ let indicatorDataMaps={rsi:new Map(),ao:new Map()};
 let pocketPivotTimes=new Set();
 let drawings={};      // {symbol:[{id,type,...}]}
 let drawIdCtr=0;
+let setups=[];
+let setupIdCtr=0;
+let editingSetupId=null;
+let draftSetupAnchor=null;
+let setupMarkersRaf=0;
+let setupMarkerPositionRaf=0;
+let setupDraftData=null;
+let setupMarkerDrag=null;
+let leftPanelTab='movers';
+let openSetupLibraryMenuId=null;
+let setupThumbnailRenderToken=0;
+const setupThumbnailCache=new Map();
+const setupThumbnailJobs=new Map();
+const symbolBarsCache=new Map();
+const SETUP_THUMBNAIL_RENDER_VERSION='v2';
 
 const RIGHT_OFFSET_BARS = 6;
 let persistedRightOffset = RIGHT_OFFSET_BARS;
@@ -1620,6 +1806,8 @@ let selectedId=null;
 let selectedIds=new Set();
 let marqueeSelection=null;
 let previewMouseX=0,previewMouseY=0;
+let rrNavRaf=0;
+let rrNavAnimRaf=0;
 // drag state (global so document listeners can access)
 let dragId=null,dragStartX=0,dragStartY=0,dragOrig=null,wasDrag=false;
 
@@ -1751,6 +1939,8 @@ function loadSettings(){try{return JSON.parse(localStorage.getItem('bm_cfg')||'n
 async function saveDrawings(){
   try{
     await fetch('/api/drawings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(drawings)});
+    invalidateSetupThumbnailCacheForSymbol(currentSymbol);
+    if(leftPanelTab==='setups') renderSetupLists();
     flash('Drawings saved');
   }catch(e){}
 }
@@ -1845,6 +2035,918 @@ async function saveFavorites(skipFlash=false){
     });
     if(!skipFlash) flash('Favorites saved');
   }catch(e){}
+}
+function normalizeLoadedSetups(raw){
+  const safeItems=Array.isArray(raw) ? raw : [];
+  const seenIds=new Set();
+  let nextId=0;
+  let changed=false;
+  const items=safeItems.map(item=>{
+    const setup=(item && typeof item==='object') ? { ...item } : {};
+    let id=Number.isInteger(setup.id) && setup.id>0 ? setup.id : null;
+    if(id==null || seenIds.has(id)){
+      changed=true;
+      nextId+=1;
+      while(seenIds.has(nextId)) nextId+=1;
+      id=nextId;
+    }
+    seenIds.add(id);
+    nextId=Math.max(nextId,id);
+    const tags=Array.isArray(setup.tags)
+      ? setup.tags.map(v=>String(v||'').trim()).filter(Boolean)
+      : String(setup.tags||'').split(',').map(v=>v.trim()).filter(Boolean);
+    const rrIds=Array.isArray(setup.rrIds)
+      ? [...new Set(setup.rrIds.map(v=>parseInt(v,10)).filter(v=>Number.isInteger(v) && v>0))]
+      : [];
+    return {
+      id,
+      symbol:String(setup.symbol||'').toUpperCase(),
+      timeframe:['D','3D','W','M'].includes(String(setup.timeframe||'')) ? String(setup.timeframe) : 'D',
+      moveKey:String(setup.moveKey||''),
+      year:String(setup.year||''),
+      title:String(setup.title||'').trim(),
+      note:String(setup.note||''),
+      tags,
+      rrIds,
+      range:(setup.range && typeof setup.range==='object') ? {
+        fromTime:String(setup.range.fromTime||''),
+        toTime:String(setup.range.toTime||''),
+      } : null,
+      anchor:(setup.anchor && typeof setup.anchor==='object') ? {
+        time:String(setup.anchor.time||''),
+        price:Number(setup.anchor.price),
+      } : null,
+      createdAt:String(setup.createdAt||''),
+      updatedAt:String(setup.updatedAt||''),
+    };
+  }).filter(setup=>setup.symbol);
+  return { items, maxId: nextId, changed };
+}
+async function loadSetups(){
+  try{
+    const raw=await fetchJsonOptional('/api/setups', []);
+    const normalized=normalizeLoadedSetups(raw);
+    setups=normalized.items;
+    setupIdCtr=normalized.maxId;
+    if(normalized.changed){
+      await fetch('/api/setups',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(setups)});
+    }
+  }catch(e){
+    setups=[];
+    setupIdCtr=0;
+  }
+}
+async function saveSetups(skipFlash=false){
+  try{
+    await fetch('/api/setups',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(setups)});
+    if(!skipFlash) flash('Setups saved');
+  }catch(e){}
+}
+function invalidateSetupThumbnailCacheForSymbol(symbol){
+  const sym=String(symbol||'').toUpperCase();
+  if(!sym) return;
+  for(const key of [...setupThumbnailCache.keys()]){
+    if(key.startsWith(`${sym}|`)) setupThumbnailCache.delete(key);
+  }
+  for(const key of [...setupThumbnailJobs.keys()]){
+    if(key.startsWith(`${sym}|`)) setupThumbnailJobs.delete(key);
+  }
+}
+function getSetupTimeframe(setup){
+  const tf=String(setup?.timeframe || 'D');
+  return ['D','3D','W','M'].includes(tf) ? tf : 'D';
+}
+function getSetupThumbnailAspectRatio(){
+  const chartPane=document.getElementById('chart');
+  const paneW=chartPane?.clientWidth || 0;
+  const paneH=chartPane?.clientHeight || 0;
+  const ratio=(paneW > 0 && paneH > 0)
+    ? (paneW / paneH)
+    : ((Number.isFinite(canvasCssWidth) && Number.isFinite(canvasCssHeight) && canvasCssHeight>0)
+      ? (canvasCssWidth / canvasCssHeight)
+      : 1.8);
+  return Math.max(1.2, Math.min(2.2, ratio * 0.78));
+}
+async function getBarsForSymbol(symbol){
+  const sym=String(symbol||'').toUpperCase();
+  if(!sym) return [];
+  if(sym===currentSymbol && Array.isArray(currentBars) && currentBars.length) return currentBars;
+  if(symbolBarsCache.has(sym)) return symbolBarsCache.get(sym);
+  const promise=(async()=>{
+    const bars=await fetchJsonOptional(`/api/ohlcv?symbol=${encodeURIComponent(sym)}`, []);
+    return Array.isArray(bars) ? bars : [];
+  })();
+  symbolBarsCache.set(sym, promise);
+  try{
+    return await promise;
+  }catch(e){
+    symbolBarsCache.delete(sym);
+    return [];
+  }
+}
+function getLinkedRrTradeForSetup(setup){
+  if(!setup?.symbol || !Array.isArray(setup.rrIds) || !setup.rrIds.length) return null;
+  const symbolDrawings=Array.isArray(drawings[setup.symbol]) ? drawings[setup.symbol] : [];
+  const rrTrades=symbolDrawings.filter(d=>d?.type==='rr' && setup.rrIds.includes(d.id));
+  if(!rrTrades.length) return null;
+  if(!setup.anchor?.time) return rrTrades[0];
+  const anchorMs=new Date(setup.anchor.time).getTime();
+  return rrTrades.slice().sort((a,b)=>{
+    const aMs=new Date(a.entry?.time || 0).getTime();
+    const bMs=new Date(b.entry?.time || 0).getTime();
+    return Math.abs(aMs-anchorMs) - Math.abs(bMs-anchorMs);
+  })[0];
+}
+function getSetupThumbnailCacheKey(setup){
+  const rr=getLinkedRrTradeForSetup(setup);
+  const rrKey=rr
+    ? [rr.id, rr.entry?.time, rr.entry?.price, rr.stop?.price, rr.target?.price, rr.endTime, rr.color, rr.riskColor, rr.rewardColor, rr.opacity].join('|')
+    : 'norr';
+  const maKey=maList
+    .filter(ma=>ma?.enabled)
+    .map(ma=>[ma.type, ma.period, ma.color].join(':'))
+    .join('|');
+  return [
+    SETUP_THUMBNAIL_RENDER_VERSION,
+    String(setup.symbol||'').toUpperCase(),
+    setup.id,
+    setup.updatedAt || '',
+    getSetupTimeframe(setup),
+    getSetupThumbnailAspectRatio().toFixed(3),
+    isLightTheme ? 'light' : 'dark',
+    priceColors.up,
+    priceColors.down,
+    maKey,
+    rrKey,
+  ].join('|');
+}
+function getSetupThumbnailSpec(setup, bars){
+  const tfBars=resampleBars(bars, getSetupTimeframe(setup));
+  if(!Array.isArray(tfBars) || !tfBars.length) return null;
+  const indexByTime=new Map(tfBars.map((b,i)=>[b.time,i]));
+  const rr=getLinkedRrTradeForSetup(setup);
+  if(rr){
+    const entryIdx=getNearestBarIndexForTime(rr.entry?.time, tfBars, indexByTime);
+    const endIdx=getNearestBarIndexForTime(rr.endTime || rr.entry?.time, tfBars, indexByTime);
+    if(entryIdx!=null && endIdx!=null){
+      const left=Math.min(entryIdx, endIdx);
+      const right=Math.max(entryIdx, endIdx);
+      return {
+        bars: tfBars,
+        fromIdx: Math.max(0, left-30),
+        toIdx: Math.min(tfBars.length-1, right),
+        rr,
+      };
+    }
+  }
+  if(setup.range?.fromTime && setup.range?.toTime){
+    const fromIdx=getNearestBarIndexForTime(setup.range.fromTime, tfBars, indexByTime);
+    const toIdx=getNearestBarIndexForTime(setup.range.toTime, tfBars, indexByTime);
+    if(fromIdx!=null && toIdx!=null){
+      return {
+        bars: tfBars,
+        fromIdx: Math.max(0, Math.min(fromIdx,toIdx)),
+        toIdx: Math.min(tfBars.length-1, Math.max(fromIdx,toIdx)),
+        rr: null,
+      };
+    }
+  }
+  return null;
+}
+function buildSetupThumbnailDataUrl(setup, bars){
+  const spec=getSetupThumbnailSpec(setup, bars);
+  if(!spec) return null;
+  const viewBars=spec.bars.slice(spec.fromIdx, spec.toIdx+1);
+  if(!viewBars.length) return null;
+  const aspect=getSetupThumbnailAspectRatio();
+  const displayWidth=248;
+  const renderScale=2.2;
+  const width=Math.round(displayWidth * renderScale);
+  const height=Math.max(220, Math.round(width / aspect));
+  const dpr=Math.max(1, Math.min(1.5, window.devicePixelRatio || 1));
+  const canvas=document.createElement('canvas');
+  canvas.width=Math.round(width*dpr);
+  canvas.height=Math.round(height*dpr);
+  canvas.style.width=`${displayWidth}px`;
+  canvas.style.height=`${Math.round(displayWidth / aspect)}px`;
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.imageSmoothingEnabled=true;
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+
+  const bg=isLightTheme ? '#f7f9fb' : '#0b0f14';
+  const neutral=isLightTheme ? '#7f8a97' : '#91a0ad';
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,width,height);
+
+  const plot={ left:8, right:8, top:8, bottom:10 };
+  const plotW=width-plot.left-plot.right;
+  const plotH=height-plot.top-plot.bottom;
+  const contentLeft=plot.left + Math.round(plotW * 0.03);
+  const contentRight=width - plot.right - Math.round(plotW * 0.21);
+  const contentW=Math.max(24, contentRight-contentLeft);
+
+  let minPrice=Math.min(...viewBars.map(b=>Number(b.low)||Number(b.close)||0));
+  let maxPrice=Math.max(...viewBars.map(b=>Number(b.high)||Number(b.close)||0));
+  if(spec.rr){
+    minPrice=Math.min(minPrice, spec.rr.stop?.price ?? minPrice, spec.rr.entry?.price ?? minPrice, spec.rr.target?.price ?? minPrice);
+    maxPrice=Math.max(maxPrice, spec.rr.stop?.price ?? maxPrice, spec.rr.entry?.price ?? maxPrice, spec.rr.target?.price ?? maxPrice);
+  }
+  if(!Number.isFinite(minPrice) || !Number.isFinite(maxPrice)) return null;
+  if(maxPrice<=minPrice){
+    maxPrice=minPrice+1;
+  }
+  const pad=(maxPrice-minPrice)*0.12;
+  minPrice-=pad;
+  maxPrice+=pad;
+
+  const yFor=price=>plot.top + ((maxPrice-price)/(maxPrice-minPrice))*plotH;
+  const step=viewBars.length<=1 ? contentW : contentW/(viewBars.length-1);
+  const bodyW=Math.max(3.2, Math.min(10, step*0.74));
+
+  if(spec.rr){
+    const entryIdx=getNearestBarIndexForTime(spec.rr.entry?.time, spec.bars, new Map(spec.bars.map((b,i)=>[b.time,i])));
+    const endIdx=getNearestBarIndexForTime(spec.rr.endTime || spec.rr.entry?.time, spec.bars, new Map(spec.bars.map((b,i)=>[b.time,i])));
+    if(entryIdx!=null && endIdx!=null){
+      const localEntry=entryIdx-spec.fromIdx;
+      const localEnd=endIdx-spec.fromIdx;
+      const left=Math.max(contentLeft, contentLeft + Math.min(localEntry, localEnd)*step - bodyW*0.5);
+      const right=Math.min(contentRight, contentLeft + Math.max(localEntry, localEnd)*step + bodyW*0.5);
+      const yEntry=yFor(spec.rr.entry?.price ?? viewBars[0].close);
+      const yStop=yFor(spec.rr.stop?.price ?? spec.rr.entry?.price ?? viewBars[0].close);
+      const yTarget=yFor(spec.rr.target?.price ?? spec.rr.entry?.price ?? viewBars[0].close);
+      const riskTop=Math.min(yEntry, yStop);
+      const riskBottom=Math.max(yEntry, yStop);
+      const rewardTop=Math.min(yEntry, yTarget);
+      const rewardBottom=Math.max(yEntry, yTarget);
+      const opacity=Math.max(0.08, Math.min(0.45, Number.isFinite(spec.rr.opacity) ? spec.rr.opacity*0.22 : 0.2));
+      ctx.fillStyle=hexToRgba(spec.rr.rewardColor || toolSettings.rr.rewardColor || '#2f9a94', opacity);
+      ctx.fillRect(left, rewardTop, Math.max(2, right-left), Math.max(2, rewardBottom-rewardTop));
+      ctx.fillStyle=hexToRgba(spec.rr.riskColor || toolSettings.rr.riskColor || '#d25448', opacity);
+      ctx.fillRect(left, riskTop, Math.max(2, right-left), Math.max(2, riskBottom-riskTop));
+      ctx.strokeStyle=hexToRgba(spec.rr.color || toolSettings.rr.color || '#cfd6df', 0.9);
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(left, yEntry);
+      ctx.lineTo(right, yEntry);
+      ctx.stroke();
+    }
+  }
+
+  const viewTimes=new Set(viewBars.map(bar=>bar.time));
+  const maSeries=maList
+    .filter(ma=>ma?.enabled)
+    .map(ma=>({
+      color: ma.color,
+      points: getMaData(spec.bars, ma.type, ma.period).filter(point=>viewTimes.has(point.time)),
+    }))
+    .filter(series=>series.points.length>=2);
+  maSeries.forEach(series=>{
+    ctx.strokeStyle=series.color || neutral;
+    ctx.lineWidth=1;
+    ctx.beginPath();
+    let started=false;
+    series.points.forEach(point=>{
+      const localIdx=spec.bars.findIndex(bar=>bar.time===point.time) - spec.fromIdx;
+      if(localIdx < 0 || localIdx >= viewBars.length) return;
+      const x=contentLeft + localIdx*step;
+      const y=yFor(point.value);
+      if(!Number.isFinite(x) || !Number.isFinite(y)) return;
+      if(!started){
+        ctx.moveTo(x,y);
+        started=true;
+      }else{
+        ctx.lineTo(x,y);
+      }
+    });
+    if(started) ctx.stroke();
+  });
+
+  ctx.lineWidth=1;
+  viewBars.forEach((bar, idx)=>{
+    const x=contentLeft + idx*step;
+    const yOpen=yFor(bar.open);
+    const yClose=yFor(bar.close);
+    const yHigh=yFor(bar.high);
+    const yLow=yFor(bar.low);
+    const color=bar.close>=bar.open ? priceColors.up : priceColors.down;
+    ctx.strokeStyle=color;
+    ctx.beginPath();
+    ctx.moveTo(x, yHigh);
+    ctx.lineTo(x, yLow);
+    ctx.stroke();
+    const top=Math.min(yOpen,yClose);
+    const bodyH=Math.max(1.2, Math.abs(yClose-yOpen));
+    ctx.fillStyle=color;
+    ctx.fillRect(x-bodyW/2, top, bodyW, bodyH);
+  });
+
+  ctx.strokeStyle=neutral;
+  ctx.globalAlpha=0.4;
+  ctx.strokeRect(0.5,0.5,width-1,height-1);
+  ctx.globalAlpha=1;
+  return canvas.toDataURL('image/png');
+}
+async function ensureSetupThumbnail(setup, renderToken){
+  const cacheKey=getSetupThumbnailCacheKey(setup);
+  if(setupThumbnailCache.has(cacheKey)){
+    const imgEl=document.querySelector(`[data-setup-thumb="${setup.id}"]`);
+    if(imgEl && renderToken===setupThumbnailRenderToken){
+      imgEl.innerHTML=`<img src="${setupThumbnailCache.get(cacheKey)}" alt="">`;
+    }
+    return;
+  }
+  if(setupThumbnailJobs.has(cacheKey)){
+    await setupThumbnailJobs.get(cacheKey);
+    return;
+  }
+  const job=(async()=>{
+    const bars=await getBarsForSymbol(setup.symbol);
+    const url=buildSetupThumbnailDataUrl(setup, bars);
+    if(url) setupThumbnailCache.set(cacheKey, url);
+    const imgEl=document.querySelector(`[data-setup-thumb="${setup.id}"]`);
+    if(imgEl && renderToken===setupThumbnailRenderToken){
+      imgEl.innerHTML=url
+        ? `<img src="${url}" alt="${escapeHtml(setup.title || setup.symbol)}">`
+        : `<div class="setup-library-thumb-placeholder">No RR preview yet</div>`;
+    }
+  })().finally(()=>setupThumbnailJobs.delete(cacheKey));
+  setupThumbnailJobs.set(cacheKey, job);
+  await job;
+}
+function queueSetupLibraryThumbnails(items){
+  const renderToken=++setupThumbnailRenderToken;
+  items.forEach(setup=>{
+    ensureSetupThumbnail(setup, renderToken);
+  });
+}
+function parseSetupTags(raw){
+  const seen=new Set();
+  return String(raw||'')
+    .split(',')
+    .map(v=>v.trim())
+    .filter(Boolean)
+    .filter(tag=>{
+      const key=tag.toLowerCase();
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+function escapeHtml(raw){
+  return String(raw||'')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#39;");
+}
+function formatSetupDate(raw){
+  const s=String(raw||'').trim();
+  return s ? s.slice(0,10) : '—';
+}
+function getSelectedRrTradeIds(){
+  if(!currentSymbol || !Array.isArray(drawings[currentSymbol])) return [];
+  const selected=getSelectedDrawingIds();
+  return selected.filter(id=>{
+    const d=getDrawing(id);
+    return d?.type==='rr';
+  });
+}
+function updateSetupSelectionSummary(){
+  renderSetupLists();
+  if(editingSetupId!=null || draftSetupAnchor) scheduleSetupMarkersRender();
+}
+function getVisibleTimeWindowSnapshot(){
+  if(!chart) return null;
+  const tfBars=getCurrentTfBars();
+  if(!tfBars.length) return null;
+  let range=null;
+  try{ range=chart.timeScale().getVisibleLogicalRange(); }catch(e){ range=null; }
+  if(!range || range.from==null || range.to==null) return null;
+  const fromIdx=Math.max(0, Math.min(tfBars.length-1, Math.floor(Math.min(range.from, range.to))));
+  const toIdx=Math.max(0, Math.min(tfBars.length-1, Math.ceil(Math.max(range.from, range.to))));
+  return {
+    fromTime: tfBars[fromIdx]?.time || '',
+    toTime: tfBars[toIdx]?.time || '',
+  };
+}
+function clearSetupForm(){
+  editingSetupId=null;
+  draftSetupAnchor=null;
+  setupDraftData=null;
+  scheduleSetupMarkersRender();
+}
+function openSetupEditor(setup){
+  if(!setup) return;
+  editingSetupId=setup.id;
+  draftSetupAnchor=null;
+  setupDraftData={
+    title: setup.title || '',
+    tagsText: (setup.tags||[]).join(', '),
+    note: setup.note || '',
+  };
+  scheduleSetupMarkersRender();
+}
+function openSetupDraft(anchor){
+  editingSetupId=null;
+  draftSetupAnchor=anchor || null;
+  setupDraftData={
+    title:'',
+    tagsText:'',
+    note:'',
+  };
+  setTool('pan');
+  scheduleSetupMarkersRender();
+}
+function getSetupEditorSource(){
+  if(editingSetupId!=null){
+    return setups.find(item=>item.id===editingSetupId) || null;
+  }
+  if(draftSetupAnchor){
+    return { id:'draft', symbol:currentSymbol, anchor:draftSetupAnchor, rrIds:[] };
+  }
+  return null;
+}
+function updateSetupDraftField(field, value){
+  if(!setupDraftData){
+    const source=getSetupEditorSource();
+    if(!source) return;
+    setupDraftData={
+      title: source.title || '',
+      tagsText: (source.tags||[]).join(', '),
+      note: source.note || '',
+    };
+  }
+  setupDraftData[field]=value;
+}
+function getCurrentSetupDraftValues(source){
+  const base=source || getSetupEditorSource();
+  return {
+    title: setupDraftData?.title ?? base?.title ?? '',
+    tagsText: setupDraftData?.tagsText ?? (base?.tags||[]).join(', '),
+    note: setupDraftData?.note ?? base?.note ?? '',
+  };
+}
+function getSuggestedSetupTags(limit=16){
+  const counts=new Map();
+  for(const setup of setups){
+    for(const rawTag of (setup.tags||[])){
+      const tag=String(rawTag||'').trim();
+      if(!tag) continue;
+      const key=tag.toLowerCase();
+      const entry=counts.get(key) || { tag, count:0 };
+      entry.count += 1;
+      if(!counts.has(key)) counts.set(key, entry);
+    }
+  }
+  return [...counts.values()]
+    .sort((a,b)=>b.count-a.count || a.tag.localeCompare(b.tag))
+    .slice(0, limit)
+    .map(entry=>entry.tag);
+}
+function toggleSetupDraftTag(tag){
+  const values=getCurrentSetupDraftValues();
+  const tags=parseSetupTags(values.tagsText || '');
+  const key=String(tag||'').trim().toLowerCase();
+  if(!key) return;
+  const next=tags.some(item=>item.toLowerCase()===key)
+    ? tags.filter(item=>item.toLowerCase()!==key)
+    : [...tags, String(tag).trim()];
+  updateSetupDraftField('tagsText', next.join(', '));
+  scheduleSetupMarkersRender();
+}
+function equalSetupTagLists(a,b){
+  const aa=(a||[]).map(v=>String(v||'').trim().toLowerCase()).filter(Boolean);
+  const bb=(b||[]).map(v=>String(v||'').trim().toLowerCase()).filter(Boolean);
+  if(aa.length!==bb.length) return false;
+  return aa.every((tag, idx)=>tag===bb[idx]);
+}
+function equalIdLists(a,b){
+  const aa=(a||[]).map(v=>parseInt(v,10)).filter(v=>Number.isInteger(v) && v>0).sort((x,y)=>x-y);
+  const bb=(b||[]).map(v=>parseInt(v,10)).filter(v=>Number.isInteger(v) && v>0).sort((x,y)=>x-y);
+  if(aa.length!==bb.length) return false;
+  return aa.every((id, idx)=>id===bb[idx]);
+}
+function getSetupAutoSaveSignature(){
+  if(editingSetupId!=null) return `saved:${editingSetupId}`;
+  if(draftSetupAnchor?.time && Number.isFinite(draftSetupAnchor?.price)) return `draft:${draftSetupAnchor.time}:${draftSetupAnchor.price}`;
+  return '';
+}
+function isSetupEditorDirty(){
+  const source=getSetupEditorSource();
+  if(!source) return false;
+  const draft=getCurrentSetupDraftValues(source);
+  const title=String(draft.title||'').trim();
+  const note=String(draft.note||'').trim();
+  const tags=parseSetupTags(draft.tagsText||'');
+  if(editingSetupId==null){
+    return !!(title || note || tags.length);
+  }
+  const existing=setups.find(item=>item.id===editingSetupId);
+  if(!existing) return !!(title || note || tags.length);
+  const selectedRrIds=getSelectedRrTradeIds();
+  const rrIds=selectedRrIds.length ? selectedRrIds : (existing.rrIds || []);
+  return title!==String(existing.title||'').trim()
+    || note!==String(existing.note||'').trim()
+    || !equalSetupTagLists(tags, existing.tags || [])
+    || !equalIdLists(rrIds, existing.rrIds || []);
+}
+async function autoSaveAndCloseSetupEditor(signature){
+  const currentSignature=getSetupAutoSaveSignature();
+  if(!currentSignature || (signature && signature!==currentSignature)) return;
+  if(isSetupEditorDirty()){
+    const payload=buildSetupPayload();
+    if(payload){
+      saveOrUpdateSetup(payload);
+      renderSetupLists();
+      scheduleSetupMarkersRender();
+      await saveSetups(true);
+    }
+  }
+  clearSetupForm();
+  renderSetupLists();
+}
+function pointerHitsRrTrade(e){
+  const wrap=document.getElementById('chart-wrap');
+  if(!wrap || !currentSymbol || !e.target?.closest?.('#chart-wrap')) return false;
+  const rect=wrap.getBoundingClientRect();
+  const x=e.clientX-rect.left;
+  const y=e.clientY-rect.top;
+  if(!Number.isFinite(x) || !Number.isFinite(y)) return false;
+  const hit=hitTestFull(x,y);
+  if(!hit) return false;
+  const drawing=getDrawing(hit.id);
+  return drawing?.type==='rr';
+}
+function getSetupsForSymbol(symbol){
+  const sym=String(symbol||'').toUpperCase();
+  return setups
+    .filter(setup=>setup.symbol===sym)
+    .sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')));
+}
+function findSetupRow(setup){
+  if(!setup) return null;
+  if(setup.moveKey){
+    const exact=allRows.find(r=>rowKey(r)===setup.moveKey);
+    if(exact) return exact;
+  }
+  return allRows.find(r=>r.symbol===setup.symbol) || null;
+}
+function focusSavedTimeWindow(snapshot){
+  if(!snapshot?.fromTime || !snapshot?.toTime || !chart) return false;
+  const tfBars=getCurrentTfBars();
+  if(!tfBars.length) return false;
+  const indexByTime=new Map(tfBars.map((b,i)=>[b.time,i]));
+  const fromIdx=getNearestBarIndexForTime(snapshot.fromTime, tfBars, indexByTime);
+  const toIdx=getNearestBarIndexForTime(snapshot.toTime, tfBars, indexByTime);
+  if(fromIdx==null || toIdx==null) return false;
+  let targetFrom=Math.min(fromIdx,toIdx);
+  let targetTo=Math.max(fromIdx,toIdx);
+  let desiredSpan=null;
+  try{
+    const currentRange=chart.timeScale().getVisibleLogicalRange();
+    if(currentRange && currentRange.from!=null && currentRange.to!=null){
+      desiredSpan=Math.max(1, Math.ceil(Math.abs(currentRange.to-currentRange.from)));
+    }
+  }catch(e){}
+  if((desiredSpan==null || !Number.isFinite(desiredSpan)) && currentMoveRow){
+    const fallbackRange=buildInitialSelectionRange(tfBars, currentMoveRow.low_date, currentMoveRow.high_date);
+    if(fallbackRange){
+      desiredSpan=Math.max(1, Math.ceil(Math.abs(fallbackRange.to-fallbackRange.from)));
+    }
+  }
+  if(desiredSpan!=null && Number.isFinite(desiredSpan)){
+    const currentSpan=Math.max(1, targetTo-targetFrom);
+    if(desiredSpan > currentSpan){
+      const center=(targetFrom+targetTo)/2;
+      const half=desiredSpan/2;
+      targetFrom=Math.max(0, center-half);
+      targetTo=Math.min(tfBars.length-1, center+half);
+      const adjustedSpan=targetTo-targetFrom;
+      if(adjustedSpan < desiredSpan){
+        if(targetFrom<=0) targetTo=Math.min(tfBars.length-1, desiredSpan);
+        else if(targetTo>=tfBars.length-1) targetFrom=Math.max(0, tfBars.length-1-desiredSpan);
+      }
+    }
+  }
+  animateLogicalRange({ from: targetFrom, to: targetTo });
+  return true;
+}
+function focusSetupTimeWindow(snapshot, anchorTime=null){
+  if(!snapshot?.fromTime || !snapshot?.toTime || !chart) return false;
+  const tfBars=getCurrentTfBars();
+  if(!tfBars.length) return false;
+  const indexByTime=new Map(tfBars.map((b,i)=>[b.time,i]));
+  const fromIdx=getNearestBarIndexForTime(snapshot.fromTime, tfBars, indexByTime);
+  const toIdx=getNearestBarIndexForTime(snapshot.toTime, tfBars, indexByTime);
+  if(fromIdx==null || toIdx==null) return false;
+  const contentFrom=Math.min(fromIdx,toIdx);
+  const contentTo=Math.max(fromIdx,toIdx);
+  const contentSpan=Math.max(1, contentTo-contentFrom);
+  let desiredSpan=null;
+  try{
+    const currentRange=chart.timeScale().getVisibleLogicalRange();
+    if(currentRange && currentRange.from!=null && currentRange.to!=null){
+      desiredSpan=Math.max(1, Math.ceil(Math.abs(currentRange.to-currentRange.from)));
+    }
+  }catch(e){}
+  if((desiredSpan==null || !Number.isFinite(desiredSpan)) && currentMoveRow){
+    const fallbackRange=buildInitialSelectionRange(tfBars, currentMoveRow.low_date, currentMoveRow.high_date);
+    if(fallbackRange){
+      desiredSpan=Math.max(1, Math.ceil(Math.abs(fallbackRange.to-fallbackRange.from)));
+    }
+  }
+  desiredSpan=Math.max(desiredSpan || 0, contentSpan + 1);
+  const anchorIdx=anchorTime ? getNearestBarIndexForTime(anchorTime, tfBars, indexByTime) : null;
+  let targetFrom=contentFrom;
+  let targetTo=contentTo;
+  if(desiredSpan > contentSpan){
+    if(anchorIdx!=null){
+      const rightRoom=Math.max(14, Math.round(desiredSpan * 0.36));
+      targetTo=anchorIdx + rightRoom;
+      targetFrom=targetTo - desiredSpan;
+    }else{
+      const center=(contentFrom+contentTo)/2;
+      targetFrom=center - desiredSpan/2;
+      targetTo=center + desiredSpan/2;
+    }
+    if(targetFrom > contentFrom){
+      const shift=targetFrom-contentFrom;
+      targetFrom-=shift;
+      targetTo-=shift;
+    }
+    if(targetTo < contentTo){
+      const shift=contentTo-targetTo;
+      targetFrom+=shift;
+      targetTo+=shift;
+    }
+    const maxIdx=tfBars.length-1;
+    if(targetFrom < 0){
+      targetTo-=targetFrom;
+      targetFrom=0;
+    }
+    if(targetTo > maxIdx){
+      const shift=targetTo-maxIdx;
+      targetFrom-=shift;
+      targetTo=maxIdx;
+      if(targetFrom < 0) targetFrom=0;
+    }
+  }
+  animateLogicalRange({ from: targetFrom, to: targetTo });
+  return true;
+}
+function applySetupFocus(setup){
+  if(!setup) return;
+  if(Array.isArray(setup.rrIds) && setup.rrIds.length){
+    const currentIds=new Set((drawings[currentSymbol]||[]).map(d=>d.id));
+    const rrIds=setup.rrIds.filter(id=>currentIds.has(id));
+    if(rrIds.length){
+      setMultiSelection(rrIds);
+      redrawAll();
+    }
+  }
+  if(focusSetupTimeWindow(setup.range, setup.anchor?.time)) return;
+  if(Array.isArray(setup.rrIds) && setup.rrIds.length){
+    const trade=(drawings[currentSymbol]||[])
+      .filter(d=>d.type==='rr' && setup.rrIds.includes(d.id))
+      .sort((a,b)=>String(a.entry?.time||'').localeCompare(String(b.entry?.time||'')))[0];
+    if(trade){
+      const tfBars=getCurrentTfBars();
+      const indexByTime=new Map(tfBars.map((b,i)=>[b.time,i]));
+      const entryIdx=getNearestBarIndexForTime(trade.entry?.time, tfBars, indexByTime);
+      const endIdx=getNearestBarIndexForTime(trade.endTime || trade.entry?.time, tfBars, indexByTime);
+      if(entryIdx!=null && endIdx!=null){
+        focusRrTradeWindow({ from: Math.min(entryIdx,endIdx), to: Math.max(entryIdx,endIdx) });
+      }
+    }
+  }
+}
+function buildSetupPayload(){
+  if(!currentSymbol || !currentMoveRow) return null;
+  const source=getSetupEditorSource();
+  const draft=getCurrentSetupDraftValues(source);
+  const title=String(draft.title||'').trim();
+  const note=String(draft.note||'').trim();
+  const tags=parseSetupTags(draft.tagsText||'');
+  if(!title && !note && !tags.length) return null;
+  const existing=editingSetupId!=null ? setups.find(item=>item.id===editingSetupId) : null;
+  const selectedRrIds=getSelectedRrTradeIds();
+  const rrIds=selectedRrIds.length ? selectedRrIds : (existing?.rrIds || []);
+  const now=new Date().toISOString();
+  return {
+    id: existing?.id ?? ++setupIdCtr,
+    symbol: currentSymbol,
+    timeframe: currentTF,
+    moveKey: rowKey(currentMoveRow),
+    year: String(currentMoveRow.year||''),
+    title: title || `${currentSymbol} Setup ${formatSetupDate(now)}`,
+    note,
+    tags,
+    rrIds,
+    range: getVisibleTimeWindowSnapshot(),
+    anchor: existing?.anchor || draftSetupAnchor || source?.anchor || null,
+    createdAt: existing?.createdAt || now,
+    updatedAt: now,
+  };
+}
+function saveOrUpdateSetup(payload){
+  if(!payload) return false;
+  const existingIdx=setups.findIndex(setup=>setup.id===payload.id);
+  if(existingIdx>=0) setups.splice(existingIdx,1,payload);
+  else setups.unshift(payload);
+  return true;
+}
+function getSetupMarkerItems(){
+  const saved=getSetupsForSymbol(currentSymbol)
+    .filter(setup=>setup.anchor?.time && Number.isFinite(setup.anchor?.price))
+    .map(setup=>({ kind:'saved', setup, id:setup.id, anchor:setup.anchor }));
+  if(draftSetupAnchor){
+    saved.unshift({ kind:'draft', setup:null, id:'draft', anchor:draftSetupAnchor });
+  }
+  return saved;
+}
+function getSetupMarkerLayout(item){
+  const x=time2p(item.anchor.time);
+  const y=price2p(item.anchor.price);
+  if(x==null || y==null || x < -20 || x > canvasCssWidth + 20 || y < -20 || y > canvasCssHeight + 20){
+    return { visible:false, x:0, y:0 };
+  }
+  return { visible:true, x:Math.round(x), y:Math.round(y) };
+}
+function renderSetupMarkers(){
+  const layer=document.getElementById('setup-markers');
+  if(!layer) return;
+  const items=getSetupMarkerItems();
+  if(!currentSymbol || !items.length){
+    layer.innerHTML='';
+    return;
+  }
+  const html=[];
+  for(const item of items){
+    const setup=item.setup;
+    const layout=getSetupMarkerLayout(item);
+    if(!layout.visible) continue;
+    const suggestedTags=getSuggestedSetupTags();
+    const expanded=(item.kind==='draft') || editingSetupId===item.id;
+    if(expanded){
+      const values=getCurrentSetupDraftValues(item.kind==='saved' ? setup : { anchor:item.anchor, tags:[], note:'', title:'' });
+      const selectedTags=parseSetupTags(values.tagsText || '');
+      const selectedRrIds=getSelectedRrTradeIds();
+      const linkedRrCount=selectedRrIds.length || (setup?.rrIds?.length || 0);
+      html.push(`
+        <div class="setup-marker expanded active" data-setup-marker="${item.id}" style="left:${layout.x}px;top:${layout.y}px;">
+          <span class="setup-marker-pin" aria-hidden="true"></span>
+          <div class="setup-marker-head" data-setup-drag="${item.id}">
+            <div class="setup-marker-title">${escapeHtml(item.kind==='draft' ? 'New Setup' : (setup.title || setup.symbol))}</div>
+            <button class="setup-pill-edit" type="button" data-setup-close="${item.id}" aria-label="Close setup editor">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10"/><path d="M15 5L5 15"/></svg>
+            </button>
+          </div>
+          <div class="setup-marker-card">
+            <input class="setup-marker-input" data-setup-input="title" data-setup-id="${item.id}" type="text" value="${escapeHtml(values.title)}" placeholder="Setup title">
+            <textarea class="setup-marker-input setup-marker-tags" data-setup-input="tagsText" data-setup-id="${item.id}" placeholder="Tags, comma separated">${escapeHtml(values.tagsText)}</textarea>
+            ${suggestedTags.length ? `<div class="setup-tag-suggestions">${suggestedTags.map(tag=>`
+              <button class="setup-tag-suggestion ${selectedTags.some(item=>item.toLowerCase()===tag.toLowerCase()) ? 'active' : ''}" type="button" data-setup-tag-pick="${escapeHtml(tag)}">${escapeHtml(tag)}</button>
+            `).join('')}</div>` : ''}
+            <textarea class="setup-marker-textarea" data-setup-input="note" data-setup-id="${item.id}" placeholder="Setup notes">${escapeHtml(values.note)}</textarea>
+            <div class="setup-marker-actions">
+              <div class="setup-marker-actions-left">
+                <div class="setup-marker-check">${selectedRrIds.length ? 'Selected RR will link on save' : 'Click RR trades while this tag is open'}</div>
+              </div>
+              <div class="setup-marker-meta">${linkedRrCount} RR linked</div>
+            </div>
+            <div class="setup-marker-actions">
+              <div class="setup-marker-actions-left">
+                <button class="setup-mini-btn" type="button" data-setup-save="${item.id}">${item.kind==='draft' ? 'Save' : 'Update'}</button>
+              </div>
+              <div class="setup-marker-actions-right">
+                ${item.kind==='saved' ? `<button class="setup-mini-btn" type="button" data-setup-delete="${item.id}">Delete</button>` : `<button class="setup-mini-btn" type="button" data-setup-cancel-draft="${item.id}">Cancel</button>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+    }else{
+      html.push(`
+        <div class="setup-marker" data-setup-marker="${item.id}" style="left:${layout.x}px;top:${layout.y}px;">
+          <span class="setup-marker-pin" aria-hidden="true"></span>
+          <button class="setup-pill-main" type="button" data-setup-open-editor="${item.id}" title="${escapeHtml(setup.title || setup.symbol)}">
+            <span class="setup-pill-title">${escapeHtml(setup.title || setup.symbol)}</span>
+            <span class="setup-pill-count">${setup.rrIds?.length || 0}RR</span>
+          </button>
+        </div>
+      `);
+    }
+  }
+  layer.innerHTML=html.join('');
+  positionSetupMarkers();
+}
+function scheduleSetupMarkersRender(){
+  if(setupMarkersRaf) return;
+  setupMarkersRaf=requestAnimationFrame(()=>{
+    setupMarkersRaf=0;
+    renderSetupMarkers();
+  });
+}
+function placeSetupMarkerNode(node, layout){
+  const pad=8;
+  const expanded=node.classList.contains('expanded');
+  const width=node.offsetWidth || 0;
+  const height=node.offsetHeight || 0;
+  const dx=expanded ? 12 : 10;
+  const dy=expanded ? -14 : -(height/2);
+  let rawLeft=layout.x;
+  let rawTop=layout.y;
+  let actualLeft=rawLeft + dx;
+  let actualTop=rawTop + dy;
+  if(width>0){
+    actualLeft=Math.max(pad, Math.min(canvasCssWidth - width - pad, actualLeft));
+    rawLeft=actualLeft - dx;
+  }
+  if(height>0){
+    actualTop=Math.max(pad, Math.min(canvasCssHeight - height - pad, actualTop));
+    rawTop=actualTop - dy;
+  }
+  node.style.left=`${Math.round(rawLeft)}px`;
+  node.style.top=`${Math.round(rawTop)}px`;
+}
+function positionSetupMarkers(){
+  const layer=document.getElementById('setup-markers');
+  if(!layer) return;
+  const items=getSetupMarkerItems();
+  const layoutById=new Map(items.map(item=>[String(item.id), getSetupMarkerLayout(item)]));
+  const nodes=layer.querySelectorAll('[data-setup-marker]');
+  nodes.forEach(node=>{
+    const layout=layoutById.get(String(node.dataset.setupMarker));
+    if(!layout?.visible){
+      node.classList.add('hidden');
+      return;
+    }
+    node.classList.remove('hidden');
+    placeSetupMarkerNode(node, layout);
+  });
+}
+function scheduleSetupMarkerPositionUpdate(){
+  if(setupMarkerPositionRaf) return;
+  setupMarkerPositionRaf=requestAnimationFrame(()=>{
+    setupMarkerPositionRaf=0;
+    positionSetupMarkers();
+  });
+}
+function renderSetupLists(){
+  const list=document.getElementById('setup-library-list');
+  const summary=document.getElementById('setup-library-summary');
+  if(!list || !summary) return;
+  const query=String(document.getElementById('setup-library-search')?.value||'').trim().toLowerCase();
+  const matchesQuery=(setup)=>{
+    if(!query) return true;
+    return [setup.symbol, setup.year, setup.title, setup.note, ...(setup.tags||[])]
+      .some(v=>String(v||'').toLowerCase().includes(query));
+  };
+  const allItems=[...setups]
+    .filter(matchesQuery)
+    .sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')));
+  summary.textContent=`${allItems.length} setup${allItems.length===1?'':'s'}`;
+  const thumbAspect=getSetupThumbnailAspectRatio();
+  list.innerHTML=allItems.length ? allItems.map(setup=>`
+    <div class="setup-library-item" data-setup-open="${setup.id}">
+      <div class="setup-library-thumb" data-setup-thumb="${setup.id}" style="--setup-thumb-aspect:${thumbAspect};">
+        <div class="setup-library-thumb-placeholder">Loading preview…</div>
+      </div>
+      <div class="setup-library-item-head">
+        <div class="setup-library-item-main">
+          <div class="setup-library-title">${escapeHtml(setup.title || setup.symbol)}</div>
+          <div class="setup-library-meta">${escapeHtml(setup.symbol)} • ${escapeHtml(setup.year || '—')} • ${escapeHtml(formatSetupDate(setup.updatedAt || setup.createdAt))}</div>
+        </div>
+        <div class="setup-library-menu">
+          <button class="setup-library-menu-btn" type="button" data-setup-menu-toggle="${setup.id}" aria-label="Setup actions">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="4.5" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="10" cy="15.5" r="1.6"/></svg>
+          </button>
+          ${openSetupLibraryMenuId===setup.id ? `
+            <div class="setup-library-menu-pop" data-setup-menu="${setup.id}">
+              <button class="setup-library-menu-action danger" type="button" data-setup-library-delete="${setup.id}">Delete setup</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+      ${(setup.tags||[]).length ? `<div class="setup-tags">${setup.tags.map(tag=>`<span class="setup-tag">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
+      ${setup.note ? `<div class="setup-card-note">${escapeHtml(setup.note)}</div>` : ''}
+    </div>
+  `).join('') : `<div class="setup-library-empty">No saved setups yet.</div>`;
+  scheduleSetupMarkerPositionUpdate();
+  if(allItems.length) queueSetupLibraryThumbnails(allItems);
+}
+async function deleteSetupById(id){
+  const next=setups.filter(setup=>setup.id!==id);
+  if(next.length===setups.length) return;
+  setups=next;
+  if(editingSetupId===id) editingSetupId=null;
+  if(openSetupLibraryMenuId===id) openSetupLibraryMenuId=null;
+  renderSetupLists();
+  scheduleSetupMarkersRender();
+  await saveSetups();
 }
 function isFavoriteRow(r){
   return favorites.has(rowKey(r));
@@ -2318,6 +3420,220 @@ window.addEventListener('resize', () => {
 if (localStorage.getItem('ind_open') === '1') {
   setIndOpen(true);
 }
+
+// ==============================================
+// SETUP LIBRARY PANEL
+// ==============================================
+const setupsToggle=document.getElementById('setups-toggle');
+
+function switchLeftPanelTab(tab){
+  leftPanelTab = (tab === 'setups') ? 'setups' : 'movers';
+  document.getElementById('tab-movers')?.classList.toggle('active', leftPanelTab==='movers');
+  document.getElementById('tab-setups')?.classList.toggle('active', leftPanelTab==='setups');
+  document.getElementById('setups-toggle')?.classList.toggle('active', leftPanelTab==='setups');
+  document.getElementById('pane-movers')?.classList.toggle('hidden', leftPanelTab!=='movers');
+  document.getElementById('pane-setups')?.classList.toggle('hidden', leftPanelTab!=='setups');
+  localStorage.setItem('left_panel_tab', leftPanelTab);
+  if(leftPanelTab==='setups') renderSetupLists();
+}
+
+function setSetupsOpen(open){
+  switchLeftPanelTab(open ? 'setups' : 'movers');
+}
+
+async function openSetupById(id){
+  const setup=setups.find(item=>item.id===id);
+  if(!setup) return;
+  setSetupsOpen(true);
+  await focusSetupById(id);
+}
+
+async function focusSetupById(id){
+  const setup=setups.find(item=>item.id===id);
+  if(!setup) return;
+  if(setup.symbol===currentSymbol){
+    applySetupFocus(setup);
+    openSetupEditor(setup);
+    return;
+  }
+  const row=findSetupRow(setup);
+  if(!row) return;
+  const idx=filtered.findIndex(r=>rowKey(r)===rowKey(row));
+  await loadMoveRecord(row, idx>=0 ? idx : null);
+  applySetupFocus(setup);
+  openSetupEditor(setup);
+}
+
+setupsToggle?.addEventListener('click',(e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  switchLeftPanelTab(leftPanelTab==='setups' ? 'movers' : 'setups');
+});
+document.getElementById('tab-movers')?.addEventListener('click',()=>switchLeftPanelTab('movers'));
+document.getElementById('tab-setups')?.addEventListener('click',()=>switchLeftPanelTab('setups'));
+document.getElementById('setup-library-search')?.addEventListener('input',()=>renderSetupLists());
+document.getElementById('setup-library-list')?.addEventListener('click', async (e)=>{
+  const menuToggle=e.target.closest('[data-setup-menu-toggle]');
+  if(menuToggle){
+    e.preventDefault();
+    e.stopPropagation();
+    const id=parseInt(menuToggle.dataset.setupMenuToggle,10);
+    if(Number.isFinite(id)){
+      openSetupLibraryMenuId = openSetupLibraryMenuId===id ? null : id;
+      renderSetupLists();
+    }
+    return;
+  }
+  const deleteBtn=e.target.closest('[data-setup-library-delete]');
+  if(deleteBtn){
+    e.preventDefault();
+    e.stopPropagation();
+    const id=parseInt(deleteBtn.dataset.setupLibraryDelete,10);
+    if(Number.isFinite(id)) await deleteSetupById(id);
+    return;
+  }
+  const item=e.target.closest('[data-setup-open]');
+  if(!item) return;
+  openSetupLibraryMenuId=null;
+  const id=parseInt(item.dataset.setupOpen,10);
+  if(Number.isFinite(id)) await openSetupById(id);
+});
+document.addEventListener('pointerdown',(e)=>{
+  if((editingSetupId!=null || draftSetupAnchor)
+    && !e.target?.closest?.('#setup-markers [data-setup-marker]')
+    && !pointerHitsRrTrade(e)){
+    const signature=getSetupAutoSaveSignature();
+    setTimeout(()=>{ autoSaveAndCloseSetupEditor(signature); },0);
+  }
+  if(!e.target?.closest?.('#setup-library-list .setup-library-menu')){
+    if(openSetupLibraryMenuId!=null){
+      openSetupLibraryMenuId=null;
+      renderSetupLists();
+    }
+  }
+}, true);
+switchLeftPanelTab(localStorage.getItem('left_panel_tab') === 'setups' ? 'setups' : 'movers');
+
+async function commitSetupEditor(){
+  const payload=buildSetupPayload();
+  if(!payload){
+    flash('Add a title, tag, or note first');
+    return;
+  }
+  saveOrUpdateSetup(payload);
+  editingSetupId=payload.id;
+  draftSetupAnchor=null;
+  setupDraftData={
+    title: payload.title,
+    tagsText: (payload.tags||[]).join(', '),
+    note: payload.note || '',
+  };
+  renderSetupLists();
+  scheduleSetupMarkersRender();
+  await saveSetups();
+}
+
+document.getElementById('setup-markers')?.addEventListener('click', async (e)=>{
+  e.stopPropagation();
+  const openCompact=e.target.closest('[data-setup-open-editor]');
+  if(openCompact){
+    const id=parseInt(openCompact.dataset.setupOpenEditor,10);
+    const setup=Number.isFinite(id) ? setups.find(item=>item.id===id) : null;
+    if(setup) openSetupEditor(setup);
+    return;
+  }
+  const tagPick=e.target.closest('[data-setup-tag-pick]');
+  if(tagPick){
+    toggleSetupDraftTag(tagPick.dataset.setupTagPick || '');
+    return;
+  }
+  const closeBtn=e.target.closest('[data-setup-close]');
+  if(closeBtn){
+    clearSetupForm();
+    renderSetupLists();
+    return;
+  }
+  const saveBtn=e.target.closest('[data-setup-save]');
+  if(saveBtn){
+    await commitSetupEditor();
+    return;
+  }
+  const deleteBtn=e.target.closest('[data-setup-delete]');
+  if(deleteBtn){
+    const id=parseInt(deleteBtn.dataset.setupDelete,10);
+    if(Number.isFinite(id)) await deleteSetupById(id);
+    return;
+  }
+  const cancelDraft=e.target.closest('[data-setup-cancel-draft]');
+  if(cancelDraft){
+    clearSetupForm();
+    renderSetupLists();
+  }
+});
+
+document.getElementById('setup-markers')?.addEventListener('input',(e)=>{
+  e.stopPropagation();
+  const fieldEl=e.target.closest('[data-setup-input]');
+  if(fieldEl){
+    updateSetupDraftField(fieldEl.dataset.setupInput, fieldEl.value);
+    return;
+  }
+});
+
+document.getElementById('setup-markers')?.addEventListener('change',(e)=>{
+  e.stopPropagation();
+});
+
+document.getElementById('setup-markers')?.addEventListener('mousedown',(e)=>{
+  e.stopPropagation();
+  const interactive=e.target.closest('button, input, textarea, label');
+  if(interactive && !interactive.hasAttribute('data-setup-drag')) return;
+  const dragEl=e.target.closest('[data-setup-drag]');
+  if(!dragEl || e.button!==0) return;
+  const markerId=dragEl.dataset.setupDrag;
+  const source=markerId==='draft'
+    ? { id:'draft', anchor:draftSetupAnchor }
+    : setups.find(item=>String(item.id)===String(markerId));
+  if(!source?.anchor) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const wrap=document.getElementById('chart-wrap');
+  const rect=wrap.getBoundingClientRect();
+  setupMarkerDrag={ id: markerId, moved:false };
+  const onMove=(ev)=>{
+    if(!setupMarkerDrag) return;
+    const x=Math.max(0, Math.min(rect.width, ev.clientX-rect.left));
+    const y=Math.max(0, Math.min(rect.height, ev.clientY-rect.top));
+    const time=snapCoordinateToCurrentTF(x);
+    let price=priceSeries?.coordinateToPrice(y);
+    if(!time || price==null || !Number.isFinite(price)) return;
+    price=parseFloat(price.toFixed(4));
+    setupMarkerDrag.moved=true;
+    if(markerId==='draft'){
+      draftSetupAnchor={ time, price };
+    }else{
+      const setup=setups.find(item=>String(item.id)===String(markerId));
+      if(setup){
+        setup.anchor={ time, price };
+        setup.updatedAt=new Date().toISOString();
+      }
+    }
+    scheduleSetupMarkerPositionUpdate();
+  };
+  const onUp=async ()=>{
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    const moved=setupMarkerDrag?.moved;
+    const movedId=setupMarkerDrag?.id;
+    setupMarkerDrag=null;
+    if(moved && movedId!=='draft'){
+      renderSetupLists();
+      await saveSetups(true);
+    }
+  };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+});
 
 document.getElementById('ind-rsi-enabled')?.addEventListener('change', e => {
   indicatorSettings.rsi.enabled=!!e.target.checked;
@@ -2903,12 +4219,12 @@ function applyMoveMarkers(){
   }catch(e){}
 }
 
-function applyInitialSelectionRange(tfBars, startTime, endTime){
-  if(!chart || !Array.isArray(tfBars) || !tfBars.length || !startTime || !endTime) return;
+function buildInitialSelectionRange(tfBars, startTime, endTime){
+  if(!Array.isArray(tfBars) || !tfBars.length || !startTime || !endTime) return null;
   const times=tfBars.map(b=>b.time);
   const si=times.indexOf(startTime);
   const ei=times.indexOf(endTime);
-  if(si < 0 || ei < 0) return;
+  if(si < 0 || ei < 0) return null;
 
   const left=Math.min(si, ei);
   const right=Math.max(si, ei);
@@ -2949,6 +4265,13 @@ function applyInitialSelectionRange(tfBars, startTime, endTime){
     from: fromIdx,
     to: toIdx,
   };
+  return range;
+}
+
+function applyInitialSelectionRange(tfBars, startTime, endTime){
+  if(!chart) return;
+  const range=buildInitialSelectionRange(tfBars, startTime, endTime);
+  if(!range) return;
   chart.timeScale().setVisibleLogicalRange(range);
   syncSubchartsToMain(range);
 }
@@ -2999,6 +4322,181 @@ function time2p(t){
   return chart.timeScale().timeToCoordinate(best);
 }
 
+function getNearestBarIndexForTime(t, bars, indexByTime){
+  if(!Array.isArray(bars) || !bars.length || !t) return null;
+  const snapped=snapChartTimeToBars(t, bars) || normalizeChartTimeInput(t);
+  if(snapped && indexByTime?.has(snapped)) return indexByTime.get(snapped);
+  const targetMs=new Date(snapped || t).getTime();
+  if(!Number.isFinite(targetMs)) return null;
+  let bestIdx=null;
+  let bestDiff=Infinity;
+  for(let i=0;i<bars.length;i++){
+    const diff=Math.abs(new Date(bars[i].time).getTime()-targetMs);
+    if(diff<bestDiff){
+      bestDiff=diff;
+      bestIdx=i;
+    }
+  }
+  return bestIdx;
+}
+
+function getRrNavigatorState(){
+  if(!chart || !currentSymbol || !Array.isArray(drawings[currentSymbol]) || !currentBars.length){
+    return { total:0, leftCount:0, rightCount:0, prevTrade:null, nextTrade:null };
+  }
+  const tfBars=getCurrentTfBars();
+  if(!tfBars.length){
+    return { total:0, leftCount:0, rightCount:0, prevTrade:null, nextTrade:null };
+  }
+  const indexByTime=new Map(tfBars.map((b,i)=>[b.time,i]));
+  const trades=drawings[currentSymbol]
+    .filter(d=>d && d.type==='rr' && d.entry?.time)
+    .map(d=>{
+      const entryIdx=getNearestBarIndexForTime(d.entry?.time, tfBars, indexByTime);
+      const endIdx=getNearestBarIndexForTime(d.endTime || d.entry?.time, tfBars, indexByTime);
+      if(entryIdx==null || endIdx==null) return null;
+      const from=Math.min(entryIdx, endIdx);
+      const to=Math.max(entryIdx, endIdx);
+      return { id:d.id, drawing:d, from, to, center:(from+to)/2 };
+    })
+    .filter(Boolean)
+    .sort((a,b)=>a.center-b.center);
+  if(!trades.length){
+    return { total:0, leftCount:0, rightCount:0, prevTrade:null, nextTrade:null };
+  }
+  let visibleRange=null;
+  try{ visibleRange=chart.timeScale().getVisibleLogicalRange(); }catch(e){ visibleRange=null; }
+  if(!visibleRange || visibleRange.from==null || visibleRange.to==null){
+    return { total:trades.length, leftCount:0, rightCount:0, prevTrade:null, nextTrade:null };
+  }
+  const visibleFrom=Math.min(visibleRange.from, visibleRange.to);
+  const visibleTo=Math.max(visibleRange.from, visibleRange.to);
+  const leftTrades=trades.filter(tr=>tr.to < visibleFrom).sort((a,b)=>b.center-a.center);
+  const rightTrades=trades.filter(tr=>tr.from > visibleTo).sort((a,b)=>a.center-b.center);
+  return {
+    total: trades.length,
+    leftCount: leftTrades.length,
+    rightCount: rightTrades.length,
+    prevTrade: leftTrades[0] || null,
+    nextTrade: rightTrades[0] || null,
+  };
+}
+
+function updateRrTradeNavigator(){
+  const el=document.getElementById('rr-nav');
+  const countEl=document.getElementById('rr-nav-count');
+  const prevBtn=document.getElementById('rr-nav-prev');
+  const nextBtn=document.getElementById('rr-nav-next');
+  if(!el || !countEl || !prevBtn || !nextBtn) return;
+  const state=getRrNavigatorState();
+  if(!state.total){
+    el.classList.add('hidden');
+    prevBtn.disabled=true;
+    nextBtn.disabled=true;
+    countEl.textContent='0 Trades';
+    return;
+  }
+  el.classList.remove('hidden');
+  countEl.textContent=`${state.total} Trades`;
+  prevBtn.disabled=!state.prevTrade;
+  nextBtn.disabled=!state.nextTrade;
+  prevBtn.title=state.leftCount ? `${state.leftCount} RR trade${state.leftCount===1?'':'s'} before view` : 'No earlier RR trades';
+  nextBtn.title=state.rightCount ? `${state.rightCount} RR trade${state.rightCount===1?'':'s'} after view` : 'No later RR trades';
+}
+
+function scheduleRrTradeNavigatorUpdate(){
+  if(rrNavRaf) return;
+  rrNavRaf=requestAnimationFrame(()=>{
+    rrNavRaf=0;
+    updateRrTradeNavigator();
+  });
+}
+
+function animateLogicalRange(targetRange, duration=260){
+  if(!chart || !targetRange || targetRange.from==null || targetRange.to==null) return;
+  if(rrNavAnimRaf){
+    try{ cancelAnimationFrame(rrNavAnimRaf); }catch(e){}
+    rrNavAnimRaf=0;
+  }
+  let startRange=null;
+  try{ startRange=chart.timeScale().getVisibleLogicalRange(); }catch(e){ startRange=null; }
+  if(!startRange || startRange.from==null || startRange.to==null){
+    try{ chart.timeScale().setVisibleLogicalRange(targetRange); }catch(e){}
+    syncSubchartsToMain(targetRange);
+    redrawAll();
+    return;
+  }
+  const from0=Number(startRange.from);
+  const to0=Number(startRange.to);
+  const from1=Number(targetRange.from);
+  const to1=Number(targetRange.to);
+  if(!Number.isFinite(from0) || !Number.isFinite(to0) || !Number.isFinite(from1) || !Number.isFinite(to1)){
+    try{ chart.timeScale().setVisibleLogicalRange(targetRange); }catch(e){}
+    syncSubchartsToMain(targetRange);
+    redrawAll();
+    return;
+  }
+  const start=performance.now();
+  const ease=t=>1-Math.pow(1-t,3);
+  const step=(now)=>{
+    const rawT=Math.max(0, Math.min(1, (now-start)/duration));
+    const t=ease(rawT);
+    const range={
+      from: from0 + (from1-from0)*t,
+      to: to0 + (to1-to0)*t,
+    };
+    try{ chart.timeScale().setVisibleLogicalRange(range); }catch(e){}
+    syncSubchartsToMain(range);
+    redrawAll();
+    if(rawT < 1){
+      rrNavAnimRaf=requestAnimationFrame(step);
+    }else{
+      rrNavAnimRaf=0;
+      try{ chart.timeScale().setVisibleLogicalRange(targetRange); }catch(e){}
+      syncSubchartsToMain(targetRange);
+      redrawAll();
+    }
+  };
+  rrNavAnimRaf=requestAnimationFrame(step);
+}
+
+function focusRrTradeWindow(trade){
+  if(!chart || !trade) return;
+  const tfBars=getCurrentTfBars();
+  if(!tfBars.length) return;
+  let currentRange=null;
+  try{ currentRange=chart.timeScale().getVisibleLogicalRange(); }catch(e){ currentRange=null; }
+  const baseSpan=currentTF==='M' ? 28 : currentTF==='W' ? 56 : currentTF==='3D' ? 90 : 140;
+  const currentSpan=(currentRange && currentRange.from!=null && currentRange.to!=null)
+    ? Math.max(1, Math.ceil(Math.abs(currentRange.to-currentRange.from)))
+    : baseSpan;
+  const tradeSpan=Math.max(1, trade.to-trade.from+1);
+  const desiredSpan=Math.max(
+    tradeSpan + Math.max(10, Math.round(tradeSpan*1.25)),
+    Math.min(currentSpan, Math.round(baseSpan*1.35)),
+    baseSpan
+  );
+  const center=(trade.from+trade.to)/2;
+  let from=Math.max(0, center - desiredSpan/2);
+  let to=Math.min(tfBars.length-1, center + desiredSpan/2);
+  if((to-from) < desiredSpan){
+    if(from<=0) to=Math.min(tfBars.length-1, desiredSpan);
+    else if(to>=tfBars.length-1) from=Math.max(0, tfBars.length-1-desiredSpan);
+  }
+  const range={ from, to };
+  animateLogicalRange(range);
+}
+
+function navigateRrTrade(direction){
+  const state=getRrNavigatorState();
+  const target=direction==='prev' ? state.prevTrade : state.nextTrade;
+  if(!target) return;
+  focusRrTradeWindow(target);
+}
+
+document.getElementById('rr-nav-prev')?.addEventListener('click',()=>navigateRrTrade('prev'));
+document.getElementById('rr-nav-next')?.addEventListener('click',()=>navigateRrTrade('next'));
+
 function redrawAll(){
   ctx2.clearRect(0,0,canvasCssWidth,canvasCssHeight);
   if(currentSymbol&&drawings[currentSymbol])
@@ -3007,6 +4505,8 @@ function redrawAll(){
   if(freehandStroke) drawFreehandStroke(freehandStroke, false, true);
   if(pendingP1)drawPreview();
   if(measureStart)drawMeasure();
+  scheduleRrTradeNavigatorUpdate();
+  scheduleSetupMarkerPositionUpdate();
 }
 
 function isDrawingSelected(id){
@@ -3026,17 +4526,20 @@ function hasAnySelection(){
 function clearSelection(){
   selectedId=null;
   selectedIds.clear();
+  updateSetupSelectionSummary();
 }
 
 function setSingleSelection(id){
   selectedId=id ?? null;
   selectedIds.clear();
   if(id!=null) selectedIds.add(id);
+  updateSetupSelectionSummary();
 }
 
 function setMultiSelection(ids){
   selectedIds=new Set((ids||[]).filter(id=>id!=null));
   selectedId=selectedIds.size ? [...selectedIds][selectedIds.size-1] : null;
+  updateSetupSelectionSummary();
 }
 
 function drawMarqueeSelection(){
@@ -3583,10 +5086,10 @@ function appendFreehandPoint(stroke, x, y){
 // ==============================================
 // TOOL SETUP
 // ==============================================
-const TOOLS=['pan','hline','line','seg','box','pen','highlight','rr','text','note','measure'];
+const TOOLS=['pan','hline','line','seg','box','pen','highlight','setup','rr','text','note','measure'];
 function setTool(t){
   drawTool=t;pendingP1=null;freehandStroke=null;
-  setHintText('Click second point to finish', false);
+  setHintText(t==='setup' ? 'Click chart to place setup tag' : 'Click second point to finish', t==='setup');
   if(t!=='measure'){measureStart=null;measureEnd=null;measureShortcutActive=false;}
   TOOLS.forEach(id=>document.getElementById('tool-'+id).classList.toggle('active',id===t));
   syncDrawVars();
@@ -3693,6 +5196,7 @@ function setupChartEvents(){
   }catch(e){}
 
   wrapEl?.addEventListener('mousedown', e => {
+    if(e.target?.closest?.('#setup-markers [data-setup-marker]')) return;
     lastChartPointerShift = !!e.shiftKey;
   }, true);
   wrapEl?.addEventListener('mouseup', () => {
@@ -3700,6 +5204,7 @@ function setupChartEvents(){
   }, true);
 
   wrapEl?.addEventListener('mousedown', e => {
+    if(e.target?.closest?.('#setup-markers [data-setup-marker]')) return;
     if(!isFreehandTool(drawTool) || e.button!==0 || !currentSymbol) return;
     const rect=wrapEl.getBoundingClientRect();
     const x=e.clientX-rect.left;
@@ -3763,6 +5268,10 @@ function setupChartEvents(){
     if(actionTool==='hline'){
       addDrawing({type:'hline',price,color:drawColor,width:drawWidth,style:drawLineStyle});saveDrawings();
       setTool('pan');
+    }
+    else if(actionTool==='setup'){
+      openSetupDraft({ time, price });
+      renderSetupLists();
     }
     else if(actionTool==='rr'){
       const rrId=addDrawing(makeDefaultRrTrade(price, time));
@@ -3848,7 +5357,9 @@ function setupDrag(){
 
   let dragPart='whole';
   let marqueeActive=false;
+  let dragUndoPushed=false;
   wrapEl.addEventListener('mousedown',e=>{
+    if(e.target?.closest?.('#setup-markers [data-setup-marker]')) return;
     if(drawTool!=='pan'||e.button!==0||!currentSymbol)return;
     const rect=wrapEl.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;
@@ -3882,6 +5393,7 @@ function setupDrag(){
     dragId=fullHit.id;
     dragPart=fullHit.part;
     dragStartX=x; dragStartY=y; wasDrag=false;
+    dragUndoPushed=false;
     dragOrig=JSON.parse(JSON.stringify(getDrawing(dragId)));
     e.stopImmediatePropagation();
     e.preventDefault();
@@ -3898,6 +5410,10 @@ function setupDrag(){
     if(dragId===null)return;
     const rect=wrapEl.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;
+    if(!dragUndoPushed && (Math.abs(x-dragStartX) > 1 || Math.abs(y-dragStartY) > 1)){
+      pushUndo();
+      dragUndoPushed=true;
+    }
     wasDrag=true;
     applyDrag(dragId,dragPart,x-dragStartX,y-dragStartY);
     redrawAll();
@@ -3927,10 +5443,10 @@ function setupDrag(){
       if(wasDrag){
         suppressPanSelectionClick=true;
         setTimeout(()=>{ suppressPanSelectionClick=false; },0);
-        pushUndo();
         saveDrawings();
       }
       dragId=null; dragOrig=null;
+      dragUndoPushed=false;
       setTimeout(()=>{ wasDrag=false; },50);
     }
   });
@@ -4487,9 +6003,13 @@ function showTextInput(px,py,price,time,initialText='',onConfirm){
 // KEYBOARD
 // ==============================================
 document.addEventListener('keydown',e=>{
-  const inInput=document.activeElement===document.getElementById('txt-input')
-    ||document.activeElement.tagName==='INPUT'
-    ||document.activeElement.tagName==='SELECT';
+  const activeEl=document.activeElement;
+  const tagName=activeEl?.tagName || '';
+  const inInput=activeEl===document.getElementById('txt-input')
+    || tagName==='INPUT'
+    || tagName==='SELECT'
+    || tagName==='TEXTAREA'
+    || !!activeEl?.isContentEditable;
   if((e.key==='Delete'||e.key==='Backspace')&&hasAnySelection()&&!inInput){
     if(!currentSymbol||!drawings[currentSymbol])return;
     const idsToDelete=new Set(getSelectedDrawingIds());
@@ -4501,8 +6021,21 @@ document.addEventListener('keydown',e=>{
     redrawAll();saveDrawings();
     return;
   }
+  if((e.key==='Delete'||e.key==='Backspace')&&!inInput){
+    if(editingSetupId!=null){
+      e.preventDefault();
+      deleteSetupById(editingSetupId);
+      return;
+    }
+    if(draftSetupAnchor){
+      e.preventDefault();
+      clearSetupForm();
+      renderSetupLists();
+      return;
+    }
+  }
   if(!inInput && e.altKey && !e.ctrlKey && !e.metaKey){
-    const keyMap={'v':'pan','h':'hline','a':'line','s':'seg','b':'box','p':'pen','g':'highlight','q':'rr','t':'text','n':'note','m':'measure'};
+    const keyMap={'v':'pan','h':'hline','a':'line','s':'seg','b':'box','p':'pen','g':'highlight','k':'setup','q':'rr','t':'text','n':'note','m':'measure'};
     if(keyMap[e.key.toLowerCase()]){
       e.preventDefault();
       setTool(keyMap[e.key.toLowerCase()]);
@@ -4510,6 +6043,11 @@ document.addEventListener('keydown',e=>{
     }
   }
   if(e.key==='Escape'&&!inInput){
+    if(editingSetupId!=null || draftSetupAnchor){
+      clearSetupForm();
+      renderSetupLists();
+      return;
+    }
     setTool('pan');
     chart.applyOptions({handleScroll:true,handleScale:true});
     return;
@@ -4706,6 +6244,7 @@ function initChart(){
   try{
     chart.timeScale().subscribeVisibleLogicalRangeChange((range)=>{
       syncSubchartsToMain(range);
+      scheduleRrTradeNavigatorUpdate();
     });
   }catch(e){}
   candleSeries=chart.addCandlestickSeries({
@@ -5356,6 +6895,7 @@ async function loadResults(){
     document.querySelectorAll('.table-header span').forEach(s=>s.classList.remove('sort-asc','sort-desc'));
     document.querySelector('.table-header span[data-col="year"]')?.classList.add('sort-desc');
     applyFilters();
+    renderSetupLists();
   }
   catch(e){document.getElementById('table-body').innerHTML=`<div style="padding:20px;color:#CC8844;font-family:var(--mono);font-size:12px;">Error: ${e.message}</div>`;}
 }
@@ -5430,19 +6970,24 @@ function renderTable(){
 // ==============================================
 // SELECT ROW
 // ==============================================
-async function selectRow(i){
+async function loadMoveRecord(r, tableIndex=null){
   const selectionToken = ++currentSelectionToken;
-  activeIdx=i;renderTable();
+  activeIdx=Number.isInteger(tableIndex) ? tableIndex : -1;
+  renderTable();
   document.querySelector('.row.active')?.scrollIntoView({block:'nearest'});
-  const r=filtered[i];
   currentMoveRow = r;
   currentSymbol=r.symbol;
+  clearSetupForm();
+  clearSelection();
   resetCurrentRsData();
+  renderSetupLists();
+  scheduleSetupMarkersRender();
   document.getElementById('ct-sym').textContent=r.symbol;
   document.getElementById('ct-cond').textContent=r.year;
   document.getElementById('ct-gain').textContent=`+${parseFloat(r.gain_pct).toFixed(2)}%`;
   document.getElementById('ct-range').textContent=`${r.low_date} → ${r.high_date}`;
   document.getElementById('ct-vol').textContent=`$${r.avg_vol_b}B/mo`;
+  document.getElementById('rr-nav')?.classList.add('hidden');
   document.getElementById('placeholder').classList.add('hidden');
   document.getElementById('loading').classList.remove('hidden');
   try{
@@ -5464,6 +7009,8 @@ async function selectRow(i){
     applyMoveMarkers();
     applyInitialSelectionRange(tfBars, sb.time, eb.time);
     redrawAll();
+    renderSetupLists();
+    scheduleSetupMarkersRender();
     
     // Reset crosshair info
     updateCrosshairInfo(null);
@@ -5471,8 +7018,13 @@ async function selectRow(i){
     loadRsForSymbol(r.symbol, selectionToken);
   }catch(e){
     console.error(e);document.getElementById('ct-gain').textContent=`Error: ${e.message}`;
+    document.getElementById('rr-nav')?.classList.add('hidden');
     document.getElementById('loading').classList.add('hidden');
   }
+}
+async function selectRow(i){
+  if(!Number.isInteger(i) || i < 0 || i >= filtered.length) return;
+  return loadMoveRecord(filtered[i], i);
 }
 
 // ==============================================
@@ -5486,7 +7038,7 @@ window.addEventListener('load',async()=>{
     themeToggle.textContent = '🌙 Dark';
   }
   initChart();
-  await Promise.all([loadFavorites(), loadDrawings()]);
+  await Promise.all([loadFavorites(), loadDrawings(), loadSetups()]);
   loadResults();
 });
 

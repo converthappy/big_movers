@@ -1,0 +1,60 @@
+[
+  {
+    "id": 3,
+    "symbol": "LITE",
+    "timeframe": "D",
+    "moveKey": "LITE|2026|2026-01-16|2026-03-02",
+    "year": "2026",
+    "title": "reversal",
+    "note": "",
+    "tags": [
+      "reversal",
+      "rsi cross back",
+      "rsi reset",
+      "AO cross back",
+      "pullback into emas",
+      "AO bull div"
+    ],
+    "rrIds": [
+      40
+    ],
+    "range": {
+      "fromTime": "2024-10-07",
+      "toTime": "2025-12-05"
+    },
+    "anchor": {
+      "time": "2025-05-27",
+      "price": 62.8062
+    },
+    "createdAt": "2026-04-02T14:10:31.255Z",
+    "updatedAt": "2026-04-02T14:10:57.188Z"
+  },
+  {
+    "id": 2,
+    "symbol": "LITE",
+    "timeframe": "D",
+    "moveKey": "LITE|2026|2026-01-16|2026-03-02",
+    "year": "2026",
+    "title": "rsi wrap around",
+    "note": "",
+    "tags": [
+      "rsi reset",
+      "rsi wrap around",
+      "higher low",
+      "ema cross back"
+    ],
+    "rrIds": [
+      43
+    ],
+    "range": {
+      "fromTime": "2025-08-25",
+      "toTime": "2026-03-20"
+    },
+    "anchor": {
+      "time": "2026-02-23",
+      "price": 398.9248
+    },
+    "createdAt": "2026-04-02T13:06:22.193Z",
+    "updatedAt": "2026-04-02T13:48:25.039Z"
+  }
+]
