@@ -2877,7 +2877,17 @@ function positionSetupMarkers(){
   if(!layer) return;
   const items=getSetupMarkerItems();
   const layoutById=new Map(items.map(item=>[String(item.id), getSetupMarkerLayout(item)]));
+  const visibleIds=new Set(
+    items
+      .filter(item=>layoutById.get(String(item.id))?.visible)
+      .map(item=>String(item.id))
+  );
   const nodes=layer.querySelectorAll('[data-setup-marker]');
+  const nodeIds=new Set([...nodes].map(node=>String(node.dataset.setupMarker)));
+  if(visibleIds.size!==nodeIds.size || [...visibleIds].some(id=>!nodeIds.has(id))){
+    scheduleSetupMarkersRender();
+    return;
+  }
   nodes.forEach(node=>{
     const layout=layoutById.get(String(node.dataset.setupMarker));
     if(!layout?.visible){
