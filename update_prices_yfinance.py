@@ -23,7 +23,7 @@ import platform
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Iterable
+from typing import Callable, Iterable
 
 import pandas as pd
 import yfinance as yf
@@ -50,6 +50,15 @@ else:
 class CsvTarget:
     symbol: str
     path: str
+
+
+@dataclass
+class TargetState:
+    target: CsvTarget
+    header: list[str]
+    body_count: int
+    last_date: str
+    fetch_from: date
 
 
 def parse_args() -> argparse.Namespace:
@@ -201,6 +210,32 @@ def fetch_new_rows(symbol: str, start_date: str) -> pd.DataFrame:
     return df
 
 
+def get_latest_market_date(reference_symbol: str = "SPY") -> str:
+    today = date.today()
+    start = today - timedelta(days=14)
+    df = yf.download(
+        reference_symbol,
+        start=start.isoformat(),
+        end=(today + timedelta(days=1)).isoformat(),
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        actions=False,
+        threads=False,
+    )
+    if df is None or df.empty:
+        return today.isoformat()
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [col[0] for col in df.columns]
+    df = df.reset_index()
+    if "Date" not in df.columns:
+        return today.isoformat()
+    dates = pd.to_datetime(df["Date"], errors="coerce").dropna()
+    if dates.empty:
+        return today.isoformat()
+    return dates.max().strftime("%Y-%m-%d")
+
+
 def format_number(value: object, is_volume: bool = False) -> str:
     if pd.isna(value):
         return ""
@@ -226,6 +261,167 @@ def build_csv_rows(header: list[str], existing_count: int, df: pd.DataFrame) -> 
         }
         rows.append([row_map.get(col, "") for col in header])
     return rows
+
+
+def read_target_state(target: CsvTarget) -> TargetState:
+    header, body, last_date = read_existing_rows(target.path)
+    start = datetime.strptime(last_date, "%Y-%m-%d").date()
+    return TargetState(
+        target=target,
+        header=header,
+        body_count=len(body),
+        last_date=last_date,
+        fetch_from=start + timedelta(days=1),
+    )
+
+
+def append_rows_to_target(state: TargetState, df: pd.DataFrame, dry_run: bool = False) -> tuple[int, str]:
+    if df is None or df.empty:
+        return 0, state.last_date
+    rows = build_csv_rows(state.header, state.body_count, df)
+    if not dry_run:
+        with open(state.target.path, "a", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerows(rows)
+    latest = str(df["Date"].iloc[-1])
+    return len(rows), latest
+
+
+def _extract_symbol_frame(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame()
+    if not isinstance(df.columns, pd.MultiIndex):
+        out = df.reset_index()
+        if "Date" not in out.columns:
+            return pd.DataFrame()
+        return out
+    levels = [set(map(str, df.columns.get_level_values(i))) for i in range(df.columns.nlevels)]
+    target = str(symbol)
+    symbol_level = next((idx for idx, values in enumerate(levels) if target in values), None)
+    if symbol_level is None:
+        return pd.DataFrame()
+    try:
+        out = df.xs(target, axis=1, level=symbol_level)
+    except Exception:
+        return pd.DataFrame()
+    if out is None or out.empty:
+        return pd.DataFrame()
+    out = out.reset_index()
+    if "Date" not in out.columns:
+        date_col = next((col for col in out.columns if str(col).lower().startswith("date")), None)
+        if date_col is None:
+            return pd.DataFrame()
+        out = out.rename(columns={date_col: "Date"})
+    return out
+
+
+def fetch_new_rows_batch(states: list[TargetState], end_date: str | None = None) -> dict[str, pd.DataFrame]:
+    if not states:
+        return {}
+    start = min(state.fetch_from for state in states)
+    end = end_date or (date.today() + timedelta(days=1)).isoformat()
+    tickers = " ".join(state.target.symbol for state in states)
+    df = yf.download(
+        tickers,
+        start=start.isoformat(),
+        end=end,
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        actions=False,
+        group_by="ticker",
+        threads=False,
+    )
+    if df is None or df.empty:
+        return {state.target.symbol: pd.DataFrame() for state in states}
+    out: dict[str, pd.DataFrame] = {}
+    for state in states:
+        frame = _extract_symbol_frame(df, state.target.symbol)
+        if frame.empty:
+            out[state.target.symbol] = pd.DataFrame()
+            continue
+        keep = [col for col in ("Date", "Open", "High", "Low", "Close", "Volume") if col in frame.columns]
+        frame = frame[keep].copy()
+        frame["Date"] = pd.to_datetime(frame["Date"], errors="coerce")
+        frame = frame.dropna(subset=["Date"])
+        frame["Date"] = frame["Date"].dt.strftime("%Y-%m-%d")
+        frame = frame[frame["Date"] > state.last_date].reset_index(drop=True)
+        out[state.target.symbol] = frame
+    return out
+
+
+def batch_update_targets(
+    targets: list[CsvTarget],
+    dry_run: bool = False,
+    batch_size: int = 40,
+    latest_market_date: str | None = None,
+    progress_callback: Callable[[str, dict], None] | None = None,
+) -> dict:
+    latest_market_date = latest_market_date or get_latest_market_date()
+    updated = 0
+    unchanged = 0
+    missing = 0
+    failed = 0
+    details: list[dict] = []
+    batch: list[TargetState] = []
+
+    def emit(symbol: str, detail: dict):
+        details.append(detail)
+        if progress_callback:
+            progress_callback(symbol, detail)
+
+    def flush_batch():
+        nonlocal updated, unchanged, failed, batch
+        if not batch:
+            return
+        try:
+            data_by_symbol = fetch_new_rows_batch(batch, end_date=(date.today() + timedelta(days=1)).isoformat())
+            for state in batch:
+                try:
+                    frame = data_by_symbol.get(state.target.symbol, pd.DataFrame())
+                    added, latest = append_rows_to_target(state, frame, dry_run=dry_run)
+                    if added:
+                        updated += 1
+                        emit(state.target.symbol, {"symbol": state.target.symbol, "status": "updated", "rows_added": added, "latest": latest})
+                    else:
+                        unchanged += 1
+                        emit(state.target.symbol, {"symbol": state.target.symbol, "status": "current"})
+                except Exception as exc:
+                    failed += 1
+                    emit(state.target.symbol, {"symbol": state.target.symbol, "status": "error", "error": str(exc)})
+        except Exception as exc:
+            err = str(exc)
+            for state in batch:
+                failed += 1
+                emit(state.target.symbol, {"symbol": state.target.symbol, "status": "error", "error": err})
+        finally:
+            batch = []
+
+    for target in targets:
+        if not target:
+            continue
+        try:
+            state = read_target_state(target)
+        except Exception as exc:
+            failed += 1
+            emit(target.symbol, {"symbol": target.symbol, "status": "error", "error": str(exc)})
+            continue
+        if state.last_date >= latest_market_date:
+            unchanged += 1
+            emit(state.target.symbol, {"symbol": state.target.symbol, "status": "current"})
+            continue
+        batch.append(state)
+        if len(batch) >= max(1, int(batch_size)):
+            flush_batch()
+    flush_batch()
+    return {
+        "updated": updated,
+        "unchanged": unchanged,
+        "missing": missing,
+        "failed": failed,
+        "details": details,
+        "latest_market_date": latest_market_date,
+    }
 
 
 def update_one(target: CsvTarget, dry_run: bool = False) -> tuple[int, str]:
@@ -267,28 +463,41 @@ def main() -> int:
     unchanged = 0
     missing = 0
     failed = 0
-
+    targets: list[CsvTarget] = []
+    symbol_order: list[str] = []
     for idx, symbol in enumerate(symbols, start=1):
         target = find_csv_target(symbol, target_dirs)
         if not target:
             missing += 1
             print(f"[{idx}/{len(symbols)}] {symbol}: missing local CSV")
             continue
-        try:
-            added, latest = update_one(target, dry_run=args.dry_run)
-            if added:
-                updated += 1
-                mode = "would append" if args.dry_run else "appended"
-                print(f"[{idx}/{len(symbols)}] {symbol}: {mode} {added} row(s) -> {latest}")
-            else:
-                unchanged += 1
-                print(f"[{idx}/{len(symbols)}] {symbol}: already current")
-        except Exception as exc:
-            failed += 1
-            print(f"[{idx}/{len(symbols)}] {symbol}: ERROR {exc}")
-        if args.pause > 0 and idx < len(symbols):
-            import time
-            time.sleep(args.pause)
+        targets.append(target)
+        symbol_order.append(symbol)
+
+    latest_market_date = get_latest_market_date()
+    print(f"Latest market date: {latest_market_date}")
+    index_by_symbol = {symbol: idx for idx, symbol in enumerate(symbol_order, start=1)}
+
+    def on_progress(symbol: str, detail: dict):
+        idx = index_by_symbol.get(symbol, "?")
+        status = detail.get("status")
+        if status == "updated":
+            mode = "would append" if args.dry_run else "appended"
+            print(f"[{idx}/{len(symbols)}] {symbol}: {mode} {detail.get('rows_added', 0)} row(s) -> {detail.get('latest', '')}")
+        elif status == "current":
+            print(f"[{idx}/{len(symbols)}] {symbol}: already current")
+        else:
+            print(f"[{idx}/{len(symbols)}] {symbol}: ERROR {detail.get('error', 'unknown error')}")
+
+    summary = batch_update_targets(
+        targets,
+        dry_run=args.dry_run,
+        latest_market_date=latest_market_date,
+        progress_callback=on_progress,
+    )
+    updated += summary["updated"]
+    unchanged += summary["unchanged"]
+    failed += summary["failed"]
 
     print("\nSummary")
     print(f"  updated:   {updated}")

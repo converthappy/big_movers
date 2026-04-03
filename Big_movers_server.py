@@ -6,8 +6,14 @@
 import csv
 import os
 import json
+import threading
+import uuid
 from bisect import bisect_right
 from flask import Flask, jsonify, send_from_directory, request, Response
+import pandas as pd
+import yfinance as yf
+
+import update_prices_yfinance as yahoo_updater
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=SCRIPT_DIR, static_url_path="")
@@ -18,12 +24,16 @@ RESULTS_CSV = os.path.join(SCRIPT_DIR, "big_movers_result.csv")
 STOCKS_DIRS = [
     os.path.join(SCRIPT_DIR, "collected_stocks"),
 ]
+COLLECTED_STOCKS_DIR = STOCKS_DIRS[0]
 
 # SPY benchmark data source (UI "VS" overlay)
 SPY_HIST_CSV = os.path.join(SCRIPT_DIR, "SPY Historical Data.csv")
 _SPY_BARS_CACHE = None
 _UNIVERSE_CLOSES_CACHE = None
 _RS_SERIES_CACHE = {}
+RESULT_FIELDS = ["year", "symbol", "gain_pct", "low_date", "high_date", "low_price", "high_price", "avg_vol_b"]
+_REFRESH_JOBS = {}
+_REFRESH_JOB_LOCK = threading.Lock()
 
 def _normalize_date_maybe(raw):
     s = str(raw or "").strip()
@@ -256,6 +266,355 @@ def _load_universe_close_cache():
     return universe
 
 
+def _reset_symbol_caches(symbol=None):
+    global _UNIVERSE_CLOSES_CACHE
+    _UNIVERSE_CLOSES_CACHE = None
+    if symbol:
+        _RS_SERIES_CACHE.pop(str(symbol).upper(), None)
+    else:
+        _RS_SERIES_CACHE.clear()
+
+
+def _read_results_rows():
+    if not os.path.exists(RESULTS_CSV):
+        return []
+    rows = []
+    with open(RESULTS_CSV, "r", encoding="utf-8-sig", newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            rows.append({field: str(row.get(field, "") or "") for field in RESULT_FIELDS})
+    return rows
+
+
+def _write_results_rows(rows):
+    with open(RESULTS_CSV, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=RESULT_FIELDS)
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _flatten_download_frame(df):
+    if df is None or df.empty:
+        return pd.DataFrame()
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [col[0] for col in df.columns]
+    frame = df.reset_index()
+    if "Date" not in frame.columns and "Datetime" in frame.columns:
+        frame = frame.rename(columns={"Datetime": "Date"})
+    keep = [col for col in ("Date", "Open", "High", "Low", "Close", "Volume") if col in frame.columns]
+    if "Date" not in keep:
+        return pd.DataFrame()
+    return frame[keep].copy()
+
+
+def _download_symbol_history(symbol):
+    df = yf.download(
+        symbol,
+        period="max",
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        actions=False,
+        threads=False,
+    )
+    frame = _flatten_download_frame(df)
+    if frame.empty:
+        return []
+    frame["Date"] = pd.to_datetime(frame["Date"]).dt.strftime("%Y-%m-%d")
+    bars = []
+    for rec in frame.to_dict("records"):
+        t = _normalize_date_maybe(rec.get("Date"))
+        o = _parse_float_maybe(rec.get("Open"))
+        h = _parse_float_maybe(rec.get("High"))
+        l = _parse_float_maybe(rec.get("Low"))
+        c = _parse_float_maybe(rec.get("Close"))
+        v = _parse_volume_maybe(rec.get("Volume"))
+        if not t or None in (o, h, l, c):
+            continue
+        if c <= 0 or h <= 0 or l <= 0:
+            continue
+        bars.append({
+            "time": t,
+            "open": o,
+            "high": h,
+            "low": l,
+            "close": c,
+            "volume": v,
+        })
+    bars.sort(key=lambda x: x["time"])
+    return bars
+
+
+def _write_symbol_bars_csv(symbol, bars):
+    os.makedirs(COLLECTED_STOCKS_DIR, exist_ok=True)
+    path = os.path.join(COLLECTED_STOCKS_DIR, f"{symbol.upper()}.csv")
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Date", "Open", "High", "Low", "Close", "Volume"])
+        for bar in bars:
+            writer.writerow([
+                bar["time"],
+                f"{bar['open']:.6f}".rstrip("0").rstrip("."),
+                f"{bar['high']:.6f}".rstrip("0").rstrip("."),
+                f"{bar['low']:.6f}".rstrip("0").rstrip("."),
+                f"{bar['close']:.6f}".rstrip("0").rstrip("."),
+                str(int(round(bar.get("volume", 0) or 0))),
+            ])
+    return path
+
+
+def _compute_yearly_big_moves(symbol, bars):
+    rows = []
+    by_year = {}
+    for idx, bar in enumerate(bars):
+        year = str(bar.get("time", ""))[:4]
+        if len(year) != 4 or not year.isdigit():
+            continue
+        by_year.setdefault(year, []).append((idx, bar))
+
+    for year, items in sorted(by_year.items()):
+        if len(items) < 2:
+            continue
+        min_low = None
+        min_idx = None
+        min_date = ""
+        best = None
+        for idx, bar in items:
+            low = _parse_float_maybe(bar.get("low"))
+            high = _parse_float_maybe(bar.get("high"))
+            if low is not None and (min_low is None or low < min_low):
+                min_low = low
+                min_idx = idx
+                min_date = bar["time"]
+            if min_low is None or min_low <= 0 or high is None or high <= 0 or min_idx is None:
+                continue
+            gain_pct = ((high / min_low) - 1.0) * 100.0
+            if best is None or gain_pct > best["gain_pct"]:
+                period = bars[min_idx:idx + 1]
+                daily_dollar = [
+                    (_parse_float_maybe(day.get("close")) or 0.0) * (_parse_volume_maybe(day.get("volume")) or 0.0)
+                    for day in period
+                ]
+                avg_monthly_dollar_b = (sum(daily_dollar) / len(daily_dollar) * 21.0 / 1e9) if daily_dollar else 0.0
+                best = {
+                    "year": year,
+                    "symbol": symbol,
+                    "gain_pct": gain_pct,
+                    "low_date": min_date,
+                    "high_date": bar["time"],
+                    "low_price": min_low,
+                    "high_price": high,
+                    "avg_vol_b": avg_monthly_dollar_b,
+                }
+        if not best:
+            continue
+        rows.append({
+            "year": best["year"],
+            "symbol": best["symbol"],
+            "gain_pct": f"{best['gain_pct']:.2f}",
+            "low_date": best["low_date"],
+            "high_date": best["high_date"],
+            "low_price": f"{best['low_price']:.6f}".rstrip("0").rstrip("."),
+            "high_price": f"{best['high_price']:.6f}".rstrip("0").rstrip("."),
+            "avg_vol_b": f"{best['avg_vol_b']:.2f}",
+        })
+    return rows
+
+
+def _import_symbol_and_scan(symbol):
+    symbol = str(symbol or "").strip().upper()
+    if not symbol:
+        raise ValueError("symbol required")
+    bars = _download_symbol_history(symbol)
+    if not bars:
+        raise ValueError(f"No Yahoo history returned for {symbol}")
+    csv_path = _write_symbol_bars_csv(symbol, bars)
+    new_rows = _compute_yearly_big_moves(symbol, bars)
+    if not new_rows:
+        raise ValueError(f"No yearly big moves found for {symbol}")
+    existing = [row for row in _read_results_rows() if str(row.get("symbol", "")).upper() != symbol]
+    merged = existing + new_rows
+    merged.sort(key=lambda row: (
+        int(str(row.get("year", "0") or 0)),
+        str(row.get("symbol", "")),
+        str(row.get("low_date", "")),
+        str(row.get("high_date", "")),
+    ))
+    _write_results_rows(merged)
+    _reset_symbol_caches(symbol)
+    return {
+        "symbol": symbol,
+        "csv_path": csv_path,
+        "rows": new_rows,
+        "bars": len(bars),
+    }
+
+
+def _refresh_chart_data_to_current():
+    os.makedirs(COLLECTED_STOCKS_DIR, exist_ok=True)
+    symbols = yahoo_updater.list_symbols_in_dirs([COLLECTED_STOCKS_DIR])
+    if not symbols:
+        symbols = yahoo_updater.read_symbols_from_result(RESULTS_CSV)
+    targets = []
+    missing = 0
+    details = []
+    for symbol in symbols:
+        target = yahoo_updater.find_csv_target(symbol, [COLLECTED_STOCKS_DIR])
+        if not target:
+            missing += 1
+            details.append({"symbol": symbol, "status": "missing"})
+            continue
+        targets.append(target)
+    summary = yahoo_updater.batch_update_targets(targets, dry_run=False)
+    _reset_symbol_caches()
+    return {
+        "updated": summary["updated"],
+        "unchanged": summary["unchanged"],
+        "missing": missing,
+        "failed": summary["failed"],
+        "details": details + summary["details"],
+        "latest_market_date": summary.get("latest_market_date"),
+    }
+
+
+def _get_refresh_job_symbols():
+    os.makedirs(COLLECTED_STOCKS_DIR, exist_ok=True)
+    symbols = yahoo_updater.list_symbols_in_dirs([COLLECTED_STOCKS_DIR])
+    if not symbols:
+        symbols = yahoo_updater.read_symbols_from_result(RESULTS_CSV)
+    return symbols
+
+
+def _serialize_refresh_job(job):
+    if not job:
+        return None
+    details = list(job.get("details", []))
+    return {
+        "id": job["id"],
+        "state": job["state"],
+        "total": job["total"],
+        "processed": job["processed"],
+        "updated": job["updated"],
+        "unchanged": job["unchanged"],
+        "missing": job["missing"],
+        "failed": job["failed"],
+        "current_symbol": job.get("current_symbol"),
+        "current_index": job.get("current_index"),
+        "created_at": job.get("created_at"),
+        "finished_at": job.get("finished_at"),
+        "latest_market_date": job.get("latest_market_date"),
+        "error": job.get("error"),
+        "last_detail": details[-1] if details else None,
+    }
+
+
+def _get_active_refresh_job():
+    with _REFRESH_JOB_LOCK:
+        for job in _REFRESH_JOBS.values():
+            if job.get("state") == "running":
+                return _serialize_refresh_job(job)
+    return None
+
+
+def _get_refresh_job(job_id):
+    with _REFRESH_JOB_LOCK:
+        job = _REFRESH_JOBS.get(job_id)
+        return _serialize_refresh_job(job) if job else None
+
+
+def _update_refresh_job(job_id, **patch):
+    with _REFRESH_JOB_LOCK:
+        job = _REFRESH_JOBS.get(job_id)
+        if not job:
+            return None
+        job.update(patch)
+        return _serialize_refresh_job(job)
+
+
+def _run_refresh_job(job_id):
+    with _REFRESH_JOB_LOCK:
+        job = _REFRESH_JOBS.get(job_id)
+        symbols = list(job.get("symbols", [])) if job else []
+    try:
+        targets = []
+        latest_market_date = yahoo_updater.get_latest_market_date()
+        _update_refresh_job(job_id, latest_market_date=latest_market_date)
+        for symbol in symbols:
+            target = yahoo_updater.find_csv_target(symbol, [COLLECTED_STOCKS_DIR])
+            if not target:
+                with _REFRESH_JOB_LOCK:
+                    job = _REFRESH_JOBS.get(job_id)
+                    if not job:
+                        return
+                    job["missing"] += 1
+                    job["processed"] += 1
+                    job["details"].append({"symbol": symbol, "status": "missing"})
+                continue
+            targets.append(target)
+
+        total_targets = len(targets)
+        symbol_index = {target.symbol: idx for idx, target in enumerate(targets, start=1)}
+
+        def on_progress(symbol, detail):
+            with _REFRESH_JOB_LOCK:
+                job = _REFRESH_JOBS.get(job_id)
+                if not job:
+                    return
+                job["current_symbol"] = symbol
+                job["current_index"] = symbol_index.get(symbol, job["processed"] + 1)
+                status = detail.get("status")
+                if status == "updated":
+                    job["updated"] += 1
+                elif status == "current":
+                    job["unchanged"] += 1
+                else:
+                    job["failed"] += 1
+                job["processed"] += 1
+                job["details"].append(detail)
+
+        if total_targets:
+            yahoo_updater.batch_update_targets(
+                targets,
+                dry_run=False,
+                latest_market_date=latest_market_date,
+                progress_callback=on_progress,
+            )
+        _reset_symbol_caches()
+        _update_refresh_job(job_id, state="done", current_symbol=None, current_index=None, finished_at=pd.Timestamp.utcnow().isoformat())
+    except Exception as exc:
+        _update_refresh_job(job_id, state="error", current_symbol=None, current_index=None, finished_at=pd.Timestamp.utcnow().isoformat(), error=str(exc))
+
+
+def _start_refresh_job():
+    active = _get_active_refresh_job()
+    if active:
+        return active, False
+    symbols = _get_refresh_job_symbols()
+    job_id = uuid.uuid4().hex
+    job = {
+        "id": job_id,
+        "state": "running",
+        "symbols": symbols,
+        "total": len(symbols),
+        "processed": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "missing": 0,
+        "failed": 0,
+        "current_symbol": None,
+        "current_index": None,
+        "created_at": pd.Timestamp.utcnow().isoformat(),
+        "finished_at": None,
+        "error": None,
+        "details": [],
+    }
+    with _REFRESH_JOB_LOCK:
+        _REFRESH_JOBS[job_id] = job
+    thread = threading.Thread(target=_run_refresh_job, args=(job_id,), daemon=True)
+    thread.start()
+    return _serialize_refresh_job(job), True
+
+
 def _weighted_ibd_score(closes, idx):
     lookbacks = (63, 126, 189, 252)
     if idx is None or idx < lookbacks[-1]:
@@ -463,6 +822,37 @@ def api_setups():
         cleaned = [item for item in data if isinstance(item, dict)]
         _write_json_file(SETUPS_FILE, cleaned)
         return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/import_symbol", methods=["POST"])
+def api_import_symbol():
+    try:
+        data = request.get_json(silent=True) or {}
+        symbol = (data.get("symbol") or "").strip().upper()
+        if not symbol:
+            return jsonify({"error": "symbol required"}), 400
+        result = _import_symbol_and_scan(symbol)
+        return jsonify({"ok": True, **result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/refresh_prices", methods=["GET", "POST"])
+def api_refresh_prices():
+    try:
+        if request.method == "GET":
+            job_id = (request.args.get("job_id") or "").strip()
+            if job_id:
+                job = _get_refresh_job(job_id)
+                if not job:
+                    return jsonify({"error": "refresh job not found"}), 404
+                return jsonify({"ok": True, "job": job})
+            active = _get_active_refresh_job()
+            return jsonify({"ok": True, "job": active})
+        job, started = _start_refresh_job()
+        return jsonify({"ok": True, "job": job, "started": started})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

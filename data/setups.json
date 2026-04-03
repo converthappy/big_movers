@@ -1,11 +1,42 @@
 [
   {
+    "id": 5,
+    "symbol": "BE",
+    "timeframe": "D",
+    "moveKey": "BE|2026|2026-01-02|2026-02-25",
+    "year": "2026",
+    "setupDate": "",
+    "title": "continuation after reversal",
+    "note": "",
+    "tags": [
+      "pullback into emas",
+      "reversal",
+      "rsi cross back",
+      "3d rsi cross back",
+      "range low reclaim"
+    ],
+    "rrIds": [
+      54
+    ],
+    "range": {
+      "fromTime": "2024-07-09",
+      "toTime": "2026-04-02"
+    },
+    "anchor": {
+      "time": "2025-08-27",
+      "price": 24.1681
+    },
+    "createdAt": "2026-04-03T01:50:21.198Z",
+    "updatedAt": "2026-04-03T01:50:43.198Z"
+  },
+  {
     "id": 4,
     "symbol": "LITE",
     "timeframe": "D",
     "moveKey": "LITE|2026|2026-01-16|2026-03-02",
-    "year": "2026",
-    "title": "continuation",
+    "year": "2025",
+    "setupDate": "2025-06-04",
+    "title": "continuation after reversal",
     "note": "",
     "tags": [
       "rsi reset",
@@ -16,7 +47,7 @@
       47
     ],
     "range": {
-      "fromTime": "2024-09-12",
+      "fromTime": "2024-09-09",
       "toTime": "2025-12-22"
     },
     "anchor": {
@@ -24,7 +55,7 @@
       "price": 76.538
     },
     "createdAt": "2026-04-02T14:16:29.855Z",
-    "updatedAt": "2026-04-02T14:16:29.855Z"
+    "updatedAt": "2026-04-03T01:54:28.497Z"
   },
   {
     "id": 3,
@@ -32,6 +63,7 @@
     "timeframe": "D",
     "moveKey": "LITE|2026|2026-01-16|2026-03-02",
     "year": "2026",
+    "setupDate": "",
     "title": "reversal",
     "note": "",
     "tags": [
@@ -62,6 +94,7 @@
     "timeframe": "D",
     "moveKey": "LITE|2026|2026-01-16|2026-03-02",
     "year": "2026",
+    "setupDate": "",
     "title": "rsi wrap around",
     "note": "",
     "tags": [

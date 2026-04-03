@@ -74,10 +74,19 @@
   .setup-library-search{
     width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;
   }
-  .setup-library-list{flex:1;overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px;}
+  .setup-library-list{
+    flex:1;
+    overflow:auto;
+    padding:8px;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:8px;
+    align-content:start;
+  }
   .setup-library-item{
     border:1px solid var(--border);background:rgba(255,255,255,0.02);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:7px;cursor:pointer;
     transition:border-color .12s ease, background .12s ease, transform .12s ease;
+    min-width:0;
   }
   .setup-library-item:hover{border-color:rgba(0,212,170,0.26);background:rgba(0,212,170,0.05);transform:translateY(-1px);}
   .setup-library-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
@@ -93,6 +102,10 @@
   .setup-library-title{font-family:var(--tv);font-size:12px;font-weight:700;color:var(--text);}
   .setup-library-meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
   .setup-library-empty{padding:16px 12px;color:var(--muted);font-family:var(--mono);font-size:11px;}
+  .setup-library-empty{grid-column:1 / -1;}
+  @media (max-width: 380px){
+    .setup-library-list{grid-template-columns:minmax(0, 1fr);}
+  }
   .setup-library-menu{position:relative;flex:0 0 auto;}
   .setup-library-menu-btn{
     width:24px;height:24px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;
@@ -873,6 +886,56 @@
     width: 32px;
     height: 32px;
   }
+  .tb-btn.wide{
+    width:auto;
+    min-width:32px;
+    padding:0 10px;
+    gap:6px;
+  }
+  .sync-status{
+    min-width:220px;
+    max-width:min(42vw, 460px);
+    padding:6px 10px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:rgba(255,255,255,0.03);
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:10px;
+    line-height:1.35;
+    display:none;
+    align-items:center;
+    gap:8px;
+  }
+  .sync-status.show{display:inline-flex;}
+  .sync-status[data-state="running"]{border-color:rgba(0,212,170,0.30);color:var(--text);}
+  .sync-status[data-state="done"]{border-color:rgba(0,212,170,0.30);color:var(--accent);}
+  .sync-status[data-state="error"]{border-color:rgba(255,107,107,0.40);color:#ff8f8f;}
+  .sync-status-dot{
+    width:7px;
+    height:7px;
+    border-radius:999px;
+    background:currentColor;
+    flex:0 0 auto;
+    opacity:0.9;
+  }
+  .sync-status[data-state="running"] .sync-status-dot{
+    animation:syncPulse 1.2s ease-in-out infinite;
+  }
+  .sync-status-text{
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  @keyframes syncPulse{
+    0%,100%{transform:scale(0.8);opacity:0.45;}
+    50%{transform:scale(1.15);opacity:1;}
+  }
+  .tb-btn.busy{
+    pointer-events:none;
+    opacity:0.65;
+  }
   .tb-btn .tb-ico{
     display:inline-flex;
     align-items:center;
@@ -1158,6 +1221,12 @@
     <div class="stat-badge">Showing <span id="count">0</span> stocks</div>
     <div class="spacer"></div>
     <div class="vsep"></div>
+    <button id="import-symbol-btn" class="tb-btn wide" title="Import missing stock from Yahoo Finance">+ Stock</button>
+    <button id="refresh-prices-btn" class="tb-btn wide" title="Update all local chart CSVs to today">Update</button>
+    <div id="refresh-status" class="sync-status" data-state="idle" aria-live="polite">
+      <span class="sync-status-dot" aria-hidden="true"></span>
+      <span id="refresh-status-text" class="sync-status-text"></span>
+    </div>
     <button id="theme-toggle" class="tb-btn" title="Toggle theme">☀ Light</button>
   </div>
   <div class="main">
@@ -1707,6 +1776,8 @@ const setupThumbnailCache=new Map();
 const setupThumbnailJobs=new Map();
 const symbolBarsCache=new Map();
 const SETUP_THUMBNAIL_RENDER_VERSION='v2';
+let refreshStatusPollTimer=0;
+let activeRefreshJobId=null;
 
 const RIGHT_OFFSET_BARS = 6;
 let persistedRightOffset = RIGHT_OFFSET_BARS;
@@ -1911,6 +1982,8 @@ themeToggle.addEventListener('click', () => {
   applyTheme();
   saveSettings();
 });
+document.getElementById('import-symbol-btn')?.addEventListener('click', ()=>{ importSymbolFromYahoo(); });
+document.getElementById('refresh-prices-btn')?.addEventListener('click', ()=>{ refreshAllPricesToToday(); });
 
 // Load saved theme
 if (localStorage.getItem('bm_theme') === 'light') {
@@ -2064,6 +2137,7 @@ function normalizeLoadedSetups(raw){
       timeframe:['D','3D','W','M'].includes(String(setup.timeframe||'')) ? String(setup.timeframe) : 'D',
       moveKey:String(setup.moveKey||''),
       year:String(setup.year||''),
+      setupDate:String(setup.setupDate||''),
       title:String(setup.title||'').trim(),
       note:String(setup.note||''),
       tags,
@@ -2157,6 +2231,29 @@ function getLinkedRrTradeForSetup(setup){
     return Math.abs(aMs-anchorMs) - Math.abs(bMs-anchorMs);
   })[0];
 }
+function getSetupDateValue(setup){
+  const rrTrade=getLinkedRrTradeForSetup(setup);
+  const rrTime=String(rrTrade?.entry?.time || '').trim();
+  if(rrTime) return rrTime.slice(0,10);
+  const stored=String(setup?.setupDate || '').trim();
+  if(stored) return stored.slice(0,10);
+  const updated=String(setup?.updatedAt || setup?.createdAt || '').trim();
+  return updated ? updated.slice(0,10) : '';
+}
+function getSetupYearValue(setup){
+  const setupDate=getSetupDateValue(setup);
+  if(setupDate && setupDate.length>=4) return setupDate.slice(0,4);
+  const stored=String(setup?.year || '').trim();
+  return stored || '';
+}
+function getSetupEntryTimeForSymbol(symbol, rrIds){
+  if(!symbol || !Array.isArray(rrIds) || !rrIds.length) return '';
+  const symbolDrawings=Array.isArray(drawings[symbol]) ? drawings[symbol] : [];
+  const trade=symbolDrawings
+    .filter(d=>d?.type==='rr' && rrIds.includes(d.id) && d.entry?.time)
+    .sort((a,b)=>String(a.entry?.time||'').localeCompare(String(b.entry?.time||'')))[0];
+  return String(trade?.entry?.time || '').slice(0,10);
+}
 function getSetupThumbnailCacheKey(setup){
   const rr=getLinkedRrTradeForSetup(setup);
   const rrKey=rr
@@ -2193,7 +2290,7 @@ function getSetupThumbnailSpec(setup, bars){
       const right=Math.max(entryIdx, endIdx);
       return {
         bars: tfBars,
-        fromIdx: Math.max(0, left-30),
+        fromIdx: Math.max(0, left-50),
         toIdx: Math.min(tfBars.length-1, right),
         rr,
       };
@@ -2735,12 +2832,16 @@ function buildSetupPayload(){
   const selectedRrIds=getSelectedRrTradeIds();
   const rrIds=selectedRrIds.length ? selectedRrIds : (existing?.rrIds || []);
   const now=new Date().toISOString();
+  const setupDate=getSetupEntryTimeForSymbol(currentSymbol, rrIds)
+    || String(existing?.setupDate || '').trim()
+    || now.slice(0,10);
   return {
     id: existing?.id ?? ++setupIdCtr,
     symbol: currentSymbol,
     timeframe: currentTF,
     moveKey: rowKey(currentMoveRow),
-    year: String(currentMoveRow.year||''),
+    year: setupDate.slice(0,4) || String(currentMoveRow.year||''),
+    setupDate,
     title: title || `${currentSymbol} Setup ${formatSetupDate(now)}`,
     note,
     tags,
@@ -2928,7 +3029,7 @@ function renderSetupLists(){
       <div class="setup-library-item-head">
         <div class="setup-library-item-main">
           <div class="setup-library-title">${escapeHtml(setup.title || setup.symbol)}</div>
-          <div class="setup-library-meta">${escapeHtml(setup.symbol)} • ${escapeHtml(setup.year || '—')} • ${escapeHtml(formatSetupDate(setup.updatedAt || setup.createdAt))}</div>
+          <div class="setup-library-meta">${escapeHtml(setup.symbol)} • ${escapeHtml(getSetupYearValue(setup) || '—')} • ${escapeHtml(formatSetupDate(getSetupDateValue(setup)))}</div>
         </div>
         <div class="setup-library-menu">
           <button class="setup-library-menu-btn" type="button" data-setup-menu-toggle="${setup.id}" aria-label="Setup actions">
@@ -2992,6 +3093,24 @@ async function fetchJsonOrThrow(url){
   }
   return data;
 }
+async function postJsonOrThrow(url, payload){
+  const resp = await fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload || {}),
+  });
+  const text = await resp.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch(e) { data = null; }
+  if (!resp.ok) {
+    const msg = data?.error || text || `${resp.status} ${resp.statusText}`;
+    throw new Error(msg);
+  }
+  if (data == null) {
+    throw new Error(`Invalid JSON response from ${url}`);
+  }
+  return data;
+}
 async function fetchJsonOptional(url, fallback=null){
   try {
     const resp = await fetch(url);
@@ -3000,6 +3119,151 @@ async function fetchJsonOptional(url, fallback=null){
     return text ? JSON.parse(text) : fallback;
   } catch (e) {
     return fallback;
+  }
+}
+function setButtonBusy(button, busy, busyText='Working...'){
+  if(!button) return;
+  if(!button.dataset.label) button.dataset.label = button.textContent;
+  button.classList.toggle('busy', !!busy);
+  button.textContent = busy ? busyText : button.dataset.label;
+}
+function clearRefreshStatusPoll(){
+  if(refreshStatusPollTimer){
+    clearTimeout(refreshStatusPollTimer);
+    refreshStatusPollTimer=0;
+  }
+}
+function setRefreshStatus(state, text=''){
+  const box=document.getElementById('refresh-status');
+  const label=document.getElementById('refresh-status-text');
+  if(!box || !label) return;
+  box.dataset.state=state || 'idle';
+  label.textContent=text || '';
+  box.classList.toggle('show', !!text);
+}
+function summarizeRefreshJob(job){
+  if(!job) return '';
+  const total=Math.max(0, Number(job.total)||0);
+  const processed=Math.max(0, Number(job.processed)||0);
+  const updated=Math.max(0, Number(job.updated)||0);
+  const unchanged=Math.max(0, Number(job.unchanged)||0);
+  const missing=Math.max(0, Number(job.missing)||0);
+  const failed=Math.max(0, Number(job.failed)||0);
+  if(job.state==='running'){
+    const currentBits=[];
+    if(Number.isFinite(job.current_index) && total){
+      currentBits.push(`${job.current_index}/${total}`);
+    }else if(total){
+      currentBits.push(`${processed}/${total}`);
+    }
+    if(job.current_symbol) currentBits.push(job.current_symbol);
+    const counts=[`${updated} updated`, `${unchanged} current`];
+    if(missing) counts.push(`${missing} missing`);
+    if(failed) counts.push(`${failed} failed`);
+    return `Updating charts ${currentBits.join(' • ')}${counts.length ? ` • ${counts.join(' • ')}` : ''}`;
+  }
+  if(job.state==='done'){
+    const counts=[`${updated} updated`, `${unchanged} current`];
+    if(missing) counts.push(`${missing} missing`);
+    if(failed) counts.push(`${failed} failed`);
+    return `Update finished • ${counts.join(' • ')}`;
+  }
+  const error=String(job.error || 'Update failed');
+  const counts=[];
+  if(updated) counts.push(`${updated} updated`);
+  if(unchanged) counts.push(`${unchanged} current`);
+  if(missing) counts.push(`${missing} missing`);
+  if(failed) counts.push(`${failed} failed`);
+  return counts.length ? `${error} • ${counts.join(' • ')}` : error;
+}
+function applyRefreshJobStatus(job){
+  if(!job){
+    activeRefreshJobId=null;
+    setRefreshStatus('idle','');
+    setButtonBusy(document.getElementById('refresh-prices-btn'), false);
+    return;
+  }
+  activeRefreshJobId=job.id || null;
+  const state=String(job.state || 'idle');
+  setRefreshStatus(state, summarizeRefreshJob(job));
+  setButtonBusy(document.getElementById('refresh-prices-btn'), state==='running', 'Updating…');
+}
+async function pollRefreshJobStatus(jobId){
+  clearRefreshStatusPoll();
+  if(!jobId) return;
+  try{
+    const result=await fetchJsonOrThrow(`/api/refresh_prices?job_id=${encodeURIComponent(jobId)}`);
+    const job=result?.job || null;
+    if(!job){
+      applyRefreshJobStatus(null);
+      return;
+    }
+    applyRefreshJobStatus(job);
+    if(job.state==='running'){
+      refreshStatusPollTimer=setTimeout(()=>{ pollRefreshJobStatus(jobId); }, 700);
+      return;
+    }
+    symbolBarsCache.clear();
+    setupThumbnailCache.clear();
+    setupThumbnailJobs.clear();
+    rsSeriesCache.clear();
+    if(currentMoveRow){
+      await loadMoveRecord(currentMoveRow, activeIdx);
+    }
+    flash(job.state==='done' ? `Updated ${job.updated} charts` : `Update failed: ${job.error || 'Unknown error'}`);
+    refreshStatusPollTimer=setTimeout(()=>{ setRefreshStatus('idle',''); }, 3200);
+  }catch(e){
+    setRefreshStatus('error', `Update status failed: ${e.message}`);
+    setButtonBusy(document.getElementById('refresh-prices-btn'), false);
+    refreshStatusPollTimer=setTimeout(()=>{ setRefreshStatus('idle',''); }, 3200);
+  }
+}
+async function restoreRefreshStatusIfRunning(){
+  try{
+    const result=await fetchJsonOptional('/api/refresh_prices', null);
+    const job=result?.job || null;
+    if(job){
+      applyRefreshJobStatus(job);
+      if(job.state==='running' && job.id) pollRefreshJobStatus(job.id);
+    }
+  }catch(e){}
+}
+async function importSymbolFromYahoo(){
+  const button=document.getElementById('import-symbol-btn');
+  const raw=window.prompt('Import symbol from Yahoo Finance', (document.getElementById('f-sym')?.value || '').trim().toUpperCase());
+  const symbol=String(raw||'').trim().toUpperCase();
+  if(!symbol) return;
+  setButtonBusy(button, true, 'Importing…');
+  try{
+    const result=await postJsonOrThrow('/api/import_symbol', { symbol });
+    symbolBarsCache.delete(symbol);
+    setupThumbnailCache.clear();
+    setupThumbnailJobs.clear();
+    rsSeriesCache.delete(symbol);
+    await loadResults();
+    document.getElementById('f-sym').value = symbol;
+    applyFilters();
+    const idx=filtered.findIndex(row=>String(row.symbol||'').toUpperCase()===symbol);
+    if(idx>=0) await selectRow(idx);
+    flash(`Imported ${symbol} (${result.rows?.length || 0} mover rows)`);
+  }catch(e){
+    flash(`Import failed: ${e.message}`);
+  }finally{
+    setButtonBusy(button, false);
+  }
+}
+async function refreshAllPricesToToday(){
+  try{
+    const result=await postJsonOrThrow('/api/refresh_prices', {});
+    const job=result?.job || null;
+    if(!job){
+      throw new Error('Refresh job did not start');
+    }
+    applyRefreshJobStatus(job);
+    if(job.id) pollRefreshJobStatus(job.id);
+  }catch(e){
+    applyRefreshJobStatus(null);
+    flash(`Update failed: ${e.message}`);
   }
 }
 function resetCurrentRsData(){
@@ -7049,6 +7313,7 @@ window.addEventListener('load',async()=>{
   }
   initChart();
   await Promise.all([loadFavorites(), loadDrawings(), loadSetups()]);
+  restoreRefreshStatusIfRunning();
   loadResults();
 });
 
