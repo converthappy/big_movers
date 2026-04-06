@@ -31,6 +31,7 @@ SPY_HIST_CSV = os.path.join(SCRIPT_DIR, "SPY Historical Data.csv")
 _SPY_BARS_CACHE = None
 _UNIVERSE_CLOSES_CACHE = None
 _RS_SERIES_CACHE = {}
+_ADR_SERIES_CACHE = {}
 RESULT_FIELDS = ["year", "symbol", "gain_pct", "low_date", "high_date", "low_price", "high_price", "avg_vol_b"]
 _REFRESH_JOBS = {}
 _REFRESH_JOB_LOCK = threading.Lock()
@@ -270,9 +271,13 @@ def _reset_symbol_caches(symbol=None):
     global _UNIVERSE_CLOSES_CACHE
     _UNIVERSE_CLOSES_CACHE = None
     if symbol:
-        _RS_SERIES_CACHE.pop(str(symbol).upper(), None)
+        sym = str(symbol).upper()
+        _RS_SERIES_CACHE.pop(sym, None)
+        for key in [k for k in _ADR_SERIES_CACHE.keys() if k.startswith(f"{sym}:")]:
+            _ADR_SERIES_CACHE.pop(key, None)
     else:
         _RS_SERIES_CACHE.clear()
+        _ADR_SERIES_CACHE.clear()
 
 
 def _read_results_rows():
@@ -678,6 +683,51 @@ def _compute_ibd_style_rs_series(symbol):
     return out
 
 
+def _compute_adr_percent_series(symbol, length=20):
+    symbol = (symbol or "").strip().upper()
+    length = max(1, int(length or 20))
+    cache_key = f"{symbol}:{length}"
+    if not symbol:
+        return []
+    if cache_key in _ADR_SERIES_CACHE:
+        return _ADR_SERIES_CACHE[cache_key]
+
+    bars = _load_symbol_bars(symbol)
+    if len(bars) < length:
+        _ADR_SERIES_CACHE[cache_key] = []
+        return []
+
+    daily_ranges = []
+    for bar in bars:
+        high = _parse_float_maybe(bar.get("high"))
+        low = _parse_float_maybe(bar.get("low"))
+        if high is None or low is None or low <= 0 or high <= 0:
+            daily_ranges.append(None)
+            continue
+        daily_ranges.append(((high / low) - 1.0) * 100.0)
+
+    out = []
+    window = []
+    running = 0.0
+    for idx, value in enumerate(daily_ranges):
+        window.append(value)
+        if value is not None:
+            running += value
+        if len(window) > length:
+            removed = window.pop(0)
+            if removed is not None:
+                running -= removed
+        if len(window) < length or any(v is None for v in window):
+            continue
+        out.append({
+            "time": bars[idx]["time"],
+            "value": round(running / length, 2),
+        })
+
+    _ADR_SERIES_CACHE[cache_key] = out
+    return out
+
+
 def _resolve_index_html_path():
     # Repo uses Big_movers.html; tolerate lowercase for clones on case-sensitive FS
     for name in ("Big_movers.html", "big_movers.html"):
@@ -737,6 +787,27 @@ def api_rs_rating():
         return jsonify({
             "symbol": symbol,
             "method": "ibd_style_weighted_3_6_9_12m",
+            "series": data,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/adr_percent")
+def api_adr_percent():
+    symbol = (request.args.get("symbol") or "").strip().upper()
+    if not symbol:
+        return jsonify({"error": "symbol required"}), 400
+    try:
+        length = int(request.args.get("length") or 20)
+    except (TypeError, ValueError):
+        length = 20
+    try:
+        data = _compute_adr_percent_series(symbol, length=length)
+        return jsonify({
+            "symbol": symbol,
+            "method": "sma_of_daily_high_low_percent_range",
+            "length": max(1, length),
             "series": data,
         })
     except Exception as e:

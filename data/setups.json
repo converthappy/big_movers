@@ -1,5 +1,280 @@
 [
   {
+    "id": 14,
+    "symbol": "OSTK",
+    "timeframe": "D",
+    "moveKey": "OSTK|2020|2020-03-18|2020-08-19",
+    "year": "2004",
+    "setupDate": "2004-09-21",
+    "title": "3d rsi wrap around",
+    "note": "",
+    "tags": [
+      "rsi wrap around",
+      "rsi cross back",
+      "hold above emas",
+      "diagonal break",
+      "AO about to cross",
+      "3d rsi cross back"
+    ],
+    "rrIds": [
+      76
+    ],
+    "range": {
+      "fromTime": "2003-09-16",
+      "toTime": "2005-08-05"
+    },
+    "anchor": {
+      "time": "2004-11-23",
+      "price": 33.1567
+    },
+    "createdAt": "2026-04-06T01:46:20.890Z",
+    "updatedAt": "2026-04-06T01:50:09.005Z"
+  },
+  {
+    "id": 13,
+    "symbol": "OSTK",
+    "timeframe": "D",
+    "moveKey": "OSTK|2020|2020-03-18|2020-08-19",
+    "year": "2020",
+    "setupDate": "2020-06-01",
+    "title": "Diagonal break",
+    "note": "",
+    "tags": [
+      "pullback into emas",
+      "diagonal break",
+      "rsi reset",
+      "higher low",
+      "hold above emas",
+      "close above ema 8"
+    ],
+    "rrIds": [
+      75
+    ],
+    "range": {
+      "fromTime": "2019-11-26",
+      "toTime": "2021-02-17"
+    },
+    "anchor": {
+      "time": "2020-08-17",
+      "price": 18.257
+    },
+    "createdAt": "2026-04-06T01:40:04.075Z",
+    "updatedAt": "2026-04-06T01:40:47.873Z"
+  },
+  {
+    "id": 12,
+    "symbol": "OSTK",
+    "timeframe": "D",
+    "moveKey": "OSTK|2020|2020-03-18|2020-08-19",
+    "year": "2020",
+    "setupDate": "2020-04-28",
+    "title": "ema pullback with trend and rsi reset",
+    "note": "",
+    "tags": [
+      "pullback into emas",
+      "close above ema 8",
+      "rsi reset",
+      "3d rsi cross back",
+      "level reclaim",
+      "pocket pivot",
+      "hold above emas"
+    ],
+    "rrIds": [
+      73
+    ],
+    "range": {
+      "fromTime": "2019-05-02",
+      "toTime": "2021-01-14"
+    },
+    "anchor": {
+      "time": "2020-06-02",
+      "price": 10.3648
+    },
+    "createdAt": "2026-04-06T01:35:32.956Z",
+    "updatedAt": "2026-04-06T01:41:24.045Z"
+  },
+  {
+    "id": 11,
+    "symbol": "MRNA",
+    "timeframe": "D",
+    "moveKey": "MRNA|2026|2026-01-02|2026-01-22",
+    "year": "2026",
+    "setupDate": "2026-01-05",
+    "title": "rsi reset with trend",
+    "note": "",
+    "tags": [
+      "rsi reset",
+      "3d rsi reset",
+      "close above ema 8",
+      "pullback into emas"
+    ],
+    "rrIds": [
+      70
+    ],
+    "range": {
+      "fromTime": "2025-07-17",
+      "toTime": "2026-04-02"
+    },
+    "anchor": {
+      "time": "2026-01-21",
+      "price": 30.3603
+    },
+    "createdAt": "2026-04-04T11:46:42.433Z",
+    "updatedAt": "2026-04-04T11:46:42.433Z"
+  },
+  {
+    "id": 10,
+    "symbol": "ENPH",
+    "timeframe": "D",
+    "moveKey": "ENPH|2026|2026-01-02|2026-02-04",
+    "year": "2017",
+    "setupDate": "2017-11-06",
+    "title": "Diagonal break",
+    "note": "",
+    "tags": [
+      "pullback into emas",
+      "rsi reset",
+      "rsi wrap around",
+      "3d rsi reset",
+      "higher low",
+      "diagonal break",
+      "hold above emas"
+    ],
+    "rrIds": [
+      68
+    ],
+    "range": {
+      "fromTime": "2017-04-12",
+      "toTime": "2018-06-04"
+    },
+    "anchor": {
+      "time": "2017-11-27",
+      "price": 1.5344
+    },
+    "createdAt": "2026-04-04T11:38:10.485Z",
+    "updatedAt": "2026-04-04T11:39:35.793Z"
+  },
+  {
+    "id": 9,
+    "symbol": "AMPX",
+    "timeframe": "D",
+    "moveKey": "AMPX|2026|2026-01-02|2026-02-03",
+    "year": "2025",
+    "setupDate": "2025-06-06",
+    "title": "ema pullback with trend and rsi reset",
+    "note": "",
+    "tags": [
+      "3d rsi cross back",
+      "hold above emas",
+      "rsi reset",
+      "pullback into emas"
+    ],
+    "rrIds": [
+      65
+    ],
+    "range": {
+      "fromTime": "2024-12-27",
+      "toTime": "2025-12-09"
+    },
+    "anchor": {
+      "time": "2025-07-16",
+      "price": 3.191
+    },
+    "createdAt": "2026-04-04T11:29:52.835Z",
+    "updatedAt": "2026-04-04T11:30:49.834Z"
+  },
+  {
+    "id": 8,
+    "symbol": "AMPX",
+    "timeframe": "D",
+    "moveKey": "AMPX|2026|2026-01-02|2026-02-03",
+    "year": "2025",
+    "setupDate": "2025-09-11",
+    "title": "Diagonal break",
+    "note": "",
+    "tags": [
+      "rsi wrap around",
+      "higher low",
+      "rsi reset",
+      "pocket pivot",
+      "ema cross back",
+      "hold above emas"
+    ],
+    "rrIds": [
+      64
+    ],
+    "range": {
+      "fromTime": "2025-02-03",
+      "toTime": "2026-04-02"
+    },
+    "anchor": {
+      "time": "2025-10-07",
+      "price": 7.9283
+    },
+    "createdAt": "2026-04-04T11:24:45.935Z",
+    "updatedAt": "2026-04-04T11:26:04.802Z"
+  },
+  {
+    "id": 7,
+    "symbol": "SATS",
+    "timeframe": "D",
+    "moveKey": "SATS|2025|2025-06-09|2025-12-19",
+    "year": "2025",
+    "setupDate": "2025-12-03",
+    "title": "ema reclaim (failure to go down)",
+    "note": "",
+    "tags": [
+      "rsi cross back",
+      "ema cross back",
+      "pullback into emas",
+      "level reclaim",
+      "3d rsi reset",
+      "diagonal break"
+    ],
+    "rrIds": [
+      57
+    ],
+    "range": {
+      "fromTime": "2024-08-20",
+      "toTime": "2026-04-02"
+    },
+    "anchor": {
+      "time": "2026-01-14",
+      "price": 76.0209
+    },
+    "createdAt": "2026-04-03T05:49:47.447Z",
+    "updatedAt": "2026-04-03T05:55:32.486Z"
+  },
+  {
+    "id": 6,
+    "symbol": "SATS",
+    "timeframe": "D",
+    "moveKey": "SATS|2025|2025-06-09|2025-12-19",
+    "year": "2026",
+    "setupDate": "2026-03-27",
+    "title": "rsi wrap around",
+    "note": "the key here was rsi reset and keeping above 50 along with pullback into emas in the right order and holding above then AO crossing showing behavior not seen since Feb.",
+    "tags": [
+      "rsi wrap around",
+      "rsi reset",
+      "AO cross back",
+      "pullback into emas"
+    ],
+    "rrIds": [
+      55
+    ],
+    "range": {
+      "fromTime": "2025-08-22",
+      "toTime": "2026-04-02"
+    },
+    "anchor": {
+      "time": "2026-04-02",
+      "price": 113.6556
+    },
+    "createdAt": "2026-04-03T05:35:38.912Z",
+    "updatedAt": "2026-04-03T05:35:38.912Z"
+  },
+  {
     "id": 5,
     "symbol": "BE",
     "timeframe": "D",

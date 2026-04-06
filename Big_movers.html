@@ -1267,6 +1267,7 @@
         <span class="chart-info"   id="ct-range"></span>
         <span class="chart-info"   id="ct-vol"></span>
         <span class="chart-info"   id="ct-rs">RS —</span>
+        <span class="chart-info"   id="ct-adr">ADR —</span>
         <div class="tf-controls" style="display:flex;align-items:center;gap:3px;">
           <button class="tb-btn active" id="tf-D" title="Daily">D</button>
           <button class="tb-btn" id="tf-3D" title="3 Day">3D</button>
@@ -1423,6 +1424,7 @@
           <span class="info-value info-vol" id="info-dvol">—</span>
         </div>
         <div class="info-item"><span class="info-label">RS:</span><span class="info-value" id="info-rs">—</span></div>
+        <div class="info-item"><span class="info-label">ADR:</span><span class="info-value" id="info-adr">—</span></div>
         <div class="info-item"><span class="info-label">MA:</span><span class="info-value" id="info-ma">—</span></div>
         <div class="info-item"><span class="info-label">IND:</span><span class="info-value" id="info-ind">—</span></div>
         <div class="info-spacer"></div>
@@ -1741,6 +1743,8 @@ let currentBars=[],currentSymbol='';
 let currentMoveRow=null; // cache selected row for re-applying markers after setData()
 let currentRsSeries=[], currentRsMap=new Map(), currentRsLatest=null;
 let rsSeriesCache=new Map();
+let currentAdrSeries=[], currentAdrMap=new Map(), currentAdrLatest=null;
+let adrSeriesCache=new Map();
 let currentSelectionToken=0;
 let sortCol='year',sortDir=-1;
 let favorites=new Set();
@@ -2522,12 +2526,42 @@ function getVisibleTimeWindowSnapshot(){
   let range=null;
   try{ range=chart.timeScale().getVisibleLogicalRange(); }catch(e){ range=null; }
   if(!range || range.from==null || range.to==null) return null;
-  const fromIdx=Math.max(0, Math.min(tfBars.length-1, Math.floor(Math.min(range.from, range.to))));
-  const toIdx=Math.max(0, Math.min(tfBars.length-1, Math.ceil(Math.max(range.from, range.to))));
+  const lo=Math.min(range.from, range.to);
+  const hi=Math.max(range.from, range.to);
+  const fromIdx=Math.max(0, Math.min(tfBars.length-1, Math.floor(lo)));
+  const toIdx=Math.max(0, Math.min(tfBars.length-1, Math.ceil(hi)));
+  const centerIdx=Math.max(0, Math.min(tfBars.length-1, Math.round((lo+hi)/2)));
   return {
     fromTime: tfBars[fromIdx]?.time || '',
     toTime: tfBars[toIdx]?.time || '',
+    centerTime: tfBars[centerIdx]?.time || '',
+    spanBars: Math.max(1, hi-lo),
   };
+}
+function restoreVisibleTimeWindow(snapshot){
+  if(!chart || !snapshot) return false;
+  const tfBars=getCurrentTfBars();
+  if(!tfBars.length) return false;
+  const indexByTime=new Map(tfBars.map((b,i)=>[b.time,i]));
+  const centerIdx=getNearestBarIndexForTime(snapshot.centerTime || snapshot.fromTime || snapshot.toTime, tfBars, indexByTime);
+  if(centerIdx==null) return false;
+  const span=Math.max(1, Number(snapshot.spanBars) || 1);
+  const half=span/2;
+  let from=centerIdx-half;
+  let to=centerIdx+half;
+  if(from < 0){
+    to=Math.min(tfBars.length-1, to - from);
+    from=0;
+  }
+  if(to > tfBars.length-1){
+    const overshoot=to-(tfBars.length-1);
+    from=Math.max(0, from-overshoot);
+    to=tfBars.length-1;
+  }
+  const targetRange={ from, to };
+  try{ chart.timeScale().setVisibleLogicalRange(targetRange); }catch(e){ return false; }
+  syncSubchartsToMain(targetRange);
+  return true;
 }
 function clearSetupForm(){
   editingSetupId=null;
@@ -3079,6 +3113,17 @@ function getRsAtOrBefore(timeStr){
   }
   return best;
 }
+function getAdrAtOrBefore(timeStr){
+  if(!timeStr || !currentAdrSeries.length) return null;
+  const exact = currentAdrMap.get(timeStr);
+  if(exact != null) return exact;
+  let best = null;
+  for(const point of currentAdrSeries){
+    if(point.time > timeStr) break;
+    best = point.value;
+  }
+  return best;
+}
 async function fetchJsonOrThrow(url){
   const resp = await fetch(url);
   const text = await resp.text();
@@ -3207,6 +3252,7 @@ async function pollRefreshJobStatus(jobId){
     setupThumbnailCache.clear();
     setupThumbnailJobs.clear();
     rsSeriesCache.clear();
+    adrSeriesCache.clear();
     if(currentMoveRow){
       await loadMoveRecord(currentMoveRow, activeIdx);
     }
@@ -3240,6 +3286,7 @@ async function importSymbolFromYahoo(){
     setupThumbnailCache.clear();
     setupThumbnailJobs.clear();
     rsSeriesCache.delete(symbol);
+    adrSeriesCache.delete(symbol);
     await loadResults();
     document.getElementById('f-sym').value = symbol;
     applyFilters();
@@ -3273,12 +3320,27 @@ function resetCurrentRsData(){
   const chartRs = document.getElementById('ct-rs');
   if (chartRs) chartRs.textContent = 'RS —';
 }
+function resetCurrentAdrData(){
+  currentAdrSeries = [];
+  currentAdrMap = new Map();
+  currentAdrLatest = null;
+  const chartAdr = document.getElementById('ct-adr');
+  if (chartAdr) chartAdr.textContent = 'ADR —';
+}
 function applyCurrentRsPayload(rsPayload){
   currentRsSeries = Array.isArray(rsPayload?.series) ? rsPayload.series : [];
   currentRsMap = new Map(currentRsSeries.map(p => [p.time, p.rating]));
   currentRsLatest = currentRsSeries.length ? currentRsSeries[currentRsSeries.length - 1].rating : null;
   const chartRs = document.getElementById('ct-rs');
   if (chartRs) chartRs.textContent = currentRsLatest == null ? 'RS —' : `RS ${currentRsLatest}`;
+  updateCrosshairInfo(lastCrosshairParam);
+}
+function applyCurrentAdrPayload(adrPayload){
+  currentAdrSeries = Array.isArray(adrPayload?.series) ? adrPayload.series : [];
+  currentAdrMap = new Map(currentAdrSeries.map(p => [p.time, p.value]));
+  currentAdrLatest = currentAdrSeries.length ? currentAdrSeries[currentAdrSeries.length - 1].value : null;
+  const chartAdr = document.getElementById('ct-adr');
+  if (chartAdr) chartAdr.textContent = currentAdrLatest == null ? 'ADR —' : `ADR ${currentAdrLatest.toFixed(2)}%`;
   updateCrosshairInfo(lastCrosshairParam);
 }
 async function loadRsForSymbol(symbol, selectionToken){
@@ -3294,6 +3356,21 @@ async function loadRsForSymbol(symbol, selectionToken){
   rsSeriesCache.set(sym, payload || { series: [] });
   if (selectionToken === currentSelectionToken && sym === currentSymbol) {
     applyCurrentRsPayload(payload);
+  }
+}
+async function loadAdrForSymbol(symbol, selectionToken){
+  const sym = (symbol || '').toUpperCase();
+  if (!sym) return;
+  if (adrSeriesCache.has(sym)) {
+    if (selectionToken === currentSelectionToken && sym === currentSymbol) {
+      applyCurrentAdrPayload(adrSeriesCache.get(sym));
+    }
+    return;
+  }
+  const payload = await fetchJsonOptional(`/api/adr_percent?symbol=${encodeURIComponent(sym)}`, { series: [] });
+  adrSeriesCache.set(sym, payload || { series: [] });
+  if (selectionToken === currentSelectionToken && sym === currentSymbol) {
+    applyCurrentAdrPayload(payload);
   }
 }
 
@@ -4039,6 +4116,7 @@ function updateCrosshairInfo(param) {
   const volPaneVol = document.getElementById('vol-pane-vol');
   const volPaneDVol = document.getElementById('vol-pane-dvol');
   const infoRs = document.getElementById('info-rs');
+  const infoAdr = document.getElementById('info-adr');
   const infoMA = document.getElementById('info-ma');
   const infoInd = document.getElementById('info-ind');
   const paneRsi = document.getElementById('rsi-pane-value');
@@ -4057,6 +4135,7 @@ function updateCrosshairInfo(param) {
     if (volPaneVol) volPaneVol.textContent = '—';
     if (volPaneDVol) volPaneDVol.textContent = '—';
     if (infoRs) infoRs.textContent = currentRsLatest == null ? '—' : String(currentRsLatest);
+    if (infoAdr) infoAdr.textContent = currentAdrLatest == null ? '—' : `${currentAdrLatest.toFixed(2)}%`;
     if (infoMA) infoMA.textContent = '—';
     if (infoInd) infoInd.textContent = '—';
     if (paneRsi) paneRsi.textContent = '—';
@@ -4158,6 +4237,10 @@ function updateCrosshairInfo(param) {
   if (infoRs) {
     const rs = getRsAtOrBefore(bar.time || timeStr);
     infoRs.textContent = rs == null ? (currentRsLatest == null ? '—' : String(currentRsLatest)) : String(rs);
+  }
+  if (infoAdr) {
+    const adr = getAdrAtOrBefore(bar.time || timeStr);
+    infoAdr.textContent = adr == null ? (currentAdrLatest == null ? '—' : `${currentAdrLatest.toFixed(2)}%`) : `${Number(adr).toFixed(2)}%`;
   }
 
   // MA values (stable width)
@@ -4419,12 +4502,17 @@ function updateSpyOverlay(){
 }
 
 function setTimeframe(tf){
+  if(tf===currentTF) return;
+  const preservedWindow=getVisibleTimeWindowSnapshot();
   currentTF=tf;
   ['D','3D','W','M'].forEach(t=>document.getElementById('tf-'+t).classList.toggle('active',t===tf));
-  if(activeIdx>=0) selectRow(activeIdx);
+  if(currentBars && currentBars.length){
+    applyTimeframe(preservedWindow);
+    updateCrosshairInfo(lastCrosshairParam);
+  }
 }
 
-function applyTimeframe(){
+function applyTimeframe(preservedWindow=null){
   const bars=resampleBars(currentBars, currentTF);
   // Compute base normalization window (left edge) from the selected row's low/high dates.
   // This keeps the SPY overlay comparable when we later setVisibleRange().
@@ -4467,6 +4555,10 @@ function applyTimeframe(){
   applyMoveMarkers();
   try { updateSpyOverlay(); } catch (e) {}
   redrawAll();
+  scheduleSetupMarkersRender();
+  if(preservedWindow && !restoreVisibleTimeWindow(preservedWindow) && preservedWindow?.fromTime && preservedWindow?.toTime){
+    focusSavedTimeWindow(preservedWindow);
+  }
 }
 
 function applyMoveMarkers(){
@@ -7254,6 +7346,7 @@ async function loadMoveRecord(r, tableIndex=null){
   clearSetupForm();
   clearSelection();
   resetCurrentRsData();
+  resetCurrentAdrData();
   renderSetupLists();
   scheduleSetupMarkersRender();
   document.getElementById('ct-sym').textContent=r.symbol;
@@ -7290,6 +7383,7 @@ async function loadMoveRecord(r, tableIndex=null){
     updateCrosshairInfo(null);
     document.getElementById('loading').classList.add('hidden');
     loadRsForSymbol(r.symbol, selectionToken);
+    loadAdrForSymbol(r.symbol, selectionToken);
   }catch(e){
     console.error(e);document.getElementById('ct-gain').textContent=`Error: ${e.message}`;
     document.getElementById('rr-nav')?.classList.add('hidden');
