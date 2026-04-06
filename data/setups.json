@@ -1,11 +1,117 @@
 [
   {
+    "id": 17,
+    "symbol": "RIOT",
+    "timeframe": "D",
+    "moveKey": "RIOT|2020|2020-03-18|2020-12-31",
+    "year": "2020",
+    "setupDate": "2020-11-13",
+    "rsRating": 86,
+    "adrPercent": 9.74,
+    "dailyRsi": 61.53,
+    "threeDayRsi": 60.71,
+    "title": "diagonal break",
+    "note": "",
+    "tags": [
+      "rsi reset",
+      "pocket pivot",
+      "diagonal break",
+      "higher low"
+    ],
+    "rrIds": [
+      85
+    ],
+    "range": {
+      "fromTime": "2020-02-24",
+      "toTime": "2021-02-25"
+    },
+    "anchor": {
+      "time": "2020-12-28",
+      "price": 4.1394
+    },
+    "createdAt": "2026-04-06T06:56:29.504Z",
+    "updatedAt": "2026-04-06T06:56:29.504Z"
+  },
+  {
+    "id": 16,
+    "symbol": "RIOT",
+    "timeframe": "D",
+    "moveKey": "RIOT|2020|2020-03-18|2020-12-31",
+    "year": "2020",
+    "setupDate": "2020-07-31",
+    "rsRating": 87,
+    "adrPercent": 9.76,
+    "dailyRsi": 58.29,
+    "threeDayRsi": 74.21,
+    "title": "Diagonal break",
+    "note": "",
+    "tags": [
+      "pullback into emas",
+      "rsi wrap around",
+      "diagonal break",
+      "AO cross back",
+      "pocket pivot",
+      "hold above emas"
+    ],
+    "rrIds": [
+      83
+    ],
+    "range": {
+      "fromTime": "2019-12-13",
+      "toTime": "2020-11-05"
+    },
+    "anchor": {
+      "time": "2020-08-13",
+      "price": 2.587
+    },
+    "createdAt": "2026-04-06T06:46:33.802Z",
+    "updatedAt": "2026-04-06T06:57:32.521Z"
+  },
+  {
+    "id": 15,
+    "symbol": "CC",
+    "timeframe": "D",
+    "moveKey": "CC|2017|2017-01-03|2017-10-24",
+    "year": "2026",
+    "setupDate": "2026-03-23",
+    "rsRating": 76,
+    "adrPercent": 6.92,
+    "dailyRsi": 54.02,
+    "threeDayRsi": 64.79,
+    "title": "rsi wrap around",
+    "note": "",
+    "tags": [
+      "pullback into emas",
+      "rsi reset",
+      "rsi wrap around",
+      "hold above emas",
+      "3d rsi reset"
+    ],
+    "rrIds": [
+      78
+    ],
+    "range": {
+      "fromTime": "2025-08-04",
+      "toTime": "2026-04-02"
+    },
+    "anchor": {
+      "time": "2026-03-31",
+      "price": 17.7983
+    },
+    "createdAt": "2026-04-06T06:18:01.172Z",
+    "updatedAt": "2026-04-06T06:18:24.390Z"
+  },
+  {
     "id": 14,
     "symbol": "OSTK",
     "timeframe": "D",
     "moveKey": "OSTK|2020|2020-03-18|2020-08-19",
     "year": "2004",
     "setupDate": "2004-09-21",
+    "rsRating": 84,
+    "adrPercent": 4.88,
+    "dailyRsi": 62.24,
+    "threeDayRsi": 57.83,
     "title": "3d rsi wrap around",
     "note": "",
     "tags": [
@@ -37,6 +143,10 @@
     "moveKey": "OSTK|2020|2020-03-18|2020-08-19",
     "year": "2020",
     "setupDate": "2020-06-01",
+    "rsRating": 95,
+    "adrPercent": 12.88,
+    "dailyRsi": 66.96,
+    "threeDayRsi": 69.26,
     "title": "Diagonal break",
     "note": "",
     "tags": [
@@ -68,6 +178,10 @@
     "moveKey": "OSTK|2020|2020-03-18|2020-08-19",
     "year": "2020",
     "setupDate": "2020-04-28",
+    "rsRating": 70,
+    "adrPercent": 17.61,
+    "dailyRsi": 71.6,
+    "threeDayRsi": 69.23,
     "title": "ema pullback with trend and rsi reset",
     "note": "",
     "tags": [
@@ -100,6 +214,10 @@
     "moveKey": "MRNA|2026|2026-01-02|2026-01-22",
     "year": "2026",
     "setupDate": "2026-01-05",
+    "rsRating": 42,
+    "adrPercent": 5.08,
+    "dailyRsi": 60.18,
+    "threeDayRsi": 63.2,
     "title": "rsi reset with trend",
     "note": "",
     "tags": [
@@ -129,6 +247,10 @@
     "moveKey": "ENPH|2026|2026-01-02|2026-02-04",
     "year": "2017",
     "setupDate": "2017-11-06",
+    "rsRating": 77,
+    "adrPercent": 6.82,
+    "dailyRsi": 57.47,
+    "threeDayRsi": 61.44,
     "title": "Diagonal break",
     "note": "",
     "tags": [
@@ -161,6 +283,10 @@
     "moveKey": "AMPX|2026|2026-01-02|2026-02-03",
     "year": "2025",
     "setupDate": "2025-06-06",
+    "rsRating": 89,
+    "adrPercent": 7.86,
+    "dailyRsi": 58.47,
+    "threeDayRsi": 55.6,
     "title": "ema pullback with trend and rsi reset",
     "note": "",
     "tags": [
@@ -190,6 +316,10 @@
     "moveKey": "AMPX|2026|2026-01-02|2026-02-03",
     "year": "2025",
     "setupDate": "2025-09-11",
+    "rsRating": 96,
+    "adrPercent": 8.34,
+    "dailyRsi": 59.69,
+    "threeDayRsi": 67.07,
     "title": "Diagonal break",
     "note": "",
     "tags": [
@@ -221,6 +351,10 @@
     "moveKey": "SATS|2025|2025-06-09|2025-12-19",
     "year": "2025",
     "setupDate": "2025-12-03",
+    "rsRating": 89,
+    "adrPercent": 4.04,
+    "dailyRsi": 58,
+    "threeDayRsi": 71.06,
     "title": "ema reclaim (failure to go down)",
     "note": "",
     "tags": [
@@ -252,6 +386,10 @@
     "moveKey": "SATS|2025|2025-06-09|2025-12-19",
     "year": "2026",
     "setupDate": "2026-03-27",
+    "rsRating": 91,
+    "adrPercent": 5.56,
+    "dailyRsi": 53.83,
+    "threeDayRsi": 62.67,
     "title": "rsi wrap around",
     "note": "the key here was rsi reset and keeping above 50 along with pullback into emas in the right order and holding above then AO crossing showing behavior not seen since Feb.",
     "tags": [
@@ -279,8 +417,12 @@
     "symbol": "BE",
     "timeframe": "D",
     "moveKey": "BE|2026|2026-01-02|2026-02-25",
-    "year": "2026",
-    "setupDate": "",
+    "year": "2025",
+    "setupDate": "2025-07-03",
+    "rsRating": 81,
+    "adrPercent": 5,
+    "dailyRsi": 62.15,
+    "threeDayRsi": 60.64,
     "title": "continuation after reversal",
     "note": "",
     "tags": [
@@ -311,6 +453,10 @@
     "moveKey": "LITE|2026|2026-01-16|2026-03-02",
     "year": "2025",
     "setupDate": "2025-06-04",
+    "rsRating": 75,
+    "adrPercent": 4.56,
+    "dailyRsi": 66.25,
+    "threeDayRsi": 61.07,
     "title": "continuation after reversal",
     "note": "",
     "tags": [
@@ -337,8 +483,12 @@
     "symbol": "LITE",
     "timeframe": "D",
     "moveKey": "LITE|2026|2026-01-16|2026-03-02",
-    "year": "2026",
-    "setupDate": "",
+    "year": "2025",
+    "setupDate": "2025-05-07",
+    "rsRating": 61,
+    "adrPercent": 6.69,
+    "dailyRsi": 61.45,
+    "threeDayRsi": 49.76,
     "title": "reversal",
     "note": "",
     "tags": [
@@ -369,7 +519,11 @@
     "timeframe": "D",
     "moveKey": "LITE|2026|2026-01-16|2026-03-02",
     "year": "2026",
-    "setupDate": "",
+    "setupDate": "2026-01-29",
+    "rsRating": 94,
+    "adrPercent": 9.39,
+    "dailyRsi": 56.74,
+    "threeDayRsi": 64.81,
     "title": "rsi wrap around",
     "note": "",
     "tags": [

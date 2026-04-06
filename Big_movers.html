@@ -101,6 +101,12 @@
   }
   .setup-library-title{font-family:var(--tv);font-size:12px;font-weight:700;color:var(--text);}
   .setup-library-meta{font-family:var(--mono);font-size:10px;color:var(--muted);}
+  .setup-library-metric-pill{
+    display:inline-flex;align-items:center;gap:6px;width:max-content;max-width:100%;
+    padding:3px 8px;border-radius:999px;border:1px solid rgba(188,197,208,0.38);
+    background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;line-height:1.2;
+  }
+  [data-theme="light"] .setup-library-metric-pill{border-color:rgba(79,89,100,0.34);}
   .setup-library-empty{padding:16px 12px;color:var(--muted);font-family:var(--mono);font-size:11px;}
   .setup-library-empty{grid-column:1 / -1;}
   @media (max-width: 380px){
@@ -1745,6 +1751,7 @@ let currentRsSeries=[], currentRsMap=new Map(), currentRsLatest=null;
 let rsSeriesCache=new Map();
 let currentAdrSeries=[], currentAdrMap=new Map(), currentAdrLatest=null;
 let adrSeriesCache=new Map();
+let setupRsiSeriesCache=new Map();
 let currentSelectionToken=0;
 let sortCol='year',sortDir=-1;
 let favorites=new Set();
@@ -1773,6 +1780,7 @@ let setupMarkersRaf=0;
 let setupMarkerPositionRaf=0;
 let setupDraftData=null;
 let setupMarkerDrag=null;
+let setupMarkerSuppressOpenUntil=0;
 let leftPanelTab='movers';
 let openSetupLibraryMenuId=null;
 let setupThumbnailRenderToken=0;
@@ -2118,6 +2126,14 @@ function normalizeLoadedSetups(raw){
   const seenIds=new Set();
   let nextId=0;
   let changed=false;
+  const parseStoredSetupMetric=(raw,{allowZero=false}={})=>{
+    if(raw==null) return null;
+    if(typeof raw==='string' && !raw.trim()) return null;
+    const value=Number(raw);
+    if(!Number.isFinite(value)) return null;
+    if(!allowZero && value<=0) return null;
+    return value;
+  };
   const items=safeItems.map(item=>{
     const setup=(item && typeof item==='object') ? { ...item } : {};
     let id=Number.isInteger(setup.id) && setup.id>0 ? setup.id : null;
@@ -2142,6 +2158,10 @@ function normalizeLoadedSetups(raw){
       moveKey:String(setup.moveKey||''),
       year:String(setup.year||''),
       setupDate:String(setup.setupDate||''),
+      rsRating:parseStoredSetupMetric(setup.rsRating),
+      adrPercent:parseStoredSetupMetric(setup.adrPercent),
+      dailyRsi:parseStoredSetupMetric(setup.dailyRsi),
+      threeDayRsi:parseStoredSetupMetric(setup.threeDayRsi),
       title:String(setup.title||'').trim(),
       note:String(setup.note||''),
       tags,
@@ -2173,6 +2193,59 @@ async function loadSetups(){
     setups=[];
     setupIdCtr=0;
   }
+}
+function setupNeedsMetricBackfill(setup){
+  if(!setup) return false;
+  const derivedDate=getSetupDateValue(setup);
+  if(!derivedDate) return false;
+  if(String(setup.setupDate||'').slice(0,10)!==derivedDate) return true;
+  if(String(setup.year||'')!==(derivedDate.slice(0,4) || '')) return true;
+  return !(
+    Number.isFinite(setup.rsRating) && setup.rsRating>0
+    && Number.isFinite(setup.adrPercent) && setup.adrPercent>0
+    && Number.isFinite(setup.dailyRsi) && setup.dailyRsi>0
+    && Number.isFinite(setup.threeDayRsi) && setup.threeDayRsi>0
+  );
+}
+async function backfillSetupMetrics(force=false){
+  if(!Array.isArray(setups) || !setups.length) return;
+  let changed=false;
+  for(const setup of setups){
+    if(!setup?.symbol) continue;
+    const setupDate=getSetupDateValue(setup);
+    if(!setupDate) continue;
+    if(!force && !setupNeedsMetricBackfill(setup)) continue;
+    const metricPayloads=await ensureSetupMetricPayloads(setup.symbol);
+    const nextRsRating=getSeriesValueAtOrBefore(metricPayloads.rsSeries, setupDate, 'rating');
+    const nextAdrPercent=getSeriesValueAtOrBefore(metricPayloads.adrSeries, setupDate, 'value');
+    const nextDailyRsi=getSeriesValueAtOrBefore(metricPayloads.dailyRsiSeries, setupDate, 'value');
+    const nextThreeDayRsi=getSeriesValueAtOrBefore(metricPayloads.threeDayRsiSeries, setupDate, 'value');
+    const normalizedRs=Number.isFinite(nextRsRating) ? Math.round(nextRsRating) : null;
+    const normalizedAdr=Number.isFinite(nextAdrPercent) ? Number(nextAdrPercent.toFixed(2)) : null;
+    const normalizedDailyRsi=Number.isFinite(nextDailyRsi) ? Number(nextDailyRsi.toFixed(2)) : null;
+    const normalizedThreeDayRsi=Number.isFinite(nextThreeDayRsi) ? Number(nextThreeDayRsi.toFixed(2)) : null;
+    const nextYear=setupDate.slice(0,4) || String(setup.year||'');
+    if(
+      String(setup.setupDate||'').slice(0,10)!==setupDate
+      || String(setup.year||'')!==nextYear
+      || setup.rsRating!==normalizedRs
+      || setup.adrPercent!==normalizedAdr
+      || setup.dailyRsi!==normalizedDailyRsi
+      || setup.threeDayRsi!==normalizedThreeDayRsi
+    ){
+      setup.setupDate=setupDate;
+      setup.year=nextYear;
+      setup.rsRating=normalizedRs;
+      setup.adrPercent=normalizedAdr;
+      setup.dailyRsi=normalizedDailyRsi;
+      setup.threeDayRsi=normalizedThreeDayRsi;
+      changed=true;
+    }
+  }
+  if(!changed) return;
+  renderSetupLists();
+  scheduleSetupMarkersRender();
+  await saveSetups(true);
 }
 async function saveSetups(skipFlash=false){
   try{
@@ -2688,7 +2761,7 @@ async function autoSaveAndCloseSetupEditor(signature){
   const currentSignature=getSetupAutoSaveSignature();
   if(!currentSignature || (signature && signature!==currentSignature)) return;
   if(isSetupEditorDirty()){
-    const payload=buildSetupPayload();
+    const payload=await buildSetupPayload();
     if(payload){
       saveOrUpdateSetup(payload);
       renderSetupLists();
@@ -2854,7 +2927,7 @@ function applySetupFocus(setup){
     }
   }
 }
-function buildSetupPayload(){
+async function buildSetupPayload(){
   if(!currentSymbol || !currentMoveRow) return null;
   const source=getSetupEditorSource();
   const draft=getCurrentSetupDraftValues(source);
@@ -2869,6 +2942,11 @@ function buildSetupPayload(){
   const setupDate=getSetupEntryTimeForSymbol(currentSymbol, rrIds)
     || String(existing?.setupDate || '').trim()
     || now.slice(0,10);
+  const metricPayloads=await ensureSetupMetricPayloads(currentSymbol);
+  const rsRating=getSeriesValueAtOrBefore(metricPayloads.rsSeries, setupDate, 'rating');
+  const adrPercent=getSeriesValueAtOrBefore(metricPayloads.adrSeries, setupDate, 'value');
+  const dailyRsi=getSeriesValueAtOrBefore(metricPayloads.dailyRsiSeries, setupDate, 'value');
+  const threeDayRsi=getSeriesValueAtOrBefore(metricPayloads.threeDayRsiSeries, setupDate, 'value');
   return {
     id: existing?.id ?? ++setupIdCtr,
     symbol: currentSymbol,
@@ -2876,6 +2954,10 @@ function buildSetupPayload(){
     moveKey: rowKey(currentMoveRow),
     year: setupDate.slice(0,4) || String(currentMoveRow.year||''),
     setupDate,
+    rsRating: Number.isFinite(rsRating) ? Math.round(rsRating) : null,
+    adrPercent: Number.isFinite(adrPercent) ? Number(adrPercent.toFixed(2)) : null,
+    dailyRsi: Number.isFinite(dailyRsi) ? Number(dailyRsi.toFixed(2)) : null,
+    threeDayRsi: Number.isFinite(threeDayRsi) ? Number(threeDayRsi.toFixed(2)) : null,
     title: title || `${currentSymbol} Setup ${formatSetupDate(now)}`,
     note,
     tags,
@@ -2930,6 +3012,12 @@ function renderSetupMarkers(){
       const selectedTags=parseSetupTags(values.tagsText || '');
       const selectedRrIds=getSelectedRrTradeIds();
       const linkedRrCount=selectedRrIds.length || (setup?.rrIds?.length || 0);
+      const metricBits=[
+        formatSetupRs(setup?.rsRating),
+        formatSetupAdr(setup?.adrPercent),
+        formatSetupTimeframeRsi('D', setup?.dailyRsi),
+        formatSetupTimeframeRsi('3D', setup?.threeDayRsi),
+      ].filter(Boolean).join(' • ');
       html.push(`
         <div class="setup-marker expanded active" data-setup-marker="${item.id}" style="left:${layout.x}px;top:${layout.y}px;">
           <span class="setup-marker-pin" aria-hidden="true"></span>
@@ -2950,7 +3038,7 @@ function renderSetupMarkers(){
               <div class="setup-marker-actions-left">
                 <div class="setup-marker-check">${selectedRrIds.length ? 'Selected RR will link on save' : 'Click RR trades while this tag is open'}</div>
               </div>
-              <div class="setup-marker-meta">${linkedRrCount} RR linked</div>
+              <div class="setup-marker-meta">${linkedRrCount} RR linked${metricBits ? ` • ${escapeHtml(metricBits)}` : ''}</div>
             </div>
             <div class="setup-marker-actions">
               <div class="setup-marker-actions-left">
@@ -2967,7 +3055,7 @@ function renderSetupMarkers(){
       html.push(`
         <div class="setup-marker" data-setup-marker="${item.id}" style="left:${layout.x}px;top:${layout.y}px;">
           <span class="setup-marker-pin" aria-hidden="true"></span>
-          <button class="setup-pill-main" type="button" data-setup-open-editor="${item.id}" title="${escapeHtml(setup.title || setup.symbol)}">
+          <button class="setup-pill-main" type="button" data-setup-open-editor="${item.id}" data-setup-drag="${item.id}" title="${escapeHtml(setup.title || setup.symbol)}">
             <span class="setup-pill-title">${escapeHtml(setup.title || setup.symbol)}</span>
             <span class="setup-pill-count">${setup.rrIds?.length || 0}RR</span>
           </button>
@@ -3055,7 +3143,16 @@ function renderSetupLists(){
     .sort((a,b)=>String(b.updatedAt||b.createdAt||'').localeCompare(String(a.updatedAt||a.createdAt||'')));
   summary.textContent=`${allItems.length} setup${allItems.length===1?'':'s'}`;
   const thumbAspect=getSetupThumbnailAspectRatio();
-  list.innerHTML=allItems.length ? allItems.map(setup=>`
+  list.innerHTML=allItems.length ? allItems.map(setup=>{
+    const primaryMetricBits=[
+      formatSetupRs(setup.rsRating),
+      formatSetupAdr(setup.adrPercent),
+    ].filter(Boolean);
+    const rsiMetricBits=[
+      formatSetupTimeframeRsi('D', setup.dailyRsi),
+      formatSetupTimeframeRsi('3D', setup.threeDayRsi),
+    ].filter(Boolean);
+    return `
     <div class="setup-library-item" data-setup-open="${setup.id}">
       <div class="setup-library-thumb" data-setup-thumb="${setup.id}" style="--setup-thumb-aspect:${thumbAspect};">
         <div class="setup-library-thumb-placeholder">Loading preview…</div>
@@ -3077,9 +3174,12 @@ function renderSetupLists(){
         </div>
       </div>
       ${(setup.tags||[]).length ? `<div class="setup-tags">${setup.tags.map(tag=>`<span class="setup-tag">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
+      ${primaryMetricBits.length ? `<div class="setup-library-metric-pill">${primaryMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
+      ${rsiMetricBits.length ? `<div class="setup-library-meta">${rsiMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
       ${setup.note ? `<div class="setup-card-note">${escapeHtml(setup.note)}</div>` : ''}
     </div>
-  `).join('') : `<div class="setup-library-empty">No saved setups yet.</div>`;
+  `;
+  }).join('') : `<div class="setup-library-empty">No saved setups yet.</div>`;
   scheduleSetupMarkerPositionUpdate();
   if(allItems.length) queueSetupLibraryThumbnails(allItems);
 }
@@ -3113,16 +3213,24 @@ function getRsAtOrBefore(timeStr){
   }
   return best;
 }
+function getSeriesValueAtOrBefore(series, timeStr, valueKey){
+  if(!timeStr || !Array.isArray(series) || !series.length) return null;
+  const direct=series.find(point=>point?.time===timeStr);
+  if(direct && Number.isFinite(Number(direct[valueKey]))) return Number(direct[valueKey]);
+  let best=null;
+  for(const point of series){
+    if(!point?.time) continue;
+    if(point.time > timeStr) break;
+    const value=Number(point[valueKey]);
+    if(Number.isFinite(value)) best=value;
+  }
+  return best;
+}
 function getAdrAtOrBefore(timeStr){
   if(!timeStr || !currentAdrSeries.length) return null;
   const exact = currentAdrMap.get(timeStr);
   if(exact != null) return exact;
-  let best = null;
-  for(const point of currentAdrSeries){
-    if(point.time > timeStr) break;
-    best = point.value;
-  }
-  return best;
+  return getSeriesValueAtOrBefore(currentAdrSeries, timeStr, 'value');
 }
 async function fetchJsonOrThrow(url){
   const resp = await fetch(url);
@@ -3253,6 +3361,7 @@ async function pollRefreshJobStatus(jobId){
     setupThumbnailJobs.clear();
     rsSeriesCache.clear();
     adrSeriesCache.clear();
+    setupRsiSeriesCache.clear();
     if(currentMoveRow){
       await loadMoveRecord(currentMoveRow, activeIdx);
     }
@@ -3287,6 +3396,7 @@ async function importSymbolFromYahoo(){
     setupThumbnailJobs.clear();
     rsSeriesCache.delete(symbol);
     adrSeriesCache.delete(symbol);
+    setupRsiSeriesCache.delete(symbol);
     await loadResults();
     document.getElementById('f-sym').value = symbol;
     applyFilters();
@@ -3372,6 +3482,50 @@ async function loadAdrForSymbol(symbol, selectionToken){
   if (selectionToken === currentSelectionToken && sym === currentSymbol) {
     applyCurrentAdrPayload(payload);
   }
+}
+async function ensureSetupMetricPayloads(symbol){
+  const sym=String(symbol||'').toUpperCase();
+  const rsiPeriod=Math.max(2, Number(indicatorSettings?.rsi?.period) || 14);
+  let rsPayload=(sym===currentSymbol && currentRsSeries.length)
+    ? { series: currentRsSeries }
+    : rsSeriesCache.get(sym);
+  if(!rsPayload){
+    rsPayload=await fetchJsonOptional(`/api/rs_rating?symbol=${encodeURIComponent(sym)}`, { series: [] });
+    rsSeriesCache.set(sym, rsPayload || { series: [] });
+  }
+  let adrPayload=(sym===currentSymbol && currentAdrSeries.length)
+    ? { series: currentAdrSeries }
+    : adrSeriesCache.get(sym);
+  if(!adrPayload){
+    adrPayload=await fetchJsonOptional(`/api/adr_percent?symbol=${encodeURIComponent(sym)}`, { series: [] });
+    adrSeriesCache.set(sym, adrPayload || { series: [] });
+  }
+  let rsiPayload=setupRsiSeriesCache.get(sym);
+  if(!rsiPayload || rsiPayload.period!==rsiPeriod){
+    const bars=await getBarsForSymbol(sym);
+    const safeBars=Array.isArray(bars) ? bars : [];
+    rsiPayload={
+      period:rsiPeriod,
+      dailySeries:calcRSI(safeBars, rsiPeriod),
+      threeDaySeries:calcRSI(resampleBars(safeBars, '3D'), rsiPeriod),
+    };
+    setupRsiSeriesCache.set(sym, rsiPayload);
+  }
+  return {
+    rsSeries:Array.isArray(rsPayload?.series) ? rsPayload.series : [],
+    adrSeries:Array.isArray(adrPayload?.series) ? adrPayload.series : [],
+    dailyRsiSeries:Array.isArray(rsiPayload?.dailySeries) ? rsiPayload.dailySeries : [],
+    threeDayRsiSeries:Array.isArray(rsiPayload?.threeDaySeries) ? rsiPayload.threeDaySeries : [],
+  };
+}
+function formatSetupRs(rsRating){
+  return Number.isFinite(Number(rsRating)) ? `RS ${Math.round(Number(rsRating))}` : '';
+}
+function formatSetupAdr(adrPercent){
+  return Number.isFinite(Number(adrPercent)) ? `ADR ${Number(adrPercent).toFixed(2)}%` : '';
+}
+function formatSetupTimeframeRsi(label, rsiValue){
+  return Number.isFinite(Number(rsiValue)) ? `${label} RSI ${Number(rsiValue).toFixed(2)}` : '';
 }
 
 // ==============================================
@@ -3804,7 +3958,8 @@ async function focusSetupById(id){
   if(!setup) return;
   if(setup.symbol===currentSymbol){
     applySetupFocus(setup);
-    openSetupEditor(setup);
+    clearSetupForm();
+    scheduleSetupMarkersRender();
     return;
   }
   const row=findSetupRow(setup);
@@ -3812,7 +3967,8 @@ async function focusSetupById(id){
   const idx=filtered.findIndex(r=>rowKey(r)===rowKey(row));
   await loadMoveRecord(row, idx>=0 ? idx : null);
   applySetupFocus(setup);
-  openSetupEditor(setup);
+  clearSetupForm();
+  scheduleSetupMarkersRender();
 }
 
 setupsToggle?.addEventListener('click',(e)=>{
@@ -3866,7 +4022,7 @@ document.addEventListener('pointerdown',(e)=>{
 switchLeftPanelTab(localStorage.getItem('left_panel_tab') === 'setups' ? 'setups' : 'movers');
 
 async function commitSetupEditor(){
-  const payload=buildSetupPayload();
+  const payload=await buildSetupPayload();
   if(!payload){
     flash('Add a title, tag, or note first');
     return;
@@ -3888,6 +4044,7 @@ document.getElementById('setup-markers')?.addEventListener('click', async (e)=>{
   e.stopPropagation();
   const openCompact=e.target.closest('[data-setup-open-editor]');
   if(openCompact){
+    if(Date.now() < setupMarkerSuppressOpenUntil) return;
     const id=parseInt(openCompact.dataset.setupOpenEditor,10);
     const setup=Number.isFinite(id) ? setups.find(item=>item.id===id) : null;
     if(setup) openSetupEditor(setup);
@@ -3977,6 +4134,7 @@ document.getElementById('setup-markers')?.addEventListener('mousedown',(e)=>{
     const moved=setupMarkerDrag?.moved;
     const movedId=setupMarkerDrag?.id;
     setupMarkerDrag=null;
+    if(moved) setupMarkerSuppressOpenUntil=Date.now()+220;
     if(moved && movedId!=='draft'){
       renderSetupLists();
       await saveSetups(true);
@@ -5028,6 +5186,54 @@ function getCurrentTfBars(){
   return resampleBars(currentBars, currentTF);
 }
 
+function getResampleBucketKey(dateStr, tf){
+  const safeTf=(tf==='3D' || tf==='W' || tf==='M') ? tf : 'D';
+  if(safeTf==='D') return String(dateStr||'').slice(0,10);
+  const d=new Date(dateStr);
+  if(!Number.isFinite(d.getTime())) return String(dateStr||'').slice(0,10);
+  if(safeTf==='W'){
+    const day=d.getUTCDay()||7;
+    const mon=new Date(d);
+    mon.setUTCDate(d.getUTCDate()-(day-1));
+    return mon.toISOString().slice(0,10);
+  }
+  if(safeTf==='M'){
+    return String(dateStr||'').slice(0,7)+'-01';
+  }
+  return '';
+}
+
+function getTfBucketDailyBars(baseTime, tf){
+  const sourceTf=(tf==='3D' || tf==='W' || tf==='M') ? tf : 'D';
+  if(!Array.isArray(currentBars) || !currentBars.length || !baseTime) return [];
+  if(sourceTf==='D'){
+    const snapped=snapChartTimeToBars(baseTime, currentBars);
+    const bar=snapped ? currentBars.find(b=>b.time===snapped) : null;
+    return bar ? [bar] : [];
+  }
+  if(sourceTf==='3D'){
+    const tfBars=resampleBars(currentBars, '3D');
+    const idx=getNearestBarIndexForTime(baseTime, tfBars, new Map(tfBars.map((b,i)=>[b.time,i])));
+    if(idx==null) return [];
+    const start=idx*3;
+    return currentBars.slice(start, start+3);
+  }
+  const bucketKey=getResampleBucketKey(baseTime, sourceTf);
+  return currentBars.filter(bar=>getResampleBucketKey(bar.time, sourceTf)===bucketKey);
+}
+
+function getRepresentativeTimeForTfBucket(baseTime, tf){
+  const bucket=getTfBucketDailyBars(baseTime, tf);
+  if(!bucket.length) return snapChartTimeToBars(baseTime, currentBars) || normalizeChartTimeInput(baseTime) || baseTime;
+  return bucket[Math.floor((bucket.length-1)/2)]?.time || bucket[0]?.time || baseTime;
+}
+
+function snapCoordinateToRrTime(x, rrSourceTf=currentTF){
+  const raw=snapCoordinateToCurrentTF(x);
+  if(!raw) return null;
+  return getRepresentativeTimeForTfBucket(raw, rrSourceTf);
+}
+
 function getDefaultRrWidthBars(){
   if(currentTF==='M') return 6;
   if(currentTF==='W') return 10;
@@ -5048,12 +5254,15 @@ function makeDefaultRrTrade(entryPrice, entryTime){
   const entry=parseFloat(entryPrice.toFixed(4));
   const stop=parseFloat((entry * 0.97).toFixed(4));
   const target=parseFloat((entry * 1.06).toFixed(4));
+  const sourceTF=currentTF;
+  const storedEntryTime=getRepresentativeTimeForTfBucket(entryTime, sourceTF);
   return {
     type:'rr',
-    entry:{ time: entryTime, price: entry },
+    sourceTF,
+    entry:{ time: storedEntryTime, price: entry },
     stop:{ price: stop },
     target:{ price: target },
-    endTime: shiftTimeByBars(entryTime, getDefaultRrWidthBars()),
+    endTime: getRepresentativeTimeForTfBucket(shiftTimeByBars(entryTime, getDefaultRrWidthBars()), sourceTF),
     color: toolSettings.rr.color,
     riskColor: toolSettings.rr.riskColor,
     rewardColor: toolSettings.rr.rewardColor,
@@ -5109,11 +5318,14 @@ function hexToRgba(hex, alpha){
 
 function getRrTradeGeometry(d, preview=false){
   if(!d?.entry) return null;
-  const x1=time2p(d.entry.time);
+  const sourceTF=(d.sourceTF==='3D' || d.sourceTF==='W' || d.sourceTF==='M') ? d.sourceTF : 'D';
+  const entryTime=getRepresentativeTimeForTfBucket(d.entry.time, sourceTF);
+  const endTimeStored=d.endTime || d.stop?.time || d.target?.time || d.entry.time;
+  const resolvedEndTime=getRepresentativeTimeForTfBucket(endTimeStored, sourceTF);
+  const x1=time2p(entryTime);
   const yEntry=price2p(d.entry.price);
   if(x1==null || yEntry==null) return null;
-  const endTime=d.endTime || d.stop?.time || d.target?.time || d.entry.time;
-  const x2=time2p(endTime);
+  const x2=time2p(resolvedEndTime);
   if(x2==null) return null;
   let stopPrice=d.stop?.price;
   let targetPrice=d.target?.price;
@@ -5135,7 +5347,8 @@ function getRrTradeGeometry(d, preview=false){
   const centerX = left + (right-left)/2;
   return {
     x1, x2, left, right, centerX, top, bottom, yEntry, yStop, yTarget,
-    endTime,
+    entryTime,
+    endTime: resolvedEndTime,
     stopPrice, targetPrice, riskTop, riskBottom, rewardTop, rewardBottom,
     risk, reward, rr,
     riskPct: d.entry.price ? ((risk / d.entry.price) * 100) : null,
@@ -6009,6 +6222,7 @@ function applyDrag(id,part,dx,dy){
     }));
   }
   else if(d.type==='rr'){
+    const rrSourceTf=(o.sourceTF==='3D' || o.sourceTF==='W' || o.sourceTF==='M') ? o.sourceTF : currentTF;
     if(part==='entry'){
       d.entry={...d.entry, price:toPrice(o.entry.price,dy)};
     } else if(part==='stop'){
@@ -6016,10 +6230,17 @@ function applyDrag(id,part,dx,dy){
     } else if(part==='target'){
       d.target={...d.target, price:toPrice(o.target.price,dy)};
     } else if(part==='width'){
-      d.endTime=toTime(o.endTime || o.stop?.time || o.target?.time || o.entry.time, dx);
+      const baseRightX=time2p(getRepresentativeTimeForTfBucket(o.endTime || o.stop?.time || o.target?.time || o.entry.time, rrSourceTf));
+      if(baseRightX!=null){
+        d.sourceTF=currentTF;
+        d.endTime=snapCoordinateToRrTime(baseRightX+dx, currentTF) || d.endTime;
+      }
     } else {
-      const newEntryTime=toTime(o.entry.time, dx);
-      const newRightTime=toTime(o.endTime || o.stop?.time || o.target?.time || o.entry.time, dx);
+      d.sourceTF=currentTF;
+      const baseEntryX=time2p(getRepresentativeTimeForTfBucket(o.entry.time, rrSourceTf));
+      const baseRightX=time2p(getRepresentativeTimeForTfBucket(o.endTime || o.stop?.time || o.target?.time || o.entry.time, rrSourceTf));
+      const newEntryTime=(baseEntryX!=null ? snapCoordinateToRrTime(baseEntryX+dx, currentTF) : null) || d.entry.time;
+      const newRightTime=(baseRightX!=null ? snapCoordinateToRrTime(baseRightX+dx, currentTF) : null) || d.endTime;
       d.entry={...d.entry, price:toPrice(o.entry.price,dy), time:newEntryTime};
       d.stop={...d.stop, price:toPrice(o.stop.price,dy)};
       d.target={...d.target, price:toPrice(o.target.price,dy)};
@@ -7407,6 +7628,7 @@ window.addEventListener('load',async()=>{
   }
   initChart();
   await Promise.all([loadFavorites(), loadDrawings(), loadSetups()]);
+  await backfillSetupMetrics();
   restoreRefreshStatusIfRunning();
   loadResults();
 });

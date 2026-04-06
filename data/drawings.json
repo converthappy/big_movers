@@ -1,6 +1,158 @@
 {
   "AAOI": [],
   "AG": [],
+  "AMPX": [
+    {
+      "color": "#ffffff",
+      "id": 60,
+      "p1": {
+        "price": 9.0826,
+        "time": "2025-07-21"
+      },
+      "p2": {
+        "price": 7.5086,
+        "time": "2025-09-16"
+      },
+      "style": "solid",
+      "type": "seg",
+      "width": 1
+    },
+    {
+      "color": "#ffffff",
+      "id": 61,
+      "points": [
+        {
+          "price": 6.5992,
+          "time": "2025-08-27"
+        },
+        {
+          "price": 6.4943,
+          "time": "2025-08-28"
+        },
+        {
+          "price": 6.3544,
+          "time": "2025-08-29"
+        },
+        {
+          "price": 6.3194,
+          "time": "2025-09-02"
+        },
+        {
+          "price": 6.3194,
+          "time": "2025-09-03"
+        },
+        {
+          "price": 6.3194,
+          "time": "2025-09-04"
+        },
+        {
+          "price": 6.4243,
+          "time": "2025-09-05"
+        },
+        {
+          "price": 6.4943,
+          "time": "2025-09-08"
+        },
+        {
+          "price": 6.6692,
+          "time": "2025-09-09"
+        }
+      ],
+      "type": "pen",
+      "width": 2
+    },
+    {
+      "color": "#ffffff",
+      "id": 62,
+      "points": [
+        {
+          "price": 6.2145,
+          "time": "2025-08-15"
+        },
+        {
+          "price": 6.1095,
+          "time": "2025-08-18"
+        },
+        {
+          "price": 5.9347,
+          "time": "2025-08-19"
+        },
+        {
+          "price": 5.8647,
+          "time": "2025-08-20"
+        },
+        {
+          "price": 5.8297,
+          "time": "2025-08-21"
+        },
+        {
+          "price": 5.8297,
+          "time": "2025-08-22"
+        },
+        {
+          "price": 6.0746,
+          "time": "2025-08-25"
+        },
+        {
+          "price": 6.1795,
+          "time": "2025-08-26"
+        }
+      ],
+      "type": "pen",
+      "width": 2
+    },
+    {
+      "color": "#ffffff",
+      "id": 63,
+      "p1": {
+        "price": 6.914,
+        "time": "2025-07-21"
+      },
+      "p2": {
+        "price": 6.7741,
+        "time": "2025-09-15"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#474747",
+      "endTime": "2025-10-24",
+      "entry": {
+        "price": 7.6485,
+        "time": "2025-09-11"
+      },
+      "id": 64,
+      "opacity": 1,
+      "stop": {
+        "price": 6.9643
+      },
+      "target": {
+        "price": 12.7593
+      },
+      "type": "rr",
+      "width": 0.5
+    },
+    {
+      "color": "#474747",
+      "endTime": "2025-07-30",
+      "entry": {
+        "price": 2.8544,
+        "time": "2025-06-06"
+      },
+      "id": 65,
+      "opacity": 1,
+      "stop": {
+        "price": 2.5108
+      },
+      "target": {
+        "price": 7.3437
+      },
+      "type": "rr",
+      "width": 0.5
+    }
+  ],
   "BE": [
     {
       "color": "#ffffff",
@@ -46,6 +198,27 @@
       },
       "target": {
         "price": 115.3496
+      },
+      "type": "rr",
+      "width": 0.5
+    }
+  ],
+  "CC": [
+    {
+      "color": "#474747",
+      "endTime": "2026-04-02",
+      "entry": {
+        "price": 18.3886,
+        "time": "2026-03-23"
+      },
+      "id": 78,
+      "opacity": 1,
+      "sourceTF": "D",
+      "stop": {
+        "price": 17.3941
+      },
+      "target": {
+        "price": 21.7426
       },
       "type": "rr",
       "width": 0.5
@@ -97,6 +270,56 @@
       "style": "solid",
       "type": "seg",
       "width": 2
+    }
+  ],
+  "ENPH": [
+    {
+      "color": "#ffffff",
+      "id": 66,
+      "p1": {
+        "price": 1.6047,
+        "time": "2017-10-03"
+      },
+      "p2": {
+        "price": 1.2684,
+        "time": "2017-11-02"
+      },
+      "style": "solid",
+      "type": "seg",
+      "width": 1
+    },
+    {
+      "color": "#ffffff",
+      "id": 67,
+      "p1": {
+        "price": 1.3484,
+        "time": "2017-09-01"
+      },
+      "p2": {
+        "price": 1.3271,
+        "time": "2017-11-24"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#474747",
+      "endTime": "2017-12-11",
+      "entry": {
+        "price": 1.4605,
+        "time": "2017-11-06"
+      },
+      "id": 68,
+      "opacity": 1,
+      "stop": {
+        "price": 1.3473
+      },
+      "target": {
+        "price": 2.7759
+      },
+      "type": "rr",
+      "width": 0.5
     }
   ],
   "FLNC": [
@@ -241,6 +464,24 @@
       },
       "style": "solid",
       "type": "seg",
+      "width": 2
+    }
+  ],
+  "HGSI": [
+    {
+      "color": "#ffffff",
+      "id": 79,
+      "price": 15.1231,
+      "style": "solid",
+      "type": "hline",
+      "width": 2
+    },
+    {
+      "color": "#ffffff",
+      "id": 80,
+      "price": 8.1859,
+      "style": "solid",
+      "type": "hline",
       "width": 2
     }
   ],
@@ -489,6 +730,41 @@
       "width": 0.5
     }
   ],
+  "MRNA": [
+    {
+      "color": "#ffffff",
+      "id": 69,
+      "p1": {
+        "price": 28.5838,
+        "time": "2025-03-04"
+      },
+      "p2": {
+        "price": 28.2098,
+        "time": "2026-01-29"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#474747",
+      "endTime": "2026-01-30",
+      "entry": {
+        "price": 31.4823,
+        "time": "2026-01-05"
+      },
+      "id": 70,
+      "opacity": 1,
+      "stop": {
+        "price": 28.9483
+      },
+      "target": {
+        "price": 48.0506
+      },
+      "type": "rr",
+      "width": 0.5
+    }
+  ],
   "NBIS": [
     {
       "color": "#ffffff",
@@ -660,6 +936,122 @@
       "width": 2
     }
   ],
+  "OSTK": [
+    {
+      "color": "#ffffff",
+      "id": 71,
+      "p1": {
+        "price": 6.6214,
+        "time": "2019-11-26"
+      },
+      "p2": {
+        "price": 6.3473,
+        "time": "2020-05-11"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#ffffff",
+      "id": 72,
+      "p1": {
+        "price": 9.6369,
+        "time": "2019-09-25"
+      },
+      "p2": {
+        "price": 9.2942,
+        "time": "2020-05-28"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#474747",
+      "endTime": "2020-09-02",
+      "entry": {
+        "price": 10.229,
+        "time": "2020-04-28"
+      },
+      "id": 73,
+      "opacity": 1,
+      "stop": {
+        "price": 8.8557
+      },
+      "target": {
+        "price": 91.5069
+      },
+      "type": "rr",
+      "width": 0.5
+    },
+    {
+      "color": "#ffffff",
+      "id": 74,
+      "p1": {
+        "price": 19.7115,
+        "time": "2020-05-12"
+      },
+      "p2": {
+        "price": 16.8404,
+        "time": "2020-06-04"
+      },
+      "style": "solid",
+      "type": "seg",
+      "width": 1
+    },
+    {
+      "color": "#474747",
+      "endTime": "2020-08-28",
+      "entry": {
+        "price": 19.0962,
+        "time": "2020-06-01"
+      },
+      "id": 75,
+      "opacity": 1,
+      "stop": {
+        "price": 15.8574
+      },
+      "target": {
+        "price": 98.4061
+      },
+      "type": "rr",
+      "width": 0.5
+    },
+    {
+      "color": "#474747",
+      "endTime": "2005-01-06",
+      "entry": {
+        "price": 35.0602,
+        "time": "2004-09-21"
+      },
+      "id": 76,
+      "opacity": 1,
+      "stop": {
+        "price": 31.7606
+      },
+      "target": {
+        "price": 67.1058
+      },
+      "type": "rr",
+      "width": 0.5
+    },
+    {
+      "color": "#ffffff",
+      "id": 77,
+      "p1": {
+        "price": 41.8048,
+        "time": "2004-06-17"
+      },
+      "p2": {
+        "price": 31.0843,
+        "time": "2004-09-20"
+      },
+      "style": "solid",
+      "type": "seg",
+      "width": 1
+    }
+  ],
   "PTON": [
     {
       "color": "#ffffff",
@@ -675,6 +1067,91 @@
       "style": "solid",
       "type": "seg",
       "width": 2
+    }
+  ],
+  "RIOT": [
+    {
+      "color": "#ffffff",
+      "id": 81,
+      "p1": {
+        "price": 3.1288,
+        "time": "2020-06-10"
+      },
+      "p2": {
+        "price": 2.1891,
+        "time": "2020-08-03"
+      },
+      "style": "solid",
+      "type": "seg",
+      "width": 1
+    },
+    {
+      "color": "#ffffff",
+      "id": 82,
+      "p1": {
+        "price": 2.1129,
+        "time": "2020-05-29"
+      },
+      "p2": {
+        "price": 2.0621,
+        "time": "2020-07-28"
+      },
+      "style": "solid",
+      "type": "box",
+      "width": 1
+    },
+    {
+      "color": "#474747",
+      "endTime": "2020-08-24",
+      "entry": {
+        "price": 2.5023,
+        "time": "2020-07-31"
+      },
+      "id": 83,
+      "opacity": 1,
+      "sourceTF": "D",
+      "stop": {
+        "price": 2.3256
+      },
+      "target": {
+        "price": 4.0494
+      },
+      "type": "rr",
+      "width": 0.5
+    },
+    {
+      "type": "seg",
+      "p1": {
+        "price": 4.2053,
+        "time": "2020-10-22"
+      },
+      "p2": {
+        "price": 3.5537,
+        "time": "2020-11-18"
+      },
+      "color": "#ffffff",
+      "width": 1,
+      "style": "solid",
+      "id": 84
+    },
+    {
+      "type": "rr",
+      "sourceTF": "D",
+      "entry": {
+        "time": "2020-11-13",
+        "price": 3.8706
+      },
+      "stop": {
+        "price": 3.4431
+      },
+      "target": {
+        "price": 21.143
+      },
+      "endTime": "2021-01-25",
+      "color": "#474747",
+      "width": 0.5,
+      "opacity": 1,
+      "id": 85
     }
   ],
   "SATS": [
@@ -746,358 +1223,5 @@
     }
   ],
   "UAMY": [],
-  "VSCO": [],
-  "AMPX": [
-    {
-      "type": "seg",
-      "p1": {
-        "price": 9.0826,
-        "time": "2025-07-21"
-      },
-      "p2": {
-        "price": 7.5086,
-        "time": "2025-09-16"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 60
-    },
-    {
-      "type": "pen",
-      "points": [
-        {
-          "time": "2025-08-27",
-          "price": 6.5992
-        },
-        {
-          "time": "2025-08-28",
-          "price": 6.4943
-        },
-        {
-          "time": "2025-08-29",
-          "price": 6.3544
-        },
-        {
-          "time": "2025-09-02",
-          "price": 6.3194
-        },
-        {
-          "time": "2025-09-03",
-          "price": 6.3194
-        },
-        {
-          "time": "2025-09-04",
-          "price": 6.3194
-        },
-        {
-          "time": "2025-09-05",
-          "price": 6.4243
-        },
-        {
-          "time": "2025-09-08",
-          "price": 6.4943
-        },
-        {
-          "time": "2025-09-09",
-          "price": 6.6692
-        }
-      ],
-      "color": "#ffffff",
-      "width": 2,
-      "id": 61
-    },
-    {
-      "type": "pen",
-      "points": [
-        {
-          "time": "2025-08-15",
-          "price": 6.2145
-        },
-        {
-          "time": "2025-08-18",
-          "price": 6.1095
-        },
-        {
-          "time": "2025-08-19",
-          "price": 5.9347
-        },
-        {
-          "time": "2025-08-20",
-          "price": 5.8647
-        },
-        {
-          "time": "2025-08-21",
-          "price": 5.8297
-        },
-        {
-          "time": "2025-08-22",
-          "price": 5.8297
-        },
-        {
-          "time": "2025-08-25",
-          "price": 6.0746
-        },
-        {
-          "time": "2025-08-26",
-          "price": 6.1795
-        }
-      ],
-      "color": "#ffffff",
-      "width": 2,
-      "id": 62
-    },
-    {
-      "type": "box",
-      "p1": {
-        "price": 6.914,
-        "time": "2025-07-21"
-      },
-      "p2": {
-        "price": 6.7741,
-        "time": "2025-09-15"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 63
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2025-09-11",
-        "price": 7.6485
-      },
-      "stop": {
-        "price": 6.9643
-      },
-      "target": {
-        "price": 12.7593
-      },
-      "endTime": "2025-10-24",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 64
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2025-06-06",
-        "price": 2.8544
-      },
-      "stop": {
-        "price": 2.5108
-      },
-      "target": {
-        "price": 7.3437
-      },
-      "endTime": "2025-07-30",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 65
-    }
-  ],
-  "ENPH": [
-    {
-      "type": "seg",
-      "p1": {
-        "price": 1.6047,
-        "time": "2017-10-03"
-      },
-      "p2": {
-        "price": 1.2684,
-        "time": "2017-11-02"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 66
-    },
-    {
-      "type": "box",
-      "p1": {
-        "price": 1.3484,
-        "time": "2017-09-01"
-      },
-      "p2": {
-        "price": 1.3271,
-        "time": "2017-11-24"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 67
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2017-11-06",
-        "price": 1.4605
-      },
-      "stop": {
-        "price": 1.3473
-      },
-      "target": {
-        "price": 2.7759
-      },
-      "endTime": "2017-12-11",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 68
-    }
-  ],
-  "MRNA": [
-    {
-      "type": "box",
-      "p1": {
-        "price": 28.5838,
-        "time": "2025-03-04"
-      },
-      "p2": {
-        "price": 28.2098,
-        "time": "2026-01-29"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 69
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2026-01-05",
-        "price": 31.4823
-      },
-      "stop": {
-        "price": 28.9483
-      },
-      "target": {
-        "price": 48.0506
-      },
-      "endTime": "2026-01-30",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 70
-    }
-  ],
-  "OSTK": [
-    {
-      "type": "box",
-      "p1": {
-        "price": 6.6214,
-        "time": "2019-11-26"
-      },
-      "p2": {
-        "price": 6.3473,
-        "time": "2020-05-11"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 71
-    },
-    {
-      "type": "box",
-      "p1": {
-        "price": 9.6369,
-        "time": "2019-09-25"
-      },
-      "p2": {
-        "price": 9.2942,
-        "time": "2020-05-28"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 72
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2020-04-28",
-        "price": 10.229
-      },
-      "stop": {
-        "price": 8.8557
-      },
-      "target": {
-        "price": 91.5069
-      },
-      "endTime": "2020-09-02",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 73
-    },
-    {
-      "type": "seg",
-      "p1": {
-        "price": 19.7115,
-        "time": "2020-05-12"
-      },
-      "p2": {
-        "price": 16.8404,
-        "time": "2020-06-04"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 74
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2020-06-01",
-        "price": 19.0962
-      },
-      "stop": {
-        "price": 15.8574
-      },
-      "target": {
-        "price": 98.4061
-      },
-      "endTime": "2020-08-28",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 75
-    },
-    {
-      "type": "rr",
-      "entry": {
-        "time": "2004-09-21",
-        "price": 35.0602
-      },
-      "stop": {
-        "price": 31.7606
-      },
-      "target": {
-        "price": 67.1058
-      },
-      "endTime": "2005-01-06",
-      "color": "#474747",
-      "width": 0.5,
-      "opacity": 1,
-      "id": 76
-    },
-    {
-      "type": "seg",
-      "p1": {
-        "price": 41.8048,
-        "time": "2004-06-17"
-      },
-      "p2": {
-        "price": 31.0843,
-        "time": "2004-09-20"
-      },
-      "color": "#ffffff",
-      "width": 1,
-      "style": "solid",
-      "id": 77
-    }
-  ]
+  "VSCO": []
 }
