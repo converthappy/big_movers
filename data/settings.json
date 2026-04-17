@@ -1,0 +1,110 @@
+{
+  "isLogScale": false,
+  "toolSettings": {
+    "hline": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid"
+    },
+    "ray": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid"
+    },
+    "seg": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid"
+    },
+    "line": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid"
+    },
+    "box": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid"
+    },
+    "pen": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid"
+    },
+    "highlight": {
+      "color": "#f5c842",
+      "width": 10,
+      "style": "solid"
+    },
+    "rr": {
+      "color": "#cfd6df",
+      "riskColor": "#d25448",
+      "rewardColor": "#2f9a94",
+      "width": 1,
+      "style": "solid",
+      "opacity": 1
+    },
+    "text": {
+      "color": "#ffffff",
+      "fontSize": 12,
+      "fontFamily": "Arial"
+    },
+    "note": {
+      "color": "#ffffff",
+      "width": 2,
+      "style": "solid",
+      "fontSize": 12,
+      "fontFamily": "Arial"
+    }
+  },
+  "chartType": "candle",
+  "priceColors": {
+    "up": "#6A9FCA",
+    "down": "#CC8844"
+  },
+  "spyOverlayEnabled": false,
+  "spyOverlayMode": "bar",
+  "volumePaneEnabled": false,
+  "volumePaneHeight": 140,
+  "indicatorPaneHeight": 140,
+  "indicatorSettings": {
+    "rsi": {
+      "enabled": true,
+      "period": 14,
+      "color": "#aab0b7"
+    },
+    "ao": {
+      "enabled": true,
+      "fast": 5,
+      "slow": 34,
+      "upColor": "#8f97a1",
+      "downColor": "#41464e"
+    },
+    "pocketPivot": {
+      "enabled": true,
+      "lookback": 10,
+      "color": "#4d82b7"
+    }
+  },
+  "rightOffsetBars": 6,
+  "maList": [
+    {
+      "type": "EMA",
+      "period": 8,
+      "color": "#adadad",
+      "enabled": true
+    },
+    {
+      "type": "EMA",
+      "period": 21,
+      "color": "#3f658d",
+      "enabled": true
+    },
+    {
+      "type": "MA",
+      "period": 50,
+      "color": "#aa5d41",
+      "enabled": true
+    }
+  ]
+}

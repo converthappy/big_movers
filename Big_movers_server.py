@@ -818,6 +818,7 @@ DRAWINGS_FILE = os.path.join(DATA_DIR, "drawings.json")
 LEGACY_DRAWINGS_FILE = os.path.join(SCRIPT_DIR, "drawings.json")
 FAVORITES_FILE = os.path.join(DATA_DIR, "favorites.json")
 SETUPS_FILE = os.path.join(DATA_DIR, "setups.json")
+SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
 
 
 def _ensure_data_dir():
@@ -892,6 +893,20 @@ def api_setups():
             data = []
         cleaned = [item for item in data if isinstance(item, dict)]
         _write_json_file(SETUPS_FILE, cleaned)
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/settings", methods=["GET", "POST"])
+def api_settings():
+    if request.method == "GET":
+        return jsonify(_read_state_with_legacy(SETTINGS_FILE, None, {}))
+    try:
+        data = request.get_json(silent=True)
+        if not isinstance(data, dict):
+            data = {}
+        _write_json_file(SETTINGS_FILE, data)
         return jsonify({"ok": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

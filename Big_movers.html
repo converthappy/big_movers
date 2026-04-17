@@ -1895,9 +1895,9 @@ let rrNavAnimRaf=0;
 let dragId=null,dragStartX=0,dragStartY=0,dragOrig=null,wasDrag=false;
 
 const MA_DEFAULTS=[
-  {type:'EMA',period:20, color:'#f5c842'},
-  {type:'EMA',period:50, color:'#00d4aa'},
-  {type:'MA', period:200,color:'#ff6b35'},
+  {type:'EMA',period:8, color:'#adadad'},
+  {type:'EMA',period:21,color:'#3f658d'},
+  {type:'MA', period:50,color:'#aa5d41'},
 ];
 const INDICATOR_DEFAULTS={
   rsi:{enabled:true,period:14,color:'#aab0b7'},
@@ -2007,8 +2007,8 @@ if (localStorage.getItem('bm_theme') === 'light') {
 // ==============================================
 // PERSIST
 // ==============================================
-function saveSettings(){
-  localStorage.setItem('bm_cfg',JSON.stringify({
+function buildSettingsPayload(){
+  return {
     isLogScale,toolSettings,chartType,priceColors,
     spyOverlayEnabled,spyOverlayMode,
     volumePaneEnabled: !!volPaneEnabled,
@@ -2017,10 +2017,45 @@ function saveSettings(){
     indicatorSettings,
     rightOffsetBars: persistedRightOffset,
     maList:maList.map(m=>({type:m.type,period:m.period,color:m.color,enabled:m.enabled}))
-  }));
+  };
+}
+function persistSettingsRemote(payload){
+  fetch('/api/settings',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload || {}),
+  }).catch(()=>{});
+}
+function saveSettings(){
+  const payload=buildSettingsPayload();
+  localStorage.setItem('bm_cfg',JSON.stringify(payload));
+  persistSettingsRemote(payload);
   flash('Settings saved');
 }
 function loadSettings(){try{return JSON.parse(localStorage.getItem('bm_cfg')||'null');}catch(e){return null;}}
+function stableSerialize(value){
+  if(Array.isArray(value)) return `[${value.map(stableSerialize).join(',')}]`;
+  if(value && typeof value==='object'){
+    return `{${Object.keys(value).sort().map(key=>`${JSON.stringify(key)}:${stableSerialize(value[key])}`).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+async function syncSettingsWithServer(){
+  const local=loadSettings();
+  const remote=await fetchJsonOptional('/api/settings', null);
+  const hasRemote=!!(remote && typeof remote==='object' && Object.keys(remote).length);
+  const hasLocal=!!(local && typeof local==='object' && Object.keys(local).length);
+  if(hasRemote){
+    if(!hasLocal || stableSerialize(remote)!==stableSerialize(local)){
+      localStorage.setItem('bm_cfg', JSON.stringify(remote));
+      window.location.reload();
+    }
+    return;
+  }
+  if(hasLocal){
+    persistSettingsRemote(local);
+  }
+}
 async function saveDrawings(){
   try{
     await fetch('/api/drawings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(drawings)});
@@ -7627,6 +7662,7 @@ window.addEventListener('load',async()=>{
     themeToggle.textContent = '🌙 Dark';
   }
   initChart();
+  await syncSettingsWithServer();
   await Promise.all([loadFavorites(), loadDrawings(), loadSetups()]);
   await backfillSetupMetrics();
   restoreRefreshStatusIfRunning();
