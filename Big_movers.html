@@ -107,6 +107,15 @@
     background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;line-height:1.2;
   }
   [data-theme="light"] .setup-library-metric-pill{border-color:rgba(79,89,100,0.34);}
+  .setup-library-metric-grid{
+    display:grid;grid-template-columns:auto 1fr;gap:3px 8px;align-items:baseline;
+    font-family:var(--mono);font-size:10px;line-height:1.25;color:var(--muted);
+  }
+  .setup-library-metric-grid .metric-group{
+    color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .setup-library-metric-grid .metric-values{color:var(--muted);font-weight:600;}
+  .setup-library-metric-grid .metric-values.muted{color:var(--muted);font-weight:600;}
   .setup-library-empty{padding:16px 12px;color:var(--muted);font-family:var(--mono);font-size:11px;}
   .setup-library-empty{grid-column:1 / -1;}
   @media (max-width: 380px){
@@ -172,6 +181,15 @@
   .rr-nav-btn:hover:not(:disabled){color:var(--accent);border-color:rgba(0,212,170,0.28);background:rgba(0,212,170,0.08);}
   .rr-nav-btn:disabled{opacity:0.35;cursor:default;}
   .rr-nav-count{min-width:64px;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.05em;color:var(--text);}
+  .leg-nav{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,0.02);}
+  .leg-nav-btn{
+    width:24px;height:24px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--muted);
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.12s ease;
+  }
+  .leg-nav-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+  .leg-nav-btn:hover:not(:disabled){color:var(--accent);border-color:rgba(0,212,170,0.28);background:rgba(0,212,170,0.08);}
+  .leg-nav-btn:disabled{opacity:0.35;cursor:default;}
+  .leg-nav-count{min-width:58px;text-align:center;font-size:10px;font-weight:700;letter-spacing:0.05em;color:var(--text);}
 
   /* Chart settings dropdown (type + colors) */
   .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
@@ -1005,6 +1023,45 @@
     position: relative;
     min-height: 0;
   }
+  .chart-metrics-overlay{
+    position:absolute;
+    top:12px;
+    right:72px;
+    z-index:24;
+    pointer-events:none;
+    display:grid;
+    grid-template-columns:auto auto;
+    column-gap:10px;
+    row-gap:4px;
+    padding:8px 10px;
+    border:1px solid rgba(95,108,122,0.22);
+    border-radius:10px;
+    background:rgba(8,12,15,0.42);
+    backdrop-filter:blur(6px);
+    font-family:var(--mono);
+    font-size:11px;
+    line-height:1.25;
+    color:var(--text);
+    text-align:left;
+    box-shadow:0 8px 22px rgba(0,0,0,0.18);
+  }
+  [data-theme="light"] .chart-metrics-overlay{
+    background:rgba(255,255,255,0.62);
+    border-color:rgba(70,80,92,0.18);
+    box-shadow:0 8px 22px rgba(20,30,45,0.08);
+  }
+  .chart-metrics-overlay .metric-label{color:var(--muted);white-space:nowrap;}
+  .chart-metrics-overlay .metric-value{font-weight:650;color:var(--muted);text-align:right;white-space:nowrap;}
+  .chart-metrics-overlay .metric-section{
+    grid-column:1 / -1;
+    color:var(--muted);
+    font-size:10px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border-top:1px solid rgba(95,108,122,0.18);
+    padding-top:5px;
+    margin-top:2px;
+  }
   .vol-pane{
     height: 140px;
     border-top: 1px solid var(--border);
@@ -1272,8 +1329,6 @@
         <span class="chart-gain"   id="ct-gain"></span>
         <span class="chart-info"   id="ct-range"></span>
         <span class="chart-info"   id="ct-vol"></span>
-        <span class="chart-info"   id="ct-rs">RS —</span>
-        <span class="chart-info"   id="ct-adr">ADR —</span>
         <div class="tf-controls" style="display:flex;align-items:center;gap:3px;">
           <button class="tb-btn active" id="tf-D" title="Daily">D</button>
           <button class="tb-btn" id="tf-3D" title="3 Day">3D</button>
@@ -1347,6 +1402,15 @@
         <button id="ind-toggle" class="ma-toggle-btn text" title="Indicators" aria-label="Indicators">IND</button>
         <button id="setups-toggle" class="ma-toggle-btn text" title="Setup Library" aria-label="Setup Library">SET</button>
         <button id="spy-toggle" class="ma-toggle-btn text" title="Benchmark overlay (VS SPY): Off → Line → Candle → Bar" aria-label="Benchmark overlay">VS</button>
+        <div class="leg-nav hidden" id="leg-nav" aria-label="Move leg navigator">
+          <button class="leg-nav-btn" id="leg-nav-prev" type="button" title="Previous move leg" aria-label="Previous move leg">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>
+          </button>
+          <span class="leg-nav-count" id="leg-nav-count">0 Legs</span>
+          <button class="leg-nav-btn" id="leg-nav-next" type="button" title="Next move leg" aria-label="Next move leg">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 4.5L13 10l-5.5 5.5"/></svg>
+          </button>
+        </div>
         <div class="rr-nav hidden" id="rr-nav" aria-label="Risk reward trade navigator">
           <button class="rr-nav-btn" id="rr-nav-prev" type="button" title="Previous off-screen RR trade" aria-label="Previous off-screen RR trade">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5L7 10l5.5 5.5"/></svg>
@@ -1431,6 +1495,8 @@
         </div>
         <div class="info-item"><span class="info-label">RS:</span><span class="info-value" id="info-rs">—</span></div>
         <div class="info-item"><span class="info-label">ADR:</span><span class="info-value" id="info-adr">—</span></div>
+        <div class="info-item"><span class="info-label">EXT:</span><span class="info-value" id="info-ext">—</span></div>
+        <div class="info-item"><span class="info-label">ATR:</span><span class="info-value" id="info-atr-ext">—</span></div>
         <div class="info-item"><span class="info-label">MA:</span><span class="info-value" id="info-ma">—</span></div>
         <div class="info-item"><span class="info-label">IND:</span><span class="info-value" id="info-ind">—</span></div>
         <div class="info-spacer"></div>
@@ -1441,6 +1507,14 @@
       
       <div class="chart-container">
         <div class="chart-wrap" id="chart-wrap">
+          <div class="chart-metrics-overlay" id="chart-metrics-overlay" aria-label="Chart metrics">
+            <div class="metric-label">ADR</div><div class="metric-value" id="ov-adr">—</div>
+            <div class="metric-label">RS</div><div class="metric-value" id="ov-rs">—</div>
+            <div class="metric-section">ATR Multiple</div>
+            <div class="metric-label">EMA8</div><div class="metric-value" id="ov-atr-8">—</div>
+            <div class="metric-label">EMA21</div><div class="metric-value" id="ov-atr-21">—</div>
+            <div class="metric-label">MA50</div><div class="metric-value" id="ov-atr-50">—</div>
+          </div>
           <div class="draw-toolbar" id="draw-toolbar">
             <button id="toolbar-toggle" title="Toggle toolbar">
               <svg viewBox="0 0 20 20" class="tool-icon">
@@ -1747,11 +1821,14 @@ let _syncingVolRange=false;
 let priceSeries=null;
 let currentBars=[],currentSymbol='';
 let currentMoveRow=null; // cache selected row for re-applying markers after setData()
+let currentMoveLegs=[], currentMoveLegIdx=0;
 let currentRsSeries=[], currentRsMap=new Map(), currentRsLatest=null;
 let rsSeriesCache=new Map();
 let currentAdrSeries=[], currentAdrMap=new Map(), currentAdrLatest=null;
 let adrSeriesCache=new Map();
 let setupRsiSeriesCache=new Map();
+let currentExtensionSeries=[], currentExtensionMap=new Map(), currentExtensionLatest=null;
+let extensionSeriesCache=new Map();
 let currentSelectionToken=0;
 let sortCol='year',sortDir=-1;
 let favorites=new Set();
@@ -2197,6 +2274,12 @@ function normalizeLoadedSetups(raw){
       adrPercent:parseStoredSetupMetric(setup.adrPercent),
       dailyRsi:parseStoredSetupMetric(setup.dailyRsi),
       threeDayRsi:parseStoredSetupMetric(setup.threeDayRsi),
+      extensionScore:parseStoredSetupMetric(setup.extensionScore,{allowZero:true}),
+      extensionLabel:String(setup.extensionLabel||'').trim(),
+      extensionAtr8:parseStoredSetupMetric(setup.extensionAtr8,{allowZero:true}),
+      extensionAtr21:parseStoredSetupMetric(setup.extensionAtr21,{allowZero:true}),
+      extensionAtr50:parseStoredSetupMetric(setup.extensionAtr50,{allowZero:true}),
+      extensionPct21:parseStoredSetupMetric(setup.extensionPct21,{allowZero:true}),
       title:String(setup.title||'').trim(),
       note:String(setup.note||''),
       tags,
@@ -2240,6 +2323,10 @@ function setupNeedsMetricBackfill(setup){
     && Number.isFinite(setup.adrPercent) && setup.adrPercent>0
     && Number.isFinite(setup.dailyRsi) && setup.dailyRsi>0
     && Number.isFinite(setup.threeDayRsi) && setup.threeDayRsi>0
+    && Number.isFinite(setup.extensionScore)
+    && Number.isFinite(setup.extensionAtr8)
+    && Number.isFinite(setup.extensionAtr21)
+    && Number.isFinite(setup.extensionAtr50)
   );
 }
 async function backfillSetupMetrics(force=false){
@@ -2255,10 +2342,17 @@ async function backfillSetupMetrics(force=false){
     const nextAdrPercent=getSeriesValueAtOrBefore(metricPayloads.adrSeries, setupDate, 'value');
     const nextDailyRsi=getSeriesValueAtOrBefore(metricPayloads.dailyRsiSeries, setupDate, 'value');
     const nextThreeDayRsi=getSeriesValueAtOrBefore(metricPayloads.threeDayRsiSeries, setupDate, 'value');
+    const nextExtension=getExtensionPointAtOrBefore(metricPayloads.extensionSeries, setupDate);
     const normalizedRs=Number.isFinite(nextRsRating) ? Math.round(nextRsRating) : null;
     const normalizedAdr=Number.isFinite(nextAdrPercent) ? Number(nextAdrPercent.toFixed(2)) : null;
     const normalizedDailyRsi=Number.isFinite(nextDailyRsi) ? Number(nextDailyRsi.toFixed(2)) : null;
     const normalizedThreeDayRsi=Number.isFinite(nextThreeDayRsi) ? Number(nextThreeDayRsi.toFixed(2)) : null;
+    const normalizedExtensionScore=Number.isFinite(Number(nextExtension?.score)) ? Math.round(Number(nextExtension.score)) : null;
+    const normalizedExtensionLabel=normalizedExtensionScore==null ? '' : (nextExtension?.label || getExtensionLabel(normalizedExtensionScore));
+    const normalizedExtensionAtr8=Number.isFinite(Number(nextExtension?.atr8)) ? Number(Number(nextExtension.atr8).toFixed(2)) : null;
+    const normalizedExtensionAtr21=Number.isFinite(Number(nextExtension?.atr21)) ? Number(Number(nextExtension.atr21).toFixed(2)) : null;
+    const normalizedExtensionAtr50=Number.isFinite(Number(nextExtension?.atr50)) ? Number(Number(nextExtension.atr50).toFixed(2)) : null;
+    const normalizedExtensionPct21=Number.isFinite(Number(nextExtension?.pct21)) ? Number(Number(nextExtension.pct21).toFixed(2)) : null;
     const nextYear=setupDate.slice(0,4) || String(setup.year||'');
     if(
       String(setup.setupDate||'').slice(0,10)!==setupDate
@@ -2267,6 +2361,12 @@ async function backfillSetupMetrics(force=false){
       || setup.adrPercent!==normalizedAdr
       || setup.dailyRsi!==normalizedDailyRsi
       || setup.threeDayRsi!==normalizedThreeDayRsi
+      || setup.extensionScore!==normalizedExtensionScore
+      || setup.extensionLabel!==normalizedExtensionLabel
+      || setup.extensionAtr8!==normalizedExtensionAtr8
+      || setup.extensionAtr21!==normalizedExtensionAtr21
+      || setup.extensionAtr50!==normalizedExtensionAtr50
+      || setup.extensionPct21!==normalizedExtensionPct21
     ){
       setup.setupDate=setupDate;
       setup.year=nextYear;
@@ -2274,6 +2374,12 @@ async function backfillSetupMetrics(force=false){
       setup.adrPercent=normalizedAdr;
       setup.dailyRsi=normalizedDailyRsi;
       setup.threeDayRsi=normalizedThreeDayRsi;
+      setup.extensionScore=normalizedExtensionScore;
+      setup.extensionLabel=normalizedExtensionLabel;
+      setup.extensionAtr8=normalizedExtensionAtr8;
+      setup.extensionAtr21=normalizedExtensionAtr21;
+      setup.extensionAtr50=normalizedExtensionAtr50;
+      setup.extensionPct21=normalizedExtensionPct21;
       changed=true;
     }
   }
@@ -2982,6 +3088,7 @@ async function buildSetupPayload(){
   const adrPercent=getSeriesValueAtOrBefore(metricPayloads.adrSeries, setupDate, 'value');
   const dailyRsi=getSeriesValueAtOrBefore(metricPayloads.dailyRsiSeries, setupDate, 'value');
   const threeDayRsi=getSeriesValueAtOrBefore(metricPayloads.threeDayRsiSeries, setupDate, 'value');
+  const extensionPoint=getExtensionPointAtOrBefore(metricPayloads.extensionSeries, setupDate);
   return {
     id: existing?.id ?? ++setupIdCtr,
     symbol: currentSymbol,
@@ -2993,6 +3100,12 @@ async function buildSetupPayload(){
     adrPercent: Number.isFinite(adrPercent) ? Number(adrPercent.toFixed(2)) : null,
     dailyRsi: Number.isFinite(dailyRsi) ? Number(dailyRsi.toFixed(2)) : null,
     threeDayRsi: Number.isFinite(threeDayRsi) ? Number(threeDayRsi.toFixed(2)) : null,
+    extensionScore: Number.isFinite(Number(extensionPoint?.score)) ? Math.round(Number(extensionPoint.score)) : null,
+    extensionLabel: Number.isFinite(Number(extensionPoint?.score)) ? (extensionPoint.label || getExtensionLabel(extensionPoint.score)) : '',
+    extensionAtr8: Number.isFinite(Number(extensionPoint?.atr8)) ? Number(Number(extensionPoint.atr8).toFixed(2)) : null,
+    extensionAtr21: Number.isFinite(Number(extensionPoint?.atr21)) ? Number(Number(extensionPoint.atr21).toFixed(2)) : null,
+    extensionAtr50: Number.isFinite(Number(extensionPoint?.atr50)) ? Number(Number(extensionPoint.atr50).toFixed(2)) : null,
+    extensionPct21: Number.isFinite(Number(extensionPoint?.pct21)) ? Number(Number(extensionPoint.pct21).toFixed(2)) : null,
     title: title || `${currentSymbol} Setup ${formatSetupDate(now)}`,
     note,
     tags,
@@ -3050,6 +3163,7 @@ function renderSetupMarkers(){
       const metricBits=[
         formatSetupRs(setup?.rsRating),
         formatSetupAdr(setup?.adrPercent),
+        formatSetupExtensionScore(setup?.extensionScore, setup?.extensionLabel),
         formatSetupTimeframeRsi('D', setup?.dailyRsi),
         formatSetupTimeframeRsi('3D', setup?.threeDayRsi),
       ].filter(Boolean).join(' • ');
@@ -3183,10 +3297,16 @@ function renderSetupLists(){
       formatSetupRs(setup.rsRating),
       formatSetupAdr(setup.adrPercent),
     ].filter(Boolean);
-    const rsiMetricBits=[
-      formatSetupTimeframeRsi('D', setup.dailyRsi),
-      formatSetupTimeframeRsi('3D', setup.threeDayRsi),
+    const atrMetricBits=[
+      formatSetupAtrMultiple('EMA8', setup.extensionAtr8),
+      formatSetupAtrMultiple('EMA21', setup.extensionAtr21),
+      formatSetupAtrMultiple('MA50', setup.extensionAtr50),
     ].filter(Boolean);
+    const rsiMetricBits=[
+      Number.isFinite(Number(setup.dailyRsi)) ? `D ${Number(setup.dailyRsi).toFixed(2)}` : '',
+      Number.isFinite(Number(setup.threeDayRsi)) ? `3D ${Number(setup.threeDayRsi).toFixed(2)}` : '',
+    ].filter(Boolean);
+    const hasMetrics=primaryMetricBits.length || atrMetricBits.length || rsiMetricBits.length;
     return `
     <div class="setup-library-item" data-setup-open="${setup.id}">
       <div class="setup-library-thumb" data-setup-thumb="${setup.id}" style="--setup-thumb-aspect:${thumbAspect};">
@@ -3209,8 +3329,11 @@ function renderSetupLists(){
         </div>
       </div>
       ${(setup.tags||[]).length ? `<div class="setup-tags">${setup.tags.map(tag=>`<span class="setup-tag">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
-      ${primaryMetricBits.length ? `<div class="setup-library-metric-pill">${primaryMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
-      ${rsiMetricBits.length ? `<div class="setup-library-meta">${rsiMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
+      ${hasMetrics ? `<div class="setup-library-metric-grid">
+        ${primaryMetricBits.length ? `<div class="metric-group">Profile</div><div class="metric-values muted">${primaryMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
+        ${atrMetricBits.length ? `<div class="metric-group">ATR</div><div class="metric-values">${atrMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
+        ${rsiMetricBits.length ? `<div class="metric-group">RSI</div><div class="metric-values muted">${rsiMetricBits.map(bit=>escapeHtml(bit)).join(' • ')}</div>` : ''}
+      </div>` : ''}
       ${setup.note ? `<div class="setup-card-note">${escapeHtml(setup.note)}</div>` : ''}
     </div>
   `;
@@ -3266,6 +3389,22 @@ function getAdrAtOrBefore(timeStr){
   const exact = currentAdrMap.get(timeStr);
   if(exact != null) return exact;
   return getSeriesValueAtOrBefore(currentAdrSeries, timeStr, 'value');
+}
+function getExtensionPointAtOrBefore(series, timeStr){
+  if(!timeStr || !Array.isArray(series) || !series.length) return null;
+  const direct=series.find(point=>point?.time===timeStr);
+  if(direct) return direct;
+  let best=null;
+  for(const point of series){
+    if(!point?.time) continue;
+    if(point.time > timeStr) break;
+    best=point;
+  }
+  return best;
+}
+function getCurrentExtensionAtOrBefore(timeStr){
+  if(!timeStr || !currentExtensionSeries.length) return null;
+  return currentExtensionMap.get(timeStr) || getExtensionPointAtOrBefore(currentExtensionSeries, timeStr);
 }
 async function fetchJsonOrThrow(url){
   const resp = await fetch(url);
@@ -3337,7 +3476,12 @@ function summarizeRefreshJob(job){
   const unchanged=Math.max(0, Number(job.unchanged)||0);
   const missing=Math.max(0, Number(job.missing)||0);
   const failed=Math.max(0, Number(job.failed)||0);
+  const moversUpdated=Math.max(0, Number(job.movers_updated)||0);
+  const moversMissing=Math.max(0, Number(job.movers_missing)||0);
   if(job.state==='running'){
+    if(String(job.current_symbol||'')==='current-year movers'){
+      return `Updating current-year movers • ${processed}/${total} charts checked`;
+    }
     const currentBits=[];
     if(Number.isFinite(job.current_index) && total){
       currentBits.push(`${job.current_index}/${total}`);
@@ -3346,14 +3490,18 @@ function summarizeRefreshJob(job){
     }
     if(job.current_symbol) currentBits.push(job.current_symbol);
     const counts=[`${updated} updated`, `${unchanged} current`];
+    counts.push(`${moversUpdated} movers`);
     if(missing) counts.push(`${missing} missing`);
     if(failed) counts.push(`${failed} failed`);
+    if(moversMissing) counts.push(`${moversMissing} no move`);
     return `Updating charts ${currentBits.join(' • ')}${counts.length ? ` • ${counts.join(' • ')}` : ''}`;
   }
   if(job.state==='done'){
     const counts=[`${updated} updated`, `${unchanged} current`];
+    counts.push(`${moversUpdated} current-year movers`);
     if(missing) counts.push(`${missing} missing`);
     if(failed) counts.push(`${failed} failed`);
+    if(moversMissing) counts.push(`${moversMissing} no current-year move`);
     return `Update finished • ${counts.join(' • ')}`;
   }
   const error=String(job.error || 'Update failed');
@@ -3362,6 +3510,7 @@ function summarizeRefreshJob(job){
   if(unchanged) counts.push(`${unchanged} current`);
   if(missing) counts.push(`${missing} missing`);
   if(failed) counts.push(`${failed} failed`);
+  if(moversUpdated) counts.push(`${moversUpdated} movers`);
   return counts.length ? `${error} • ${counts.join(' • ')}` : error;
 }
 function applyRefreshJobStatus(job){
@@ -3397,10 +3546,20 @@ async function pollRefreshJobStatus(jobId){
     rsSeriesCache.clear();
     adrSeriesCache.clear();
     setupRsiSeriesCache.clear();
-    if(currentMoveRow){
-      await loadMoveRecord(currentMoveRow, activeIdx);
+    const selectedSymbol=String(currentMoveRow?.symbol || '').toUpperCase();
+    const selectedYear=String(currentMoveRow?.year || '');
+    if(job.state==='done'){
+      await loadResults();
     }
-    flash(job.state==='done' ? `Updated ${job.updated} charts` : `Update failed: ${job.error || 'Unknown error'}`);
+    if(selectedSymbol && selectedYear){
+      const nextIdx=filtered.findIndex(row=>String(row.symbol||'').toUpperCase()===selectedSymbol && String(row.year||'')===selectedYear);
+      if(nextIdx>=0){
+        await selectRow(nextIdx);
+      }else if(currentMoveRow){
+        await loadMoveRecord(currentMoveRow, activeIdx);
+      }
+    }
+    flash(job.state==='done' ? `Updated ${job.updated} charts and ${job.movers_updated || 0} current-year movers` : `Update failed: ${job.error || 'Unknown error'}`);
     refreshStatusPollTimer=setTimeout(()=>{ setRefreshStatus('idle',''); }, 3200);
   }catch(e){
     setRefreshStatus('error', `Update status failed: ${e.message}`);
@@ -3462,30 +3621,67 @@ function resetCurrentRsData(){
   currentRsSeries = [];
   currentRsMap = new Map();
   currentRsLatest = null;
-  const chartRs = document.getElementById('ct-rs');
-  if (chartRs) chartRs.textContent = 'RS —';
+  updateChartMetricsOverlay();
 }
 function resetCurrentAdrData(){
   currentAdrSeries = [];
   currentAdrMap = new Map();
   currentAdrLatest = null;
-  const chartAdr = document.getElementById('ct-adr');
-  if (chartAdr) chartAdr.textContent = 'ADR —';
+  updateChartMetricsOverlay();
+}
+function resetCurrentExtensionData(){
+  currentExtensionSeries = [];
+  currentExtensionMap = new Map();
+  currentExtensionLatest = null;
+  updateChartMetricsOverlay();
 }
 function applyCurrentRsPayload(rsPayload){
   currentRsSeries = Array.isArray(rsPayload?.series) ? rsPayload.series : [];
   currentRsMap = new Map(currentRsSeries.map(p => [p.time, p.rating]));
   currentRsLatest = currentRsSeries.length ? currentRsSeries[currentRsSeries.length - 1].rating : null;
-  const chartRs = document.getElementById('ct-rs');
-  if (chartRs) chartRs.textContent = currentRsLatest == null ? 'RS —' : `RS ${currentRsLatest}`;
+  updateChartMetricsOverlay();
   updateCrosshairInfo(lastCrosshairParam);
 }
 function applyCurrentAdrPayload(adrPayload){
   currentAdrSeries = Array.isArray(adrPayload?.series) ? adrPayload.series : [];
   currentAdrMap = new Map(currentAdrSeries.map(p => [p.time, p.value]));
   currentAdrLatest = currentAdrSeries.length ? currentAdrSeries[currentAdrSeries.length - 1].value : null;
-  const chartAdr = document.getElementById('ct-adr');
-  if (chartAdr) chartAdr.textContent = currentAdrLatest == null ? 'ADR —' : `ADR ${currentAdrLatest.toFixed(2)}%`;
+  updateChartMetricsOverlay();
+  updateCrosshairInfo(lastCrosshairParam);
+}
+function formatExtensionPoint(point, compact=false){
+  if(!point || !Number.isFinite(Number(point.score))) return '';
+  const score=Math.round(Number(point.score));
+  const label=point.label || getExtensionLabel(score);
+  return compact ? `EXT ${score}` : `EXT ${score}${label ? ` ${label}` : ''}`;
+}
+function formatAtrMultipleValue(value){
+  return Number.isFinite(Number(value)) ? `(${Number(value).toFixed(2)}x)` : '—';
+}
+function formatAtrMultipleSummary(point){
+  if(!point) return '—';
+  return `EMA8 ${formatAtrMultipleValue(point.atr8)}  EMA21 ${formatAtrMultipleValue(point.atr21)}  MA50 ${formatAtrMultipleValue(point.atr50)}`;
+}
+function updateChartMetricsOverlay(point=currentExtensionLatest){
+  const ovRs=document.getElementById('ov-rs');
+  const ovAdr=document.getElementById('ov-adr');
+  const ovAtr8=document.getElementById('ov-atr-8');
+  const ovAtr21=document.getElementById('ov-atr-21');
+  const ovAtr50=document.getElementById('ov-atr-50');
+  if(ovRs) ovRs.textContent=currentRsLatest == null ? '—' : String(Math.round(Number(currentRsLatest)));
+  if(ovAdr) ovAdr.textContent=currentAdrLatest == null ? '—' : `${Number(currentAdrLatest).toFixed(2)}%`;
+  if(ovAtr8) ovAtr8.textContent=point ? formatAtrMultipleValue(point.atr8) : '—';
+  if(ovAtr21) ovAtr21.textContent=point ? formatAtrMultipleValue(point.atr21) : '—';
+  if(ovAtr50) ovAtr50.textContent=point ? formatAtrMultipleValue(point.atr50) : '—';
+}
+function applyCurrentExtensionBars(bars, symbol=currentSymbol){
+  const sym=String(symbol||'').toUpperCase();
+  const series=buildExtensionSeries(Array.isArray(bars) ? bars : []);
+  currentExtensionSeries=series;
+  currentExtensionMap=new Map(series.map(point=>[point.time, point]));
+  currentExtensionLatest=series.length ? series[series.length-1] : null;
+  if(sym) extensionSeriesCache.set(sym, { series });
+  updateChartMetricsOverlay(currentExtensionLatest);
   updateCrosshairInfo(lastCrosshairParam);
 }
 async function loadRsForSymbol(symbol, selectionToken){
@@ -3546,11 +3742,20 @@ async function ensureSetupMetricPayloads(symbol){
     };
     setupRsiSeriesCache.set(sym, rsiPayload);
   }
+  let extensionPayload=(sym===currentSymbol && currentExtensionSeries.length)
+    ? { series: currentExtensionSeries }
+    : extensionSeriesCache.get(sym);
+  if(!extensionPayload){
+    const bars=await getBarsForSymbol(sym);
+    extensionPayload={ series:buildExtensionSeries(Array.isArray(bars) ? bars : []) };
+    extensionSeriesCache.set(sym, extensionPayload);
+  }
   return {
     rsSeries:Array.isArray(rsPayload?.series) ? rsPayload.series : [],
     adrSeries:Array.isArray(adrPayload?.series) ? adrPayload.series : [],
     dailyRsiSeries:Array.isArray(rsiPayload?.dailySeries) ? rsiPayload.dailySeries : [],
     threeDayRsiSeries:Array.isArray(rsiPayload?.threeDaySeries) ? rsiPayload.threeDaySeries : [],
+    extensionSeries:Array.isArray(extensionPayload?.series) ? extensionPayload.series : [],
   };
 }
 function formatSetupRs(rsRating){
@@ -3561,6 +3766,15 @@ function formatSetupAdr(adrPercent){
 }
 function formatSetupTimeframeRsi(label, rsiValue){
   return Number.isFinite(Number(rsiValue)) ? `${label} RSI ${Number(rsiValue).toFixed(2)}` : '';
+}
+function formatSetupAtrMultiple(label, value){
+  return Number.isFinite(Number(value)) ? `${label} (${Number(value).toFixed(2)}x)` : '';
+}
+function formatSetupExtensionScore(score, label=''){
+  if(!Number.isFinite(Number(score))) return '';
+  const rounded=Math.round(Number(score));
+  const safeLabel=String(label || getExtensionLabel(rounded) || '').trim();
+  return `EXT ${rounded}${safeLabel ? ` ${safeLabel}` : ''}`;
 }
 
 // ==============================================
@@ -3576,6 +3790,147 @@ function calcEMA(bars,p){
   const k=2/(p+1);let e=bars.slice(0,p).reduce((s,b)=>s+b.close,0)/p;
   const out=[{time:bars[p-1].time,value:parseFloat(e.toFixed(4))}];
   for(let i=p;i<bars.length;i++){e=bars[i].close*k+e*(1-k);out.push({time:bars[i].time,value:parseFloat(e.toFixed(4))});}
+  return out;
+}
+function calcATR(bars,p=14){
+  if(!Array.isArray(bars) || bars.length<p+1) return [];
+  const trs=[];
+  for(let i=0;i<bars.length;i++){
+    const high=Number(bars[i].high);
+    const low=Number(bars[i].low);
+    const prevClose=i>0 ? Number(bars[i-1].close) : Number(bars[i].close);
+    if(!Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(prevClose)){
+      trs.push(null);
+      continue;
+    }
+    trs.push(Math.max(high-low, Math.abs(high-prevClose), Math.abs(low-prevClose)));
+  }
+  let seed=0;
+  for(let i=1;i<=p;i++){
+    if(!Number.isFinite(trs[i])) return [];
+    seed+=trs[i];
+  }
+  let atr=seed/p;
+  const out=[{time:bars[p].time,value:Number(atr.toFixed(4))}];
+  for(let i=p+1;i<bars.length;i++){
+    if(!Number.isFinite(trs[i])) continue;
+    atr=((atr*(p-1))+trs[i])/p;
+    out.push({time:bars[i].time,value:Number(atr.toFixed(4))});
+  }
+  return out;
+}
+function calcRollingAverageByField(bars,p,field){
+  const out=[];
+  if(!Array.isArray(bars) || bars.length<p) return out;
+  let sum=0;
+  for(let i=0;i<bars.length;i++){
+    const value=Number(bars[i]?.[field]);
+    sum+=Number.isFinite(value) ? value : 0;
+    if(i>=p){
+      const prior=Number(bars[i-p]?.[field]);
+      sum-=Number.isFinite(prior) ? prior : 0;
+    }
+    if(i>=p-1) out.push({time:bars[i].time,value:Number((sum/p).toFixed(4))});
+  }
+  return out;
+}
+function getExtensionLabel(score){
+  const value=Number(score);
+  if(!Number.isFinite(value)) return '';
+  if(value>=7) return 'Climax';
+  if(value>=5) return 'Trim';
+  if(value>=3) return 'Watch';
+  return 'Normal';
+}
+function scoreExtensionPoint(metrics){
+  if(!metrics) return { score:null, label:'' };
+  let score=0;
+  const add=(condition, points=1)=>{ if(condition) score+=points; };
+  add(metrics.atr8>=3);
+  add(metrics.atr8>=4);
+  add(metrics.atr21>=4);
+  add(metrics.atr21>=5);
+  add(metrics.atr21>=6);
+  add(metrics.pct21>=50);
+  add(metrics.pct21>=75);
+  add(metrics.atr50>=6);
+  add(metrics.atr50>=8);
+  add(metrics.atr50>=10);
+  add(metrics.rangeVsAdr>=1.75);
+  add(metrics.rangeVsAdr>=2.5);
+  add(metrics.volumeVs50>=2.5);
+  add(metrics.volumeVs50>=5);
+  add(metrics.closeLocation<=0.45 && metrics.atr21>=4);
+  add(metrics.closeLocation<=0.25 && metrics.atr21>=5);
+  return { score, label:getExtensionLabel(score) };
+}
+function buildExtensionSeries(bars){
+  if(!Array.isArray(bars) || bars.length<55) return [];
+  const ema8Map=new Map(calcEMA(bars,8).map(point=>[point.time,point.value]));
+  const ema21Map=new Map(calcEMA(bars,21).map(point=>[point.time,point.value]));
+  const ma50Map=new Map(calcMA(bars,50).map(point=>[point.time,point.value]));
+  const atr14Map=new Map(calcATR(bars,14).map(point=>[point.time,point.value]));
+  const vol50Map=new Map(calcRollingAverageByField(bars,50,'volume').map(point=>[point.time,point.value]));
+  const adr20Map=new Map(bars.map((bar,idx)=>{
+    if(idx<19) return null;
+    let sum=0, count=0;
+    for(let j=idx-19;j<=idx;j++){
+      const high=Number(bars[j].high);
+      const low=Number(bars[j].low);
+      const close=Number(bars[j].close);
+      if(Number.isFinite(high) && Number.isFinite(low) && Number.isFinite(close) && close>0){
+        sum+=((high-low)/close)*100;
+        count+=1;
+      }
+    }
+    return count ? [bar.time, sum/count] : null;
+  }).filter(Boolean));
+  const out=[];
+  for(const bar of bars){
+    const close=Number(bar.close);
+    const high=Number(bar.high);
+    const low=Number(bar.low);
+    const volume=Number(bar.volume);
+    const ema8=ema8Map.get(bar.time);
+    const ema21=ema21Map.get(bar.time);
+    const ma50=ma50Map.get(bar.time);
+    const atr14=atr14Map.get(bar.time);
+    const vol50=vol50Map.get(bar.time);
+    const adr20=adr20Map.get(bar.time);
+    if(!Number.isFinite(close) || !Number.isFinite(high) || !Number.isFinite(low) || !Number.isFinite(atr14) || atr14<=0) continue;
+    const dayRangePct=close>0 ? ((high-low)/close)*100 : null;
+    const atrPct=close>0 ? (atr14/close)*100 : null;
+    const closeLocation=(high>low) ? ((close-low)/(high-low)) : 0.5;
+    const pct8=Number.isFinite(ema8) && ema8>0 ? ((close/ema8)-1)*100 : null;
+    const pct21=Number.isFinite(ema21) && ema21>0 ? ((close/ema21)-1)*100 : null;
+    const pct50=Number.isFinite(ma50) && ma50>0 ? ((close/ma50)-1)*100 : null;
+    const metrics={
+      pct8,
+      pct21,
+      pct50,
+      atr8:Number.isFinite(pct8) && Number.isFinite(atrPct) && atrPct!==0 ? pct8/atrPct : null,
+      atr21:Number.isFinite(pct21) && Number.isFinite(atrPct) && atrPct!==0 ? pct21/atrPct : null,
+      atr50:Number.isFinite(pct50) && Number.isFinite(atrPct) && atrPct!==0 ? pct50/atrPct : null,
+      rangeVsAdr:Number.isFinite(dayRangePct) && Number.isFinite(adr20) && adr20>0 ? dayRangePct/adr20 : null,
+      volumeVs50:Number.isFinite(volume) && Number.isFinite(vol50) && vol50>0 ? volume/vol50 : null,
+      closeLocation,
+    };
+    const scored=scoreExtensionPoint(metrics);
+    out.push({
+      time:bar.time,
+      score:scored.score,
+      label:scored.label,
+      pct8:Number.isFinite(metrics.pct8) ? Number(metrics.pct8.toFixed(2)) : null,
+      pct21:Number.isFinite(metrics.pct21) ? Number(metrics.pct21.toFixed(2)) : null,
+      pct50:Number.isFinite(metrics.pct50) ? Number(metrics.pct50.toFixed(2)) : null,
+      atr8:Number.isFinite(metrics.atr8) ? Number(metrics.atr8.toFixed(2)) : null,
+      atr21:Number.isFinite(metrics.atr21) ? Number(metrics.atr21.toFixed(2)) : null,
+      atr50:Number.isFinite(metrics.atr50) ? Number(metrics.atr50.toFixed(2)) : null,
+      rangeVsAdr:Number.isFinite(metrics.rangeVsAdr) ? Number(metrics.rangeVsAdr.toFixed(2)) : null,
+      volumeVs50:Number.isFinite(metrics.volumeVs50) ? Number(metrics.volumeVs50.toFixed(2)) : null,
+      closeLocation:Number.isFinite(metrics.closeLocation) ? Number(metrics.closeLocation.toFixed(2)) : null,
+    });
+  }
   return out;
 }
 function calcRSI(bars,p){
@@ -4310,6 +4665,8 @@ function updateCrosshairInfo(param) {
   const volPaneDVol = document.getElementById('vol-pane-dvol');
   const infoRs = document.getElementById('info-rs');
   const infoAdr = document.getElementById('info-adr');
+  const infoExt = document.getElementById('info-ext');
+  const infoAtrExt = document.getElementById('info-atr-ext');
   const infoMA = document.getElementById('info-ma');
   const infoInd = document.getElementById('info-ind');
   const paneRsi = document.getElementById('rsi-pane-value');
@@ -4329,6 +4686,8 @@ function updateCrosshairInfo(param) {
     if (volPaneDVol) volPaneDVol.textContent = '—';
     if (infoRs) infoRs.textContent = currentRsLatest == null ? '—' : String(currentRsLatest);
     if (infoAdr) infoAdr.textContent = currentAdrLatest == null ? '—' : `${currentAdrLatest.toFixed(2)}%`;
+    if (infoExt) infoExt.textContent = currentExtensionLatest ? formatExtensionPoint(currentExtensionLatest, true) : '—';
+    if (infoAtrExt) infoAtrExt.textContent = currentExtensionLatest ? formatAtrMultipleSummary(currentExtensionLatest) : '—';
     if (infoMA) infoMA.textContent = '—';
     if (infoInd) infoInd.textContent = '—';
     if (paneRsi) paneRsi.textContent = '—';
@@ -4434,6 +4793,14 @@ function updateCrosshairInfo(param) {
   if (infoAdr) {
     const adr = getAdrAtOrBefore(bar.time || timeStr);
     infoAdr.textContent = adr == null ? (currentAdrLatest == null ? '—' : `${currentAdrLatest.toFixed(2)}%`) : `${Number(adr).toFixed(2)}%`;
+  }
+  if (infoExt) {
+    const ext = getCurrentExtensionAtOrBefore(bar.time || timeStr);
+    infoExt.textContent = ext ? formatExtensionPoint(ext, true) : (currentExtensionLatest ? formatExtensionPoint(currentExtensionLatest, true) : '—');
+  }
+  if (infoAtrExt) {
+    const ext = getCurrentExtensionAtOrBefore(bar.time || timeStr);
+    infoAtrExt.textContent = ext ? formatAtrMultipleSummary(ext) : (currentExtensionLatest ? formatAtrMultipleSummary(currentExtensionLatest) : '—');
   }
 
   // MA values (stable width)
@@ -4773,6 +5140,32 @@ function applyMoveMarkers(){
       {time:sb.time,position:'belowBar',color:'#00d4aa',shape:'arrowUp', text:`▶ Low ${r.low_date} $${r.low_price}`},
       {time:eb.time,position:'aboveBar',color:'#ff6b35',shape:'arrowDown',text:`◀ High ${r.high_date} +${parseFloat(r.gain_pct).toFixed(0)}%`},
     ];
+    const activeLeg=Array.isArray(currentMoveLegs) ? currentMoveLegs[currentMoveLegIdx] : null;
+    if(activeLeg?.low_date && activeLeg?.high_date){
+      const sameAsMain=String(activeLeg.low_date)===String(r.low_date) && String(activeLeg.high_date)===String(r.high_date);
+      const lsb=findBar(activeLeg.low_date);
+      const leb=findBar(activeLeg.high_date);
+      if(lsb && leb && !sameAsMain){
+        const label=`Leg ${currentMoveLegIdx+1}`;
+        const lowPrice=Number(activeLeg.low_price);
+        markers.push(
+          {
+            time:lsb.time,
+            position:'belowBar',
+            color:'#f6c84c',
+            shape:'circle',
+            text:`${label} Low ${activeLeg.low_date}${Number.isFinite(lowPrice) ? ` $${lowPrice.toFixed(2)}` : ''}`
+          },
+          {
+            time:leb.time,
+            position:'aboveBar',
+            color:'#f6c84c',
+            shape:'circle',
+            text:`${label} High ${activeLeg.high_date} +${Number(activeLeg.gain_pct||0).toFixed(0)}%`
+          }
+        );
+      }
+    }
     markers.sort((a,b)=>String(a.time).localeCompare(String(b.time)));
     priceSeries.setMarkers(markers);
   }catch(e){}
@@ -4834,6 +5227,63 @@ function applyInitialSelectionRange(tfBars, startTime, endTime){
   chart.timeScale().setVisibleLogicalRange(range);
   syncSubchartsToMain(range);
 }
+
+function renderMoveLegNavigator(){
+  const el=document.getElementById('leg-nav');
+  const countEl=document.getElementById('leg-nav-count');
+  const prevBtn=document.getElementById('leg-nav-prev');
+  const nextBtn=document.getElementById('leg-nav-next');
+  if(!el || !countEl || !prevBtn || !nextBtn) return;
+  const legs=Array.isArray(currentMoveLegs) ? currentMoveLegs : [];
+  if(legs.length<=1){
+    el.classList.add('hidden');
+    return;
+  }
+  currentMoveLegIdx=Math.max(0, Math.min(legs.length-1, currentMoveLegIdx));
+  const leg=legs[currentMoveLegIdx];
+  el.classList.remove('hidden');
+  countEl.textContent=`Leg ${currentMoveLegIdx+1}/${legs.length}`;
+  countEl.title=leg ? `${leg.low_date} → ${leg.high_date} +${Number(leg.gain_pct||0).toFixed(0)}%` : '';
+  prevBtn.disabled=currentMoveLegIdx<=0;
+  nextBtn.disabled=currentMoveLegIdx>=legs.length-1;
+}
+function focusMoveLeg(index=currentMoveLegIdx){
+  if(!currentMoveLegs.length || !chart) return;
+  currentMoveLegIdx=Math.max(0, Math.min(currentMoveLegs.length-1, index));
+  const leg=currentMoveLegs[currentMoveLegIdx];
+  const tfBars=getCurrentTfBars();
+  if(!leg || !tfBars.length) return;
+  const range=buildInitialSelectionRange(tfBars, leg.low_date, leg.high_date);
+  applyMoveMarkers();
+  if(range) animateLogicalRange(range);
+  renderMoveLegNavigator();
+}
+function navigateMoveLeg(dir){
+  const delta=dir==='prev' ? -1 : 1;
+  focusMoveLeg(currentMoveLegIdx+delta);
+}
+async function loadMoveLegsForRow(row, selectionToken){
+  currentMoveLegs=[];
+  currentMoveLegIdx=0;
+  renderMoveLegNavigator();
+  if(!row?.symbol || !row?.year) return;
+  try{
+    const payload=await fetchJsonOptional(`/api/move_legs?symbol=${encodeURIComponent(row.symbol)}&year=${encodeURIComponent(row.year)}&min_gain=50&reset_drawdown=25`, { legs:[] });
+    if(selectionToken!==currentSelectionToken || row.symbol!==currentSymbol) return;
+    const legs=Array.isArray(payload?.legs) ? payload.legs : [];
+    currentMoveLegs=legs.sort((a,b)=>String(a.low_date||'').localeCompare(String(b.low_date||'')));
+    const activeIdx=currentMoveLegs.findIndex(leg=>String(leg.low_date||'')===String(row.low_date||'') && String(leg.high_date||'')===String(row.high_date||''));
+    currentMoveLegIdx=activeIdx>=0 ? activeIdx : 0;
+    applyMoveMarkers();
+    renderMoveLegNavigator();
+  }catch(e){
+    currentMoveLegs=[];
+    currentMoveLegIdx=0;
+    renderMoveLegNavigator();
+  }
+}
+document.getElementById('leg-nav-prev')?.addEventListener('click',()=>navigateMoveLeg('prev'));
+document.getElementById('leg-nav-next')?.addEventListener('click',()=>navigateMoveLeg('next'));
 
 // ==============================================
 // CANVAS DRAW
@@ -5058,6 +5508,7 @@ document.getElementById('rr-nav-next')?.addEventListener('click',()=>navigateRrT
 
 function redrawAll(){
   ctx2.clearRect(0,0,canvasCssWidth,canvasCssHeight);
+  drawActiveMoveLegBand();
   if(currentSymbol&&drawings[currentSymbol])
     for(const d of drawings[currentSymbol])drawOne(d,isDrawingSelected(d.id));
   if(marqueeSelection) drawMarqueeSelection();
@@ -5066,6 +5517,26 @@ function redrawAll(){
   if(measureStart)drawMeasure();
   scheduleRrTradeNavigatorUpdate();
   scheduleSetupMarkerPositionUpdate();
+}
+
+function drawActiveMoveLegBand(){
+  if(!Array.isArray(currentMoveLegs) || currentMoveLegs.length<=1) return;
+  const leg=currentMoveLegs[currentMoveLegIdx];
+  if(!leg?.low_date || !leg?.high_date) return;
+  const x1=time2p(leg.low_date);
+  const x2=time2p(leg.high_date);
+  if(x1==null || x2==null) return;
+  const left=Math.max(0, Math.min(x1, x2));
+  const right=Math.min(canvasCssWidth, Math.max(x1, x2));
+  if(right-left < 2) return;
+  ctx2.save();
+  ctx2.fillStyle='rgba(246, 200, 76, 0.055)';
+  ctx2.strokeStyle='rgba(246, 200, 76, 0.26)';
+  ctx2.lineWidth=1;
+  ctx2.setLineDash([4,4]);
+  ctx2.fillRect(left, 0, right-left, canvasCssHeight);
+  ctx2.strokeRect(left+0.5, 0.5, Math.max(1, right-left-1), Math.max(1, canvasCssHeight-1));
+  ctx2.restore();
 }
 
 function isDrawingSelected(id){
@@ -7603,6 +8074,10 @@ async function loadMoveRecord(r, tableIndex=null){
   clearSelection();
   resetCurrentRsData();
   resetCurrentAdrData();
+  resetCurrentExtensionData();
+  currentMoveLegs=[];
+  currentMoveLegIdx=0;
+  renderMoveLegNavigator();
   renderSetupLists();
   scheduleSetupMarkersRender();
   document.getElementById('ct-sym').textContent=r.symbol;
@@ -7610,6 +8085,7 @@ async function loadMoveRecord(r, tableIndex=null){
   document.getElementById('ct-gain').textContent=`+${parseFloat(r.gain_pct).toFixed(2)}%`;
   document.getElementById('ct-range').textContent=`${r.low_date} → ${r.high_date}`;
   document.getElementById('ct-vol').textContent=`$${r.avg_vol_b}B/mo`;
+  document.getElementById('leg-nav')?.classList.add('hidden');
   document.getElementById('rr-nav')?.classList.add('hidden');
   document.getElementById('placeholder').classList.add('hidden');
   document.getElementById('loading').classList.remove('hidden');
@@ -7618,6 +8094,7 @@ async function loadMoveRecord(r, tableIndex=null){
     if (selectionToken !== currentSelectionToken || r.symbol !== currentSymbol) return;
     if(bars.error)throw new Error(bars.error);
     currentBars=bars;
+    applyCurrentExtensionBars(currentBars, r.symbol);
     candleSeries.setData(bars.map(b=>({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close})));
     volSeries.setData(bars.map(b => {
       const s = getComputedStyle(document.documentElement);
@@ -7631,6 +8108,7 @@ async function loadMoveRecord(r, tableIndex=null){
     const sb=findBar(r.low_date),eb=findBar(r.high_date);
     applyMoveMarkers();
     applyInitialSelectionRange(tfBars, sb.time, eb.time);
+    loadMoveLegsForRow(r, selectionToken);
     redrawAll();
     renderSetupLists();
     scheduleSetupMarkersRender();

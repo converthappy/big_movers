@@ -35,6 +35,7 @@ _ADR_SERIES_CACHE = {}
 RESULT_FIELDS = ["year", "symbol", "gain_pct", "low_date", "high_date", "low_price", "high_price", "avg_vol_b"]
 _REFRESH_JOBS = {}
 _REFRESH_JOB_LOCK = threading.Lock()
+_RESULTS_LOCK = threading.Lock()
 
 def _normalize_date_maybe(raw):
     s = str(raw or "").strip()
@@ -426,6 +427,193 @@ def _compute_yearly_big_moves(symbol, bars):
     return rows
 
 
+def _upsert_symbol_year_result(symbol, year, bars):
+    symbol = str(symbol or "").strip().upper()
+    year = str(year or "").strip()
+    if not symbol or not year:
+        return None
+
+    year_rows = [row for row in _compute_yearly_big_moves(symbol, bars) if str(row.get("year", "")) == year]
+    if not year_rows:
+        return None
+
+    next_row = year_rows[0]
+    with _RESULTS_LOCK:
+        existing = _read_results_rows()
+        merged = [
+            row for row in existing
+            if not (
+                str(row.get("symbol", "")).upper() == symbol
+                and str(row.get("year", "")) == year
+            )
+        ]
+        merged.append(next_row)
+        merged.sort(key=lambda row: (
+            int(str(row.get("year", "0") or 0)),
+            str(row.get("symbol", "")),
+            str(row.get("low_date", "")),
+            str(row.get("high_date", "")),
+        ))
+        _write_results_rows(merged)
+    return next_row
+
+
+def _refresh_current_year_mover_for_symbol(symbol, year):
+    symbol = str(symbol or "").strip().upper()
+    year = str(year or "").strip()
+    bars = _load_symbol_bars(symbol)
+    if not bars:
+        return {"status": "no_bars"}
+    row = _upsert_symbol_year_result(symbol, year, bars)
+    legs = _compute_move_legs(symbol, bars, year=year, min_gain_pct=50.0, reset_drawdown_pct=25.0)
+    _upsert_move_legs(symbol, year, legs)
+    return {
+        "status": "updated" if row else "no_move",
+        "row": row,
+        "legs": len(legs),
+    }
+
+
+def _refresh_current_year_movers_for_symbols(symbols, year):
+    year = str(year or "").strip()
+    clean_symbols = sorted({str(symbol or "").strip().upper() for symbol in symbols if str(symbol or "").strip()})
+    if not year or not clean_symbols:
+        return {"updated": 0, "missing": 0, "details": []}
+
+    symbol_set = set(clean_symbols)
+    next_rows_by_symbol = {}
+    details = []
+    missing = 0
+    for symbol in clean_symbols:
+        try:
+            bars = _load_symbol_bars(symbol)
+            if not bars:
+                missing += 1
+                details.append({"symbol": symbol, "status": "no_bars"})
+                continue
+            rows = [row for row in _compute_yearly_big_moves(symbol, bars) if str(row.get("year", "")) == year]
+            if rows:
+                next_rows_by_symbol[symbol] = rows[0]
+                status = "updated"
+            else:
+                missing += 1
+                status = "no_move"
+            legs = _compute_move_legs(symbol, bars, year=year, min_gain_pct=50.0, reset_drawdown_pct=25.0)
+            _upsert_move_legs(symbol, year, legs)
+            details.append({"symbol": symbol, "status": status, "legs": len(legs)})
+        except Exception as exc:
+            missing += 1
+            details.append({"symbol": symbol, "status": "error", "error": str(exc)})
+
+    if next_rows_by_symbol:
+        with _RESULTS_LOCK:
+            existing = _read_results_rows()
+            merged = [
+                row for row in existing
+                if not (
+                    str(row.get("symbol", "")).upper() in symbol_set
+                    and str(row.get("year", "")) == year
+                )
+            ]
+            merged.extend(next_rows_by_symbol.values())
+            merged.sort(key=lambda row: (
+                int(str(row.get("year", "0") or 0)),
+                str(row.get("symbol", "")),
+                str(row.get("low_date", "")),
+                str(row.get("high_date", "")),
+            ))
+            _write_results_rows(merged)
+
+    return {"updated": len(next_rows_by_symbol), "missing": missing, "details": details}
+
+
+def _compute_move_legs(symbol, bars, year=None, min_gain_pct=50.0, reset_drawdown_pct=25.0, min_days=5):
+    symbol = str(symbol or "").strip().upper()
+    wanted_year = str(year or "").strip()
+    legs = []
+    by_year = {}
+    for idx, bar in enumerate(bars or []):
+        y = str(bar.get("time", ""))[:4]
+        if len(y) != 4 or not y.isdigit():
+            continue
+        if wanted_year and y != wanted_year:
+            continue
+        by_year.setdefault(y, []).append((idx, bar))
+
+    for y, items in sorted(by_year.items()):
+        leg_id = 0
+        min_low = None
+        min_idx = None
+        min_date = ""
+        best_high = None
+        best_idx = None
+        best_date = ""
+        start_pos = 0
+
+        def finalize_leg(end_pos):
+            nonlocal leg_id, min_low, min_idx, min_date, best_high, best_idx, best_date, start_pos
+            if min_low is None or best_high is None or min_idx is None or best_idx is None:
+                return
+            if best_idx <= min_idx:
+                return
+            days = best_idx - min_idx + 1
+            gain_pct = ((best_high / min_low) - 1.0) * 100.0 if min_low > 0 else 0.0
+            if gain_pct < min_gain_pct or days < min_days:
+                return
+            period = bars[min_idx:best_idx + 1]
+            daily_dollar = [
+                (_parse_float_maybe(day.get("close")) or 0.0) * (_parse_volume_maybe(day.get("volume")) or 0.0)
+                for day in period
+            ]
+            avg_monthly_dollar_b = (sum(daily_dollar) / len(daily_dollar) * 21.0 / 1e9) if daily_dollar else 0.0
+            leg_id += 1
+            legs.append({
+                "symbol": symbol,
+                "year": y,
+                "leg_id": leg_id,
+                "low_date": min_date,
+                "high_date": best_date,
+                "low_price": round(float(min_low), 6),
+                "high_price": round(float(best_high), 6),
+                "gain_pct": round(float(gain_pct), 2),
+                "days": int(days),
+                "avg_vol_b": round(float(avg_monthly_dollar_b), 2),
+            })
+
+        i = 0
+        while i < len(items):
+            idx, bar = items[i]
+            low = _parse_float_maybe(bar.get("low"))
+            high = _parse_float_maybe(bar.get("high"))
+            close = _parse_float_maybe(bar.get("close"))
+            if low is not None and low > 0 and (min_low is None or low < min_low):
+                min_low = low
+                min_idx = idx
+                min_date = bar["time"]
+                best_high = None
+                best_idx = None
+                best_date = ""
+            if min_low is not None and high is not None and high > 0 and (best_high is None or high > best_high):
+                best_high = high
+                best_idx = idx
+                best_date = bar["time"]
+            if best_high is not None and close is not None and close > 0:
+                drawdown_pct = ((close / best_high) - 1.0) * 100.0
+                gain_pct = ((best_high / min_low) - 1.0) * 100.0 if min_low and min_low > 0 else 0.0
+                if gain_pct >= min_gain_pct and drawdown_pct <= -reset_drawdown_pct and best_idx is not None and idx > best_idx:
+                    finalize_leg(i)
+                    min_low = low if low is not None and low > 0 else close
+                    min_idx = idx
+                    min_date = bar["time"]
+                    best_high = high if high is not None and high > 0 else close
+                    best_idx = idx
+                    best_date = bar["time"]
+            i += 1
+        finalize_leg(len(items) - 1)
+
+    return legs
+
+
 def _import_symbol_and_scan(symbol):
     symbol = str(symbol or "").strip().upper()
     if not symbol:
@@ -503,6 +691,8 @@ def _serialize_refresh_job(job):
         "unchanged": job["unchanged"],
         "missing": job["missing"],
         "failed": job["failed"],
+        "movers_updated": job.get("movers_updated", 0),
+        "movers_missing": job.get("movers_missing", 0),
         "current_symbol": job.get("current_symbol"),
         "current_index": job.get("current_index"),
         "created_at": job.get("created_at"),
@@ -543,6 +733,7 @@ def _run_refresh_job(job_id):
     try:
         targets = []
         latest_market_date = yahoo_updater.get_latest_market_date()
+        current_year = str(latest_market_date or pd.Timestamp.utcnow().date().isoformat())[:4]
         _update_refresh_job(job_id, latest_market_date=latest_market_date)
         for symbol in symbols:
             target = yahoo_updater.find_csv_target(symbol, [COLLECTED_STOCKS_DIR])
@@ -559,15 +750,18 @@ def _run_refresh_job(job_id):
 
         total_targets = len(targets)
         symbol_index = {target.symbol: idx for idx, target in enumerate(targets, start=1)}
+        successful_symbols = []
 
         def on_progress(symbol, detail):
+            status = detail.get("status")
+            if status in {"updated", "current"}:
+                successful_symbols.append(symbol)
             with _REFRESH_JOB_LOCK:
                 job = _REFRESH_JOBS.get(job_id)
                 if not job:
                     return
                 job["current_symbol"] = symbol
                 job["current_index"] = symbol_index.get(symbol, job["processed"] + 1)
-                status = detail.get("status")
                 if status == "updated":
                     job["updated"] += 1
                 elif status == "current":
@@ -584,6 +778,20 @@ def _run_refresh_job(job_id):
                 latest_market_date=latest_market_date,
                 progress_callback=on_progress,
             )
+        _update_refresh_job(job_id, current_symbol="current-year movers", current_index=None)
+        mover_summary = _refresh_current_year_movers_for_symbols(successful_symbols, current_year)
+        with _REFRESH_JOB_LOCK:
+            job = _REFRESH_JOBS.get(job_id)
+            if job:
+                job["movers_updated"] = mover_summary.get("updated", 0)
+                job["movers_missing"] = mover_summary.get("missing", 0)
+                job["details"].append({
+                    "symbol": "current-year movers",
+                    "status": "updated",
+                    "year": current_year,
+                    "updated": mover_summary.get("updated", 0),
+                    "missing": mover_summary.get("missing", 0),
+                })
         _reset_symbol_caches()
         _update_refresh_job(job_id, state="done", current_symbol=None, current_index=None, finished_at=pd.Timestamp.utcnow().isoformat())
     except Exception as exc:
@@ -606,6 +814,8 @@ def _start_refresh_job():
         "unchanged": 0,
         "missing": 0,
         "failed": 0,
+        "movers_updated": 0,
+        "movers_missing": 0,
         "current_symbol": None,
         "current_index": None,
         "created_at": pd.Timestamp.utcnow().isoformat(),
@@ -775,6 +985,29 @@ def api_ohlcv():
     return jsonify(bars)
 
 
+@app.route("/api/move_legs")
+def api_move_legs():
+    symbol = (request.args.get("symbol") or "").strip().upper()
+    year = (request.args.get("year") or "").strip()
+    if not symbol:
+        return jsonify({"error": "symbol required"}), 400
+    try:
+        min_gain = float(request.args.get("min_gain", "50") or 50)
+        reset_drawdown = float(request.args.get("reset_drawdown", "25") or 25)
+    except ValueError:
+        return jsonify({"error": "invalid min_gain/reset_drawdown"}), 400
+    try:
+        bars = _load_symbol_bars(symbol)
+        if not bars:
+            return jsonify({"error": f"{symbol}.csv not found in any configured directory"}), 404
+        legs = _compute_move_legs(symbol, bars, year=year, min_gain_pct=min_gain, reset_drawdown_pct=reset_drawdown)
+        if year:
+            _upsert_move_legs(symbol, year, legs)
+        return jsonify({"symbol": symbol, "year": year, "legs": legs})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/rs_rating")
 def api_rs_rating():
     symbol = (request.args.get("symbol") or "").strip().upper()
@@ -819,6 +1052,7 @@ LEGACY_DRAWINGS_FILE = os.path.join(SCRIPT_DIR, "drawings.json")
 FAVORITES_FILE = os.path.join(DATA_DIR, "favorites.json")
 SETUPS_FILE = os.path.join(DATA_DIR, "setups.json")
 SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
+MOVE_LEGS_FILE = os.path.join(DATA_DIR, "move_legs.json")
 
 
 def _ensure_data_dir():
@@ -853,6 +1087,32 @@ def _read_state_with_legacy(primary_path, legacy_path, fallback):
             pass
         return legacy
     return fallback
+
+
+def _upsert_move_legs(symbol, year, legs):
+    symbol = str(symbol or "").strip().upper()
+    year = str(year or "").strip()
+    current = _read_json_file(MOVE_LEGS_FILE, [])
+    if not isinstance(current, list):
+        current = []
+    next_items = [
+        item for item in current
+        if not (
+            isinstance(item, dict)
+            and str(item.get("symbol", "")).upper() == symbol
+            and str(item.get("year", "")) == year
+        )
+    ]
+    next_items.extend(legs)
+    next_items.sort(key=lambda item: (
+        str(item.get("symbol", "")),
+        str(item.get("year", "")),
+        str(item.get("low_date", "")),
+        str(item.get("high_date", "")),
+        int(item.get("leg_id", 0) or 0),
+    ))
+    _write_json_file(MOVE_LEGS_FILE, next_items)
+    return next_items
 
 
 @app.route("/api/drawings", methods=["GET", "POST"])
